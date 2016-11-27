@@ -1,0 +1,11 @@
+.autotools
+.cproject
+.project
+.settings
+
+*.pyc
+*.pcm
+*.d
+*.so
+*__init__.py
+*.o
