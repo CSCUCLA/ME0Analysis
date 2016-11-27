@@ -38,7 +38,7 @@
 #include "DataFormats/GEMRecHit/interface/ME0RecHitCollection.h"
 
 
-#include "CSCUCLA/ME0Analysis/interface/ME0StripRecHitAlgo.h"
+#include "../interface/ME0StripRecHitAlgo.h"
 
 #include <string>
 
