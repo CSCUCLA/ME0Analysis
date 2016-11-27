@@ -1,0 +1,6 @@
+<library   name="CSCUCLAME0AnalysisPlugins" file="*.cc">
+    <use name="CSCUCLA/ME0Analysis"/>
+    <use name="RecoLocalMuon/GEMRecHit"/>
+    <use name="RecoLocalMuon/GEMRecHit"/>
+    <use name="DataFormats/MuonReco"/>    
+</library>
