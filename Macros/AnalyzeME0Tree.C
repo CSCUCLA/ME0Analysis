@@ -1,7 +1,7 @@
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
-#include "BaseTupleAnalyzer.h"
-#include "HistGetter.h"
+#include "../AnalsysisSupport/macros/BaseTupleAnalyzer.h"
+#include "../AnalsysisSupport/interface/HistGetter.h"
 #include "TVector2.h"
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/PtEtaPhiM4D.h"

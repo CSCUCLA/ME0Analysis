@@ -12,8 +12,8 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include "../../ME0Analysis/plugins/HistGetter.h"
-#include "../interface/TreeWriter.h"
+#include "../../AnalysisSupport/interface/HistGetter.h"
+#include "../../AnalysisSupport/TreeWriter.h"
 #include "../interface/MuonSegFit.h"
 
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
@@ -37,7 +37,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 
-#include "../interface/ParticleUtilities.h"
+#include "../../AnalysisSupport/interface/ParticleUtilities.h"
 
 #include <TVector2.h>
 #include <TMath.h>
