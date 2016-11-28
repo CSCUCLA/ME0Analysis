@@ -1,0 +1,88 @@
+process.mix.input.fileNames = cms.untracked.vstring(['file:MinBias_TuneZ2star_14TeV_pythia6_cff_GEN_SIM.root'])
+
+process.mix.input.fileNames = cms.untracked.vstring([
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_6.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_9.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_8.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_2.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_7.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_5.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_4.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_0.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_1.root',
+'root://cmseos.fnal.gov//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_3.root'
+])
+
+
+./makeJob.py -c digi.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_05_16/MuGun_0p5_30/GENSIM -j jobs_digi_test -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_05_16/MuGun_0p5_30/DIGI
+
+
+./makeJob.py -c digi.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/GENSIM -j jobs_digi -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/DIGI
+
+./makeJob.py -c digi.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/GENSIM -j jobs_digi_nosmear -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/DIGI_NOSMEAR
+./makeJob.py -c reco.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/DIGI_NOSMEAR -j jobs_reco_nosmear -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR
+
+
+
+cmsRun digi.py inputFiles_load="../files_0.txt" outputFile="out.root"
+
+./makeJob.py -c reco.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_05_16/MuGun_0p5_30/DIGI -j jobs_reco_test -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_05_16/MuGun_0p5_30/RECO
+
+cmsRun reco.py inputFiles_load="../files_0.txt" outputFile="out.root"
+
+./makeJob.py -c reco.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/DIGI -j jobs_reco -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO
+
+
+
+./makeJob.py -c digi.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/GENSIM -j jobs_digi_nu -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/DIGI
+
+./makeJob.py -c reco.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/DIGI -j jobs_reco_nu -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO
+
+
+cmsDriver.py SingleNuPt5-40_cff \
+--conditions auto:run2_mc -n 10 \
+--era Phase2C1 \
+--eventcontent FEVTDEBUG  \
+-s GEN,SIM --datatier GEN-SIM \
+--beamspot Realistic50ns13TeVCollision \
+--customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted \
+--geometry Extended2023D1 \
+--python SingleNuPt5-40_2023tilted_GenSimFull.py \
+--no_exec --fileout file:step1.root
+
+
+
+
+>>>>>>>>>>>>>>>>
+
+
+
+cmsDriver.py SingleMuPt100_cfi --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUG -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python SingleMuPt100_2023D6_GenSimFull.py --no_exec --fileout file:step1.root
+cmsDriver.py MinBias_TuneZ2star_14TeV_pythia6_cff --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUG -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python MinBias_GenSimFull.py --no_exec --fileout file:step1.root
+cmsDriver.py SingleNuPt5-40_cff --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUG -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python SingleNu_GenSimFull.py --no_exec --fileout file:step1.root
+cmsDriver.py step2 --conditions auto:run2_mc -n -1 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@fake --datatier GEN-SIM-DIGI-RAW --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python DigiNoPU_2023D6NoPU.py --no_exec --filein file:step1.root --fileout file:step2.root
+cmsDriver.py step2 --conditions auto:run2_mc -n -1 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@fake --datatier GEN-SIM-DIGI-RAW --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python Digi_2023D6.py --no_exec --filein file:step1.root --fileout file:step2.root  --pileup_input das:/RelValMinBias_TuneZ2star_14TeV/1/GEN-SIM --pileup AVE_200_BX_25ns
+cmsDriver.py step3 --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUGHLT,DQM --runUnscheduled -s RAW2DIGI,L1Reco,RECO,VALIDATION:@phase2Validation,DQM:@phase2 --datatier GEN-SIM-RECO,DQMIO --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D6 --python RecoFullGlobal_2023D6.py --no_exec --filein file:step2.root --fileout file:step3.root
+
+
+ ./makeJob.py -c reco.py -i /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/DIGI_NOSMEAR -j jobs_reco_nosmear -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/M
+uGun_0p5_30/RECO_NOSMEAR
+
+
+4. Samples needed for segments (with new geometry): MG0PU (no neutron backgrounds, no pile-up), MG200PU, NG200PU - Nick will help, Piet will provide instructions how to use new geometry
+
+
+
+
+cmsDriver.py SingleMuPt100_cfi --conditions auto:run2_mc -n 10 --era Phase2C1  --eventcontent FEVTDEBUG -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision  --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted  --geometry Extended2023D6 -python SingleMuPt100_2023D6_GenSimFull.py 
+
+ - --fileout file:step1.root
+
+
+cmsDriver.py Configuration/GenProduction/python/HIG-RunIISummer15GS-00677-fragment.py --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUG -s GEN:ProducerSourceSequence,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted,Configuration/DataProcessing/Utils.addMonitoring,Configuration/CMS.GenProduction/generatorProducer.py  --geometry Extended2023D1 --python HIG-RunIISummer15GS-00677_1_cfg.py --no_exec --fileout file:HIG-RunIISummer15GS-00677.root
+
+
+# with command line options: Configuration/GenProduction/python/HIG-RunIISummer15GS-00677-fragment.py --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUG -s GEN,SIM --datatier GEN-SIM --beamspot Realistic50ns13TeVCollision --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted,Configuration/DataProcessing/Utils.addMonitoring --geometry Extended2023D1 --python HIG-RunIISummer15GS-00677_1_cfg.py --no_exec --fileout file:HIG-RunIISummer15GS-00677.root --filein=file:./cmsgrid_final.lhe --filetype=LHE
+
+
+# with command line options: step3 --conditions auto:run2_mc -n 10 --era Phase2C1 --eventcontent FEVTDEBUGHLT,DQM --runUnscheduled -s RAW2DIGI,L1Reco,RECO,VALIDATION:@phase2Validation,DQM:@phase2 --datatier GEN-SIM-RECO,DQMIO --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D1 --python reco.py --no_exec --filein file:step2.root --fileout file:step3.root

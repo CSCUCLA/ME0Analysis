@@ -1,0 +1,298 @@
+
+
+cmsRun testGenTracks_cfg.py inputFiles="minBias.txt" outputFile="genout_0.root"
+
+    
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_6.root" outputFile="genout_0.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_9.root" outputFile="genout_1.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_8.root" outputFile="genout_2.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_2.root" outputFile="genout_3.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_7.root" outputFile="genout_4.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_5.root" outputFile="genout_5.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_4.root" outputFile="genout_6.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_0.root" outputFile="genout_7.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_1.root" outputFile="genout_8.root" &
+cmsRun testGenTracks_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_3.root" outputFile="genout_9.root" &
+
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_14.root"  outputFile="testout__14.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_2.root"   outputFile="testout__2.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_11.root"  outputFile="testout__11.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_6.root"   outputFile="testout__6.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_7.root"   outputFile="testout__7.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_9.root"   outputFile="testout__9.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_12.root"  outputFile="testout__12.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_13.root"  outputFile="testout__13.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_5.root"   outputFile="testout__5.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_1.root"   outputFile="testout__1.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_8.root"   outputFile="testout__8.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_10.root"  outputFile="testout__10.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_18.root"  outputFile="testout__18.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_17.root"  outputFile="testout__17.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_3.root"   outputFile="testout__3.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_16.root"  outputFile="testout__16.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_15.root"  outputFile="testout__15.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_0.root"   outputFile="testout__0.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_19.root"  outputFile="testout__19.root" &
+cmsRun test/ME0EstimateSampleFakeRate_cfg.py inputFiles="root://cmsxrootd.fnal.gov//store/user/nmccoll/ME0Samples/10_06_16/HZZ4l/RECO_NOPU/job_4.root"   outputFile="testout__4.root" &
+
+
+
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_6.root" outputFile="genout_MB_0.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_9.root" outputFile="genout_MB_1.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_8.root" outputFile="genout_MB_2.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_2.root" outputFile="genout_MB_3.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_7.root" outputFile="genout_MB_4.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_5.root" outputFile="genout_MB_5.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_4.root" outputFile="genout_MB_6.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_0.root" outputFile="genout_MB_7.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_1.root" outputFile="genout_MB_8.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_3.root" outputFile="genout_MB_9.root" &
+
+
+
+/eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/
+    
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_0.root"   outputFile="genout_ZMM_0.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_5.root"   outputFile="genout_ZMM_5.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_14.root"  outputFile="genout_ZMM_14.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_1.root"   outputFile="genout_ZMM_1.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_2.root"   outputFile="genout_ZMM_2.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_4.root"   outputFile="genout_ZMM_4.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_18.root"  outputFile="genout_ZMM_18.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_9.root"   outputFile="genout_ZMM_9.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_17.root"  outputFile="genout_ZMM_17.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_19.root"  outputFile="genout_ZMM_19.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_6.root"   outputFile="genout_ZMM_6.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_16.root"  outputFile="genout_ZMM_16.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_7.root"   outputFile="genout_ZMM_7.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_10.root"  outputFile="genout_ZMM_10.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_12.root"  outputFile="genout_ZMM_12.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_13.root"  outputFile="genout_ZMM_13.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_3.root"   outputFile="genout_ZMM_3.root"  &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_15.root"  outputFile="genout_ZMM_15.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_11.root"  outputFile="genout_ZMM_11.root" &
+cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_8.root"   outputFile="genout_ZMM_8.root"  &
+    
+
+    
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_66.root" outputFile="testfrout_66.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_94.root" outputFile="testfrout_94.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_79.root" outputFile="testfrout_79.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_41.root" outputFile="testfrout_41.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_48.root" outputFile="testfrout_48.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_70.root" outputFile="testfrout_70.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_93.root" outputFile="testfrout_93.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_51.root" outputFile="testfrout_51.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_16.root" outputFile="testfrout_16.root" &
+nohup cmsRun test/ME0TestFakeRate_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_92.root" outputFile="testfrout_92.root" &
+
+
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_6.root"  outputFile="out_0.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_15.root" outputFile="out_1.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_13.root" outputFile="out_2.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_5.root"  outputFile="out_3.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_4.root"  outputFile="out_4.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_30.root" outputFile="out_5.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_14.root" outputFile="out_6.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_19.root" outputFile="out_7.root" &
+cmsRun ME0TrackDensity_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO/job_17.root" outputFile="out_8.root" &
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_9.root"  outputFile="out_9.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_68.root" outputFile="out_68.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_60.root" outputFile="out_60.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_96.root" outputFile="out_96.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_52.root" outputFile="out_52.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_22.root" outputFile="out_22.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_65.root" outputFile="out_65.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_64.root" outputFile="out_64.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_71.root" outputFile="out_71.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_95.root" outputFile="out_95.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_34.root" outputFile="out_34.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_58.root" outputFile="out_58.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_78.root" outputFile="out_78.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_73.root" outputFile="out_73.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_91.root" outputFile="out_91.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_92.root" outputFile="out_92.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_84.root" outputFile="out_84.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_87.root" outputFile="out_87.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_56.root" outputFile="out_56.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_15.root" outputFile="out_15.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_59.root" outputFile="out_59.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_72.root" outputFile="out_72.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_89.root" outputFile="out_89.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_76.root" outputFile="out_76.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_67.root" outputFile="out_67.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_10.root" outputFile="out_10.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_43.root" outputFile="out_43.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_2.root"  outputFile="out_2.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_99.root" outputFile="out_99.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_51.root" outputFile="out_51.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_82.root" outputFile="out_82.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_17.root" outputFile="out_17.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_79.root" outputFile="out_79.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_12.root" outputFile="out_12.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_4.root"  outputFile="out_4.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_63.root" outputFile="out_63.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_66.root" outputFile="out_66.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_25.root" outputFile="out_25.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_53.root" outputFile="out_53.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_1.root"  outputFile="out_1.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_18.root" outputFile="out_18.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_47.root" outputFile="out_47.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_39.root" outputFile="out_39.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_74.root" outputFile="out_74.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_57.root" outputFile="out_57.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_69.root" outputFile="out_69.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_3.root"  outputFile="out_3.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_45.root" outputFile="out_45.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_23.root" outputFile="out_23.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_11.root" outputFile="out_11.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_81.root" outputFile="out_81.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_62.root" outputFile="out_62.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_80.root" outputFile="out_80.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_5.root"  outputFile="out_5.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_14.root" outputFile="out_14.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_55.root" outputFile="out_55.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_70.root" outputFile="out_70.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_54.root" outputFile="out_54.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_32.root" outputFile="out_32.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_26.root" outputFile="out_26.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_98.root" outputFile="out_98.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_88.root" outputFile="out_88.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_61.root" outputFile="out_61.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_7.root"  outputFile="out_7.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_49.root" outputFile="out_49.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_31.root" outputFile="out_31.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_90.root" outputFile="out_90.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_21.root" outputFile="out_21.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_75.root" outputFile="out_75.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_94.root" outputFile="out_94.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_97.root" outputFile="out_97.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_77.root" outputFile="out_77.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_85.root" outputFile="out_85.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_50.root" outputFile="out_50.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_20.root" outputFile="out_20.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_28.root" outputFile="out_28.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_86.root" outputFile="out_86.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_6.root"  outputFile="out_6.root"  &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_13.root" outputFile="out_13.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_37.root" outputFile="out_37.root" &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO/job_8.root"  outputFile="out_8.root"  &
+
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_29.root" outputFile="out_29.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_64.root" outputFile="out_64.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_54.root" outputFile="out_54.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_47.root" outputFile="out_47.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_39.root" outputFile="out_39.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_33.root" outputFile="out_33.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_96.root" outputFile="out_96.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_9.root"  outputFile="out_9.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_41.root" outputFile="out_41.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_93.root" outputFile="out_93.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_60.root" outputFile="out_60.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_68.root" outputFile="out_68.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_65.root" outputFile="out_65.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_71.root" outputFile="out_71.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_38.root" outputFile="out_38.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_35.root" outputFile="out_35.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_84.root" outputFile="out_84.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_78.root" outputFile="out_78.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_95.root" outputFile="out_95.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_56.root" outputFile="out_56.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_82.root" outputFile="out_82.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_58.root" outputFile="out_58.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_36.root" outputFile="out_36.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_59.root" outputFile="out_59.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_73.root" outputFile="out_73.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_52.root" outputFile="out_52.root"   &
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_16.root" outputFile="out_16.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_44.root" outputFile="out_44.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_10.root" outputFile="out_10.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_46.root" outputFile="out_46.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_79.root" outputFile="out_79.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_2.root"  outputFile="out_2.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_22.root" outputFile="out_22.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_40.root" outputFile="out_40.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_1.root"  outputFile="out_1.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_66.root" outputFile="out_66.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_87.root" outputFile="out_87.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_80.root" outputFile="out_80.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_91.root" outputFile="out_91.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_76.root" outputFile="out_76.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_72.root" outputFile="out_72.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_42.root" outputFile="out_42.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_48.root" outputFile="out_48.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_30.root" outputFile="out_30.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_24.root" outputFile="out_24.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_63.root" outputFile="out_63.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_92.root" outputFile="out_92.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_53.root" outputFile="out_53.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_15.root" outputFile="out_15.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_4.root"  outputFile="out_4.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_34.root" outputFile="out_34.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_17.root" outputFile="out_17.root"   &
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_99.root" outputFile="out_99.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_51.root" outputFile="out_51.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_27.root" outputFile="out_27.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_62.root" outputFile="out_62.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_55.root" outputFile="out_55.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_3.root"  outputFile="out_3.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_69.root" outputFile="out_69.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_32.root" outputFile="out_32.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_43.root" outputFile="out_43.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_12.root" outputFile="out_12.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_18.root" outputFile="out_18.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_25.root" outputFile="out_25.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_45.root" outputFile="out_45.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_57.root" outputFile="out_57.root"   &
+
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_19.root" outputFile="out_19.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_97.root" outputFile="out_97.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_83.root" outputFile="out_83.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_67.root" outputFile="out_67.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_81.root" outputFile="out_81.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_89.root" outputFile="out_89.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_23.root" outputFile="out_23.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_21.root" outputFile="out_21.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_75.root" outputFile="out_75.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_5.root"  outputFile="out_5.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_74.root" outputFile="out_74.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_94.root" outputFile="out_94.root"   &
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_61.root" outputFile="out_61.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_88.root" outputFile="out_88.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_6.root"  outputFile="out_6.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_7.root"  outputFile="out_7.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_77.root" outputFile="out_77.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_49.root" outputFile="out_49.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_26.root" outputFile="out_26.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_11.root" outputFile="out_11.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_14.root" outputFile="out_14.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_90.root" outputFile="out_90.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_31.root" outputFile="out_31.root"   &
+
+
+
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_13.root" outputFile="out_13.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_86.root" outputFile="out_86.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_28.root" outputFile="out_28.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_98.root" outputFile="out_98.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_70.root" outputFile="out_70.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_20.root" outputFile="out_20.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_85.root" outputFile="out_85.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_37.root" outputFile="out_37.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_50.root" outputFile="out_50.root"   &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_0.root"  outputFile="out_0.root"    &
+cmsRun ME0TreeMaker_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MuGun_0p5_30/RECO_NOSMEAR/job_8.root"  outputFile="out_8.root"    &
+
+
+
