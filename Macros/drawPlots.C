@@ -328,11 +328,128 @@ cout << endl;
 //     cout << TString::Format("%.3f +/- %.3f\t",h->GetBinContent(iB),h->GetBinError(iB));
 // }
 for(unsigned int iB =1 ; iB <= h->GetNbinsX();++iB){
-    // cout << TString::Format("%.1f +/- %.1f\t",200*h->GetBinContent(iB),200*h->GetBinError(iB));
-    cout << TString::Format("%.1f +/- %.1f\t",h->GetBinContent(iB),h->GetBinError(iB));
+    cout << TString::Format("%.1f +/- %.1f\t",200*h->GetBinContent(iB),200*h->GetBinError(iB));
+    // cout << TString::Format("%.1f +/- %.1f\t",h->GetBinContent(iB),h->GetBinError(iB));
 }
 cout << endl;
 }
+
+
+{
+    TFile * f = new TFile("simHitAnalyzer_MinBias.root");
+	
+	TH1 *nH;     f->GetObject("nEvents",nH);
+
+double nE = nH->GetBinContent(1);    
+TString names[] = {"muons","hadrons","electrons"};
+TString sampT[] = {"muon","hadron","ele",""};
+cout << endl;
+
+vector<TH1*> hs;
+for(unsigned int iS = 0; sampT[iS][0]; ++iS){
+	TH1 * h;
+    f->GetObject(TString::Format("%s_hitLays",sampT[iS].Data()),h);
+	h->Scale(1./nE);
+	hs.push_back(h);
+    cout << names[iS] <<"\t";
+}
+cout << endl;
+
+for(unsigned int iB = 1; iB <= 6; ++iB){
+	for(unsigned int iH = 0; iH < hs.size(); ++iH){
+	    // cout << TString::Format("%.1f +/- %.1f\t",200*hs[iH]->GetBinContent(iB),200*hs[iH]->GetBinError(iB));
+	    cout << TString::Format("%.2f +/- %.2f\t",200*hs[iH]->GetBinContent(iB)/36,200*hs[iH]->GetBinError(iB)/36);		
+		
+	}
+	cout << endl;
+}
+cout << endl;
+}
+
+{
+    TFile * f = new TFile("digiout_NUNU_0.root");
+    TString hs[] = {"ele_hitsByRadius","neutron_hitsByRadius","photon_hitsByRadius",""};
+    TString hs2[] = {"ele_hits","neutron_hits","photon_hits",""};
+    TString hsn[] = {"electrons","neutrons","photons",""};
+
+    Plotter * p = new Plotter;
+    
+    for(unsigned int iS = 0; hs[iS][0]; ++iS){
+        TH1 * h2;
+        f->GetObject(hs2[iS],h2);
+        double scale = 100.0*9*6;
+        cout <<h2 ->Integral()/scale <<" +/- "<< sqrt(h2->Integral())/scale << endl;
+
+        TH1 * h;
+        f->GetObject(hs[iS],h);
+        h->Rebin(10);
+        
+        
+
+        h->GetYaxis()->SetTitle("Rate [Hz/cm^{2}]");        
+        h->GetXaxis()->SetTitle("radius [cm]");
+    for(unsigned int iB =1; iB <= h->GetNbinsX(); ++iB){
+        double low = h->GetBinLowEdge(iB);
+        double up = h->GetBinLowEdge(iB) + h->GetBinWidth(iB);
+        double area = 2*TMath::Pi() *(up*up -low*low);
+        double timeW = 100.0*25.0e-9*1.0*9.0;
+        double newC = h->GetBinContent(iB)/(area*timeW);
+        double newE = h->GetBinError(iB)/(area*timeW);
+        h->SetBinContent(iB,newC);
+        h->SetBinError(iB,newE);
+    }
+    p->addHist(h,hsn[iS]);
+}
+    p->draw();
+}
+
+
+{
+    TFile * f = new TFile("gedigiout_MB.root"); //NUNU for neutrons
+    TString hs[] = {"ge11__hitsByRadius","ge21__hitsByRadius","",""};
+    TString hs2[] = {"ge11__hits","ge21__hits","",""};
+    TString hsn[] = {"ge11","ge21","",""};  
+    
+    TH1 * hn;
+    f->GetObject("nEvents",hn);
+    double nE = hn->GetBinContent(1);    
+    nE /= (9.0*200); //Remove for neutrons
+
+    Plotter * p = new Plotter;
+    
+    for(unsigned int iS = 0; hs[iS][0]; ++iS){
+        TH1 * h2;
+        f->GetObject(hs2[iS],h2);
+        double scale =  1;
+        if(iS == 0){
+            scale = nE *9.0*2.0*72.0; 
+        } else {
+            scale = nE *9.0*2.0*36.0;            
+        }
+        cout <<h2 ->Integral()/scale <<" +/- "<< sqrt(h2->Integral())/scale << endl;
+        TH1 * h;
+        f->GetObject(hs[iS],h);
+        h->Rebin(100);
+        
+        
+
+        h->GetYaxis()->SetTitle("Rate [Hz/cm^{2}]");        
+        h->GetXaxis()->SetTitle("radius [cm]");
+    for(unsigned int iB =1; iB <= h->GetNbinsX(); ++iB){
+        double low = h->GetBinLowEdge(iB);
+        double up = h->GetBinLowEdge(iB) + h->GetBinWidth(iB);
+        double area = 2*TMath::Pi() *(up*up -low*low);
+        double timeW = nE*25.0e-9*1.0*9.0;
+        double newC = h->GetBinContent(iB)/(area*timeW);
+        double newE = h->GetBinError(iB)/(area*timeW);
+        h->SetBinContent(iB,newC);
+        h->SetBinError(iB,newE);
+    }
+    p->addHist(h,hsn[iS]);
+}
+    p->draw();
+}
+
 
 
 {
@@ -343,7 +460,7 @@ cout << endl;
     
         TH1 * hn;
         f->GetObject("nEvents",hn);
-        double nE = nEvents->GetBinContent(1);    
+        double nE = hn->GetBinContent(1);    
     
     
     for(unsigned int iV =  0 ; vars[iV][0]; ++iV){
@@ -359,7 +476,7 @@ cout << endl;
     }    
 }
 
-
+1.4((.139*.0634*27500 + 703)/703)
 
 {
 double nE = nEvents->GetBinContent(1);    

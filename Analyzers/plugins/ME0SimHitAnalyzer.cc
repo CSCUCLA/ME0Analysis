@@ -26,7 +26,78 @@
 #include <TVector2.h>
 #include <TMath.h>
 
+#include "Geometry/GEMGeometry/interface/ME0EtaPartitionSpecs.h"
+
+
 using namespace std;
+
+
+struct SimTrackProperties{
+	double cenEta = -1;
+	double lay1Eta = -1;
+	double dPhi = -1;
+	int nLaysHit = 0;
+	bool inFirst= false;
+};
+SimTrackProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vector<std::pair<const PSimHit*,ME0DetId> >& simHits) {
+
+	SimTrackProperties prop;
+
+    std::vector<std::vector<const PSimHit*> > laysHit(6);
+    for(const auto& h : simHits){
+      laysHit[h.second.layer()  - 1].push_back(h.first);
+    }
+    std::vector<const PSimHit *> prunedHits;
+    for(auto& l : laysHit){
+      if(l.size() >0) {
+    	  prop.nLaysHit++;
+        prunedHits.push_back(l.front());
+      }
+    }
+
+    auto getGlobal = [&](const PSimHit * sh) -> GlobalPoint {
+    	return mgeom->etaPartition(sh->detUnitId())->toGlobal(sh->entryPoint());
+    };
+
+    if(laysHit[0].size()){
+    	prop.inFirst = true;
+    	prop.lay1Eta = getGlobal(laysHit[0].front()).eta();
+    }
+
+
+    if(prop.nLaysHit > 2){
+        const double beginOfDet  = 527;
+        const double centerOfDet = 539.5;
+        const double endOfDet    = 552;
+        auto getProj = [](double zValue, const GlobalPoint& up, const GlobalPoint& down) -> GlobalPoint {
+
+          auto getCenter = [](double v1,double v2,double z1,double z2,double zc)->double{
+            if(z2 == z1) return -99;
+            double m = (v2 - v1)/(z2 - z1);
+            double b =  (z2*v1 - z1*v2)/(z2 - z1);
+            return m*zc+b;
+          };
+
+          const double zc = up.z() > 0 ? zValue : -1*zValue;
+          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zc);
+          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zc);
+          return GlobalPoint(xc,yc,zc);
+        };
+
+        const int upInd = floor(prunedHits.size()/2);
+        GlobalPoint centerUp = getGlobal(prunedHits[upInd]);
+        GlobalPoint centerDown = getGlobal(prunedHits[upInd-1]);
+        GlobalPoint centerPt = getProj(centerOfDet, centerUp, centerDown);
+        GlobalPoint upPt = getProj(endOfDet, getGlobal(prunedHits[prunedHits.size() - 1]), getGlobal(prunedHits[prunedHits.size() - 2]));
+        GlobalPoint downPt = getProj(beginOfDet, getGlobal(prunedHits[1]), getGlobal(prunedHits[0]));
+
+        prop.cenEta = centerPt.eta();
+        prop.dPhi = TVector2::Phi_mpi_pi(upPt.phi() - downPt.phi());
+
+    }
+    return prop;
+}
+
 
 class ME0SimHitAnalyzer : public edm::EDAnalyzer {
     public:
@@ -69,7 +140,10 @@ ME0SimHitAnalyzer::~ME0SimHitAnalyzer() {
 }
 
 
+
 typedef std::map<unsigned int, std::vector<std::pair<const PSimHit*,ME0DetId> > > SimHCont;
+
+
 
 void
 ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -156,7 +230,22 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         type = 10;
       }
 
+
       hists.getOrMake1D("particleBreakdown",";Muons[123],Electron[45],Hadron[6-9],Other",10   ,.5,10.5)->Fill(type);
+
+
+      //Numbers special plots;
+      SimTrackProperties props = getSimTrackProperties(mgeom, it->second);
+      if(props.inFirst)                                                                           hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(1);
+      if(props.nLaysHit  && TMath::Abs(props.lay1Eta) > 2.4)                                      hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(2);
+      if(props.nLaysHit >= 3)                                                                     hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(3);
+      if(props.nLaysHit >= 3 && TMath::Abs(props.cenEta) > 2.4)                                   hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(4);
+      if(props.nLaysHit >= 3 && TMath::Abs(props.dPhi) < 0.013)                                   hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(5);
+      if(props.nLaysHit >= 3 && TMath::Abs(props.dPhi) < 0.013 && TMath::Abs(props.cenEta) > 2.4) hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(6);
+      if(props.nLaysHit >= 6 && TMath::Abs(props.dPhi) < 0.013)                                   hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI,6lDPHI",10   ,.5,10.5)->Fill(7);
+      if(props.nLaysHit >= 6 && TMath::Abs(props.dPhi) < 0.013 && TMath::Abs(props.cenEta) > 2.4) hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI,6lDPHI",10   ,.5,10.5)->Fill(8);
+
+
 
       double minETA = 0;
       double minPhi = 0;
@@ -168,6 +257,11 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       for(const auto& h : it->second){
         laysHit[h.second.layer()  - 1] ++;
         auto gl = mgeom->etaPartition(h.second )->toGlobal(h.first->entryPoint());
+//        std::vector<float> origPars = mgeom->etaPartition(h.second )->specs()->parameters();
+//
+//        cout << origPars[0] <<" "<< origPars[1] <<" "<< origPars[2] <<endl;
+
+
         if(minLay < 0 || h.second.layer() < minLay){
           minLay = h.second.layer();
           minPhi = gl.phi();
@@ -181,8 +275,10 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       for(auto& l : laysHit){if(l >0) nLaysHit++;}
       hists.getOrMake1D(TString::Format("%s_nLaysHit",prefix.Data()),";# of hit layers",7,-0.5,6.5)->Fill(nLaysHit);
 
-      for(unsigned int iL = 0; iL < laysHit.size(); ++iL)
+      for(unsigned int iL = 0; iL < laysHit.size(); ++iL){
         if(laysHit[iL]) hists.getOrMake1D(TString::Format("%s_hitLays",prefix.Data()),"; layer",7,-0.5,6.5)->Fill(iL);
+        if(laysHit[iL]) hists.getOrMake2D(TString::Format("%s_xNhits_hitLays",prefix.Data()),"; layer ; nLays",7,-0.5,6.5,7,-0.5,6.5)->Fill(iL, nLaysHit);
+      }
 
       if(idx >=  0){
         const auto& track = tracks->at(idx);

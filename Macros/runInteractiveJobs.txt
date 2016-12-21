@@ -50,8 +50,34 @@ cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/s
 
 
 
-/eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/
-    
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_6.root" outputFile="gegenout_MB_0.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_9.root" outputFile="gegenout_MB_1.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_8.root" outputFile="gegenout_MB_2.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_2.root" outputFile="gegenout_MB_3.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_7.root" outputFile="gegenout_MB_4.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_5.root" outputFile="gegenout_MB_5.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_4.root" outputFile="gegenout_MB_6.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_0.root" outputFile="gegenout_MB_7.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_1.root" outputFile="gegenout_MB_8.root" &
+cmsRun test/GESimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/GENSIM/gen_3.root" outputFile="gegenout_MB_9.root" &
+
+
+
+cmsRun test/ME0DigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO_NOPU_NOISE/job_0.root" outputFile="digiout_NUNU_0.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/NuGun/RECO_NOPU_NOISE/job_0.root" outputFile="gedigiout_NUNU_0.root" &
+
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_7.root" outputFile="gedigiout_MB_7.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_2.root" outputFile="gedigiout_MB_2.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_4.root" outputFile="gedigiout_MB_4.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_3.root" outputFile="gedigiout_MB_3.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_0.root" outputFile="gedigiout_MB_0.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_8.root" outputFile="gedigiout_MB_8.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_1.root" outputFile="gedigiout_MB_1.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_6.root" outputFile="gedigiout_MB_6.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_9.root" outputFile="gedigiout_MB_9.root" &
+cmsRun test/GEDigiAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/MinBias/DIGI_NOPU_NONOISEGEME/job_5.root" outputFile="gedigiout_MB_5.root" &
+
+
 cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_0.root"   outputFile="genout_ZMM_0.root"  &
 cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_5.root"   outputFile="genout_ZMM_5.root"  &
 cmsRun test/ME0SimHitAnalyzer_cfg.py inputFiles="root://cmseos:1094//eos/uscms/store/user/nmccoll/ME0Samples/10_06_16/Zmumu/GENSIM/job_14.root"  outputFile="genout_ZMM_14.root" &

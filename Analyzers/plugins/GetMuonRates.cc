@@ -103,7 +103,7 @@ GetMuonRates::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       (*verts)[0].position().Rho() <= 2.0 &&
       fabs((*verts)[0].position().Z())<=24.0)
     hasgoodvtx = true;
-  if(!hasgoodvtx) return;
+//  if(!hasgoodvtx) return;
 
 
   std::vector<std::pair<reco::GenParticleRef,reco::GenParticleRef> > trueLeptonList;
@@ -130,7 +130,14 @@ GetMuonRates::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if(TMath::Abs(genInfo.first->pdgId()) != ParticleInfo::p_muminus) continue;
     nZMuons++;
   }
-  if(nZMuons != 2) return;
+//  if(nZMuons != 2) return;
+
+
+  hists.getOrMake1D("nEventsRaw",";# of events",1,0,2)->Fill(1.0);
+  hists.getOrMake1D("nEvents",";# of events",1,0,2)->Fill(1.0,genEvtInfo_->weight());
+
+    if(!hasgoodvtx) return;
+
 
   int nLoose =0;
   int nTight = 0;
@@ -176,11 +183,18 @@ GetMuonRates::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 
-  hists.getOrMake1D("nEventsRaw",";# of events",1,0,2)->Fill(1.0);
-  hists.getOrMake1D("nEvents",";# of events",1,0,2)->Fill(1.0,genEvtInfo_->weight());
+
   hists.getOrMake1D("nLoose",";# of loose muons",6,-0.5,5.5)->Fill(nLoose,genEvtInfo_->weight());
   hists.getOrMake1D("nTight",";# of tight muons",6,-0.5,5.5)->Fill(nTight,genEvtInfo_->weight());
   hists.getOrMake1D("nTightISO",";# of isolated tight muons",6,-0.5,5.5)->Fill(nIsoTight,genEvtInfo_->weight());
+
+  if(nZMuons){
+	  hists.getOrMake1D("twoZ_nEventsRaw",";# of events",1,0,2)->Fill(1.0);
+	  hists.getOrMake1D("twoZ_nEvents",";# of events",1,0,2)->Fill(1.0,genEvtInfo_->weight());
+	  hists.getOrMake1D("twoZ_nLoose",";# of loose muons",6,-0.5,5.5)->Fill(nLoose,genEvtInfo_->weight());
+	  hists.getOrMake1D("twoZ_nTight",";# of tight muons",6,-0.5,5.5)->Fill(nTight,genEvtInfo_->weight());
+	  hists.getOrMake1D("twoZ_nTightISO",";# of isolated tight muons",6,-0.5,5.5)->Fill(nIsoTight,genEvtInfo_->weight());
+  }
 
 
 }
