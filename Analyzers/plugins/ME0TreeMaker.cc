@@ -12,8 +12,9 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include "../../AnalysisSupport/interface/HistGetter.h"
-#include "../../AnalysisSupport/interface/TreeWriter.h"
+#include "AnalysisSupport/Utilities/interface/Types.h"
+#include "AnalysisSupport/Utilities/interface/HistGetter.h"
+#include "AnalysisSupport/TreeInterface/interface/TreeWriter.h"
 #include "../interface/MuonSegFit.h"
 
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
@@ -38,6 +39,9 @@
 
 #include <TVector2.h>
 #include <TMath.h>
+
+using ASTypes::size;
+using ASTypes::size8;
 
 double deltaPhi(const float phi1, const float phi2) {return TVector2::Phi_mpi_pi(phi1 - phi2);}
 double deltaR2(double eta1, double phi1, double eta2, double phi2) {

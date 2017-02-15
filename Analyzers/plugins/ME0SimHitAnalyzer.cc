@@ -18,7 +18,7 @@
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
 
-#include "../../AnalysisSupport/interface/HistGetter.h"
+#include "AnalysisSupport/Utilities/interface/HistGetter.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"

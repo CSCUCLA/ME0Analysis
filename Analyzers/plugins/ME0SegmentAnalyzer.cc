@@ -18,8 +18,7 @@
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "DataFormats/GEMRecHit/interface/ME0Segment.h"
 
-
-#include "../../AnalysisSupport/interface/HistGetter.h"
+#include "AnalysisSupport/Utilities/interface/HistGetter.h"
 #include "../interface/ME0Helper.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"

@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "../../AnalysisSupport/interface/HistGetter.h"
+#include "AnalysisSupport/Utilities/interface/HistGetter.h"
 
 #include "TFile.h"
 #include "TTree.h"

@@ -1,6 +1,8 @@
 <library   name="ME0AnalysisPlugins" file="*.cc">
     <use name="ME0Analysis/Analyzers"/>
-    <use name="ME0Analysis/AnalysisSupport"/>
+    <use name="AnalysisSupport/CMSSWUtilities"/>
+    <use name="AnalysisSupport/Utilities"/>
+    <use name="AnalysisSupport/TreeInterface"/>
     <use name="RecoLocalMuon/GEMRecHit"/>
     <use name="DataFormats/MuonReco"/>    
     <use name="DataFormats/GEMRecHit"/>    

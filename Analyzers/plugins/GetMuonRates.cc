@@ -18,14 +18,14 @@
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
 
-#include "../../AnalysisSupport/interface/HistGetter.h"
+#include "AnalysisSupport/Utilities/interface/HistGetter.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 //#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
-#include "../../AnalysisSupport/interface/ParticleUtilities.h"
+#include "AnalysisSupport/CMSSWUtilities/interface/ParticleUtilities.h"
 
 #include <TVector2.h>
 #include <TMath.h>
