@@ -25,7 +25,8 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 
 process.analyze = cms.EDAnalyzer("TestGenTracks",
-        outFileName       = cms.untracked.string(options.outputFile)        
+        output       = cms.untracked.string(options.outputFile)      
+        compDigiTag  = cms.InputTag("")  
         )
 
 

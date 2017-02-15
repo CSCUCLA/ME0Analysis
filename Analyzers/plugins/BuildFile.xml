@@ -3,4 +3,5 @@
     <use name="ME0Analysis/AnalysisSupport"/>
     <use name="RecoLocalMuon/GEMRecHit"/>
     <use name="DataFormats/MuonReco"/>    
+    <use name="DataFormats/GEMRecHit"/>    
 </library>

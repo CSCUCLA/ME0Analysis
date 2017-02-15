@@ -1,3 +1,21 @@
+>>>>> NEW D7 recipe
+cmsDriver.py MinBias_TuneZ2star_14TeV_pythia6_cff  --conditions auto:phase2_realistic  -n 1000 --era Phase2C1  --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D7 --fileout file:step1_minbias.root  --no_exec
+cmsDriver.py SingleMuPt100_pythia8_cfi  --conditions auto:phase2_realistic -n 100 --era Phase2C1 --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D7 --fileout file:step1.root  --no_exec
+cmsDriver.py step2  --conditions auto:phase2_realistic -n 100 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW --datatier GEN-SIM-DIGI-RAW --geometry Extended2023D7 --filein file:step1.root  --fileout file:step2_PU.root --no_exec --python step2_PU.py --pileup_input file:step1_minbias.root --pileup AVE_200_BX_25ns
+cmsDriver.py step2  --conditions auto:phase2_realistic -n -1 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW --datatier GEN-SIM-DIGI-RAW --geometry Extended2023D7 --filein file:step1.root  --fileout file:step2.root --no_exec
+cmsDriver.py step3  --conditions auto:phase2_realistic -n 100 --era Phase2C1 --eventcontent FEVTDEBUGHLT --runUnscheduled  -s RAW2DIGI,L1Reco,RECO --datatier GEN-SIM-RECO --geometry Extended2023D7 --filein file:step2.root  --fileout file:step3.root --no_exec
+
+
+cmsDriver.py SingleMuPt100_pythia8_cfi  --conditions 90X_upgrade2023_realistic_v1 -n 100 --era Phase2C2_timing --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D4 --fileout file:step1_D4.root  --no_exec
+cmsDriver.py MinBias_TuneZ2star_14TeV_pythia6_cff  --conditions 90X_upgrade2023_realistic_v1  -n 2000 --era Phase2C2_timing  --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D4 --fileout file:step1_minbias_D4.root --python step1_minbias_D4.py --no_exec 
+cmsDriver.py step2  --conditions 90X_upgrade2023_realistic_v1 -n 100 --era Phase2C2_timing --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW --datatier GEN-SIM-DIGI-RAW --geometry Extended2023D4 --filein file:step1_D4.root  --fileout file:step2_PU_D4.root --no_exec --python step2_PU_D4.py --pileup_input file:step1_minbias_D4.root --pileup AVE_200_BX_25ns
+cmsDriver.py step2  --conditions 90X_upgrade2023_realistic_v1 -n -1 --era Phase2C2_timing --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1,DIGI2RAW --datatier GEN-SIM-DIGI-RAW --geometry Extended2023D4 --filein file:step1_D4.root  --fileout file:step2_D4.root --no_exec --python step2_D4.py
+cmsDriver.py step3  --conditions 90X_upgrade2023_realistic_v1 -n -1 --era Phase2C2_timing --eventcontent FEVTDEBUGHLT --runUnscheduled  -s RAW2DIGI,L1Reco,RECO --datatier GEN-SIM-RECO --geometry Extended2023D4 --filein file:step2_D4.root  --fileout file:step3_D4.root --no_exec --python step3_D4.py
+
+
+
+
+
 process.mix.input.fileNames = cms.untracked.vstring(['file:MinBias_TuneZ2star_14TeV_pythia6_cff_GEN_SIM.root'])
 
 process.mix.input.fileNames = cms.untracked.vstring([
