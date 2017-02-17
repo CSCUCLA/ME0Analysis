@@ -259,23 +259,47 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
 
 	SimHitProperties prop;
 
+	std::map<ME0DetId,int> nChHit;
     std::vector<std::vector<const PSimHit*> > laysHit(6);
     for(const auto& h : simHits){
       laysHit[ME0DetId(h->detUnitId()).layer() - 1].push_back(h);
-    }
-    std::vector<const PSimHit *> prunedHits;
-    for(auto& l : laysHit){
-      if(l.size() >0) {
-    	  prop.nLaysHit++;
-        prunedHits.push_back(l.front());
-      }
+      nChHit[ME0DetId(h->detUnitId()).chamberId()]++;
     }
 
-    for(unsigned int iH = 0; iH < prunedHits.size(); ++iH){
-    	if(!iH) continue;
-    	if(ME0DetId(prunedHits[iH]->detUnitId()).chamber() !=  ME0DetId(prunedHits[0]->detUnitId()).chamber())
-    		prop.oneChamber = false;
+    std::vector<const PSimHit *> prunedHits;
+    for(auto& l : laysHit){
+      if(!l.size()) continue;
+      prop.nLaysHit++;
+
+      int iMax = -1;
+      int max= 0;
+      for(unsigned int iS = 0; iS < l.size(); ++iS){
+    	  int nH = nChHit[ME0DetId(l[iS]->detUnitId()).chamberId() ];
+    	  if(nH > max ){
+    		  max = nH;
+    		  iMax = iS;
+    	  }
+      }
+      prunedHits.push_back(l[iMax] );
     }
+
+    if(nChHit.size() > 1) prop.oneChamber = false;
+
+
+
+//    std::vector<const PSimHit *> prunedHits;
+//    for(auto& l : laysHit){
+//      if(l.size() >0) {
+//    	  prop.nLaysHit++;
+//        prunedHits.push_back(l.front());
+//      }
+//    }
+//
+//    for(unsigned int iH = 0; iH < prunedHits.size(); ++iH){
+//    	if(!iH) continue;
+//    	if(ME0DetId(prunedHits[iH]->detUnitId()).chamber() !=  ME0DetId(prunedHits[0]->detUnitId()).chamber())
+//    		prop.oneChamber = false;
+//    }
 
 
     auto getGlobal = [&](const PSimHit * sh) -> GlobalPoint {

@@ -124,15 +124,27 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
 {
     TFile * f = new TFile("testSegments.root");
 
-        // TString digis[] = {"p12s256","p8s768","p8s384","p6s512","p4s768","","",""};
-        // TString digiNs[] = {"12 part. 256 strips","8 part. 768 strips","8 part. 384 strips","6 part. 512 strips","4 part. 768 strips","","",""};
+        TString digis[] = {"p8s768","p12s256","p8s384","p6s512","p4s768","","",""};
+        TString digiNs[] = {"8 part. 768 strips","12 part. 256 strips","8 part. 384 strips","6 part. 512 strips","4 part. 768 strips","","",""};
+        
+        // TString digis[] = {"p8s768","p8s768M6","p8s768L3","p8s768M6L3","","","",""};
+        // TString digiNs[] = {"6 layers, req. 4 layers per seg.","5 layers, req. 4 layers per seg.","6 layers, req. 3 layers per seg.","5 layers, req. 3 layers per seg.","",""};
+    
+    // TString digis[] = {"p8s768","p8s768L3","","","","",""};
+    // TString digiNs[] = {"Req. 4 layers per seg.","Req. 3 layers per seg.","",""};
+    
+        // TString digis[] = {"p8s256","p8s384","p8s512","p8s640","p8s768","","",""};
+        // TString digiNs[] = {"8 part. 256 strips","8 part. 384 strips","8 part. 512 strips","8 part. 640 strips","8 part. 768 strips","","",""};
+    
+    // TString digis[] = {"p2s768","p4s768","p6s768","p8s768","p10s768","","",""};
+    // TString digiNs[] = {"2 part. 768 strips","4 part. 768 strips","6 part. 768 strips","8 part. 768 strips","10 part. 768 strips","","",""};
 
-        TString digis[] = {"p6s512","p6s512M1","p6s512M2","p6s512M3","p6s512M4","p6s512M5","p6s512M6","","",""};
-        TString digiNs[] = {"6 part. 512 strips","6 part. 512 strips, no lay 1","6 part. 512 strips, no lay 2","6 part. 512 strips, no lay 3","6 part. 512 strips, no lay 4","6 part. 512 strips, no lay 5","6 part. 512 strips, no lay 6","","",""};
+        // TString digis[] = {"p6s512","p6s512M1","p6s512M2","p6s512M3","p6s512M4","p6s512M5","p6s512M6","","",""};
+        // TString digiNs[] = {"6 part. 512 strips","6 part. 512 strips, no lay 1","6 part. 512 strips, no lay 2","6 part. 512 strips, no lay 3","6 part. 512 strips, no lay 4","6 part. 512 strips, no lay 5","6 part. 512 strips, no lay 6","","",""};
         
 
 
-    TString vars[] ={ "fake_nSegs","all_fake_seg_nHits","all_fake_seg_dPhi","all_fake_seg_chi2ondof",
+    TString vars[] ={ "fake_passDPhiTime_nSegs","","all_fake_seg_nNon0","all_fake_seg_tof" ,"all_fake_seg_nHits","all_fake_seg_dPhi","all_fake_seg_chi2ondof",
             // "trueProperties_PHICenNDiff",
             // "trueProperties_ETASeedFitDiff",
                 // "trueProperties_TOFDiff",
@@ -145,10 +157,12 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
     TH1 * h;
     f->GetObject(TString::Format("%s__%s",prefix.Data(),vars[iV].Data()),h);
     if(h == 0) continue;
+    if(iV == 0) h->SetXTitle("# of bkg. segments per event");
+    if(iV == 0) h->SetYTitle("a.u.");
     cout << prefix.Data() << " "<< vars[iV].Data()<<" "<<h->GetMean() <<endl;
-    if(iV == 0) h->Rebin(2);
+    // if(iV == 0) h->Rebin(2);
     h->SetTitle(digis[iD]);
-    p->addHist(h,TString::Format("%s",digiNs[iD].Data()));
+    p->addHistLine(h,TString::Format("%s",digiNs[iD].Data()));
     }
         p->draw(false,vars[iV]);
     }
@@ -200,7 +214,7 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
         TString cats[] = {"pteq1to3_perfect_muon","pteq3to5_perfect_muon","pteq5to20_perfect_muon","ptgeq20_perfect_muon","all_fake",""};
 
     
-    TString vars[] ={ "dPhi","simMreco_phi","simMreco_eta","simMreco_dphi","simMreco_deta",""};
+    TString vars[] ={ "dPhi","tof","simMreco_phi","simMreco_eta","simMreco_dphi","simMreco_deta",""};
     
     
 
@@ -231,11 +245,21 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
 {
     TFile * f = new TFile("testSegments.root");
 
-        // TString digis[] = {"p8s768","p12s256","p8s384","p6s512","p4s768","","",""};
-        // TString digiNs[] = {"8 part. 768 strips","12 part. 256 strips","8 part. 384 strips","6 part. 512 strips","4 part. 768 strips","","",""};
+        // TString digis[] = {"p8s768","p8s768M6","p8s768L3","p8s768M6L3","","","",""};
+        // TString digiNs[] = {"6 layers, req. 4 layers per seg.","5 layers, req. 4 layers per seg.","6 layers, req. 3 layers per seg.","5 layers, req. 3 layers per seg.","",""};
+    
+        // TString digis[] = {"p8s256","p8s384","p8s512","p8s640","p8s768","","",""};
+        // TString digiNs[] = {"8 part. 256 strips","8 part. 384 strips","8 part. 512 strips","8 part. 640 strips","8 part. 768 strips","","",""};
+    
+    // TString digis[] = {"p2s768","p4s768","p6s768","p8s768","p10s768","","",""};
+    // TString digiNs[] = {"2 part. 768 strips","4 part. 768 strips","6 part. 768 strips","8 part. 768 strips","10 part. 768 strips","","",""};
+    
 
-        TString digis[] = {"p6s512","p6s512M1","p6s512M2","p6s512M3","p6s512M4","p6s512M5","p6s512M6","","",""};
-        TString digiNs[] = {"6 part. 512 strips","6 part. 512 strips, no lay 1","6 part. 512 strips, no lay 2","6 part. 512 strips, no lay 3","6 part. 512 strips, no lay 4","6 part. 512 strips, no lay 5","6 part. 512 strips, no lay 6","","",""};
+        TString digis[] = {"p8s768","p12s256","p8s384","p6s512","p4s768","","",""};
+        TString digiNs[] = {"8 part. 768 strips","12 part. 256 strips","8 part. 384 strips","6 part. 512 strips","4 part. 768 strips","","",""};
+
+        // TString digis[] = {"p6s512","p6s512M1","p6s512M2","p6s512M3","p6s512M4","p6s512M5","p6s512M6","","",""};
+        // TString digiNs[] = {"6 part. 512 strips","6 part. 512 strips, no lay 1","6 part. 512 strips, no lay 2","6 part. 512 strips, no lay 3","6 part. 512 strips, no lay 4","6 part. 512 strips, no lay 5","6 part. 512 strips, no lay 6","","",""};
 
 
         cout <<" \t";
@@ -248,14 +272,14 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
         cout << "Fake Rate (mean,sigma)\t";
         for(unsigned int iD = 0; digis[iD][0]; ++iD){
             TH1 * h = 0;
-            f->GetObject(TString::Format("%s__fake_nSegs",digis[iD].Data()),h);
+            f->GetObject(TString::Format("%s__fake_passDPhiTime_ext_nSegs",digis[iD].Data()),h);
             float mean = 0;
             float std = 0;
             if(h){
                 mean = h->GetMean();
                 std  = h->GetStdDev();
             }
-                 cout << TString::Format("%.0f,%.0f\t",mean,std);
+                 cout << TString::Format("%.1f,%.1f\t",mean,std);
         }
         cout <<endl;
         //fake proportions
@@ -288,29 +312,38 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
         TString pts[] = {"pteq1to3","pteq3to5","pteq5to20","ptgeq20",""};
         TString ptNs[] = {"1-pT-3","3-pT-5","5-pT-20","20-pT-30",""};
         TString effnums[] = {"perfect","lost",""};
+        TString effquals[] = {"seg_passDPhiTime_nHits","seg_passDPhiTime_nHits",""};
         TString effnumNs[] = {"perfect (%)","lost (%)",""};
         for(unsigned int iP = 0; pts[iP][0]; ++iP){
             for(unsigned int iN = 0; effnums[iN][0]; ++iN){
             cout << ptNs[iP] <<" "<<effnumNs[iN]<< "\t";
         for(unsigned int iD = 0; digis[iD][0]; ++iD){
-            TH1 * h1 = 0;
-            f->GetObject(TString::Format("%s__%s_dirty_muon_seg_nHits",digis[iD].Data(),pts[iP].Data()),h1);
-            TH1 * h2 = 0;
-            f->GetObject(TString::Format("%s__%s_perfect_muon_seg_nHits",digis[iD].Data(),pts[iP].Data()),h2);
-            TH1 * h3 = 0;
-            f->GetObject(TString::Format("%s__%s_lost_muon_seg_nHits",digis[iD].Data(),pts[iP].Data()),h3);
 
-            TH1 * h = 0;
-            f->GetObject(TString::Format("%s__%s_%s_muon_seg_nHits",digis[iD].Data(),pts[iP].Data(),effnums[iN].Data()),h);
-            float eff = 0;
+
+            TH1 * hd = 0;
+            f->GetObject(TString::Format("%s__%s_all_muon_seg_nHits",digis[iD].Data(),pts[iP].Data()),hd);
+            float tot = hd->Integral();
             float num = 0;
-            float tot = 0;
-            if(h && h1){
-                tot = h1->Integral()+h2->Integral()+h3->Integral();
+            if(iN){
+                TH1 * hp = 0;
+                f->GetObject(TString::Format("%s__%s_perfect_muon_%s",digis[iD].Data(),pts[iP].Data(),effquals[iN].Data()),hp);
+            
+                TH1 * hdirty = 0;
+                f->GetObject(TString::Format("%s__%s_dirty_muon_%s",digis[iD].Data(),pts[iP].Data(),effquals[iN].Data()),hdirty);  
+                
+                num =  hd->Integral() - hp->Integral() - hdirty->Integral();        
+                
+            } else {
+
+                TH1 * h = 0;
+                f->GetObject(TString::Format("%s__%s_%s_muon_%s",digis[iD].Data(),pts[iP].Data(),effnums[iN].Data(),effquals[iN].Data()),h);
                 num = h->Integral();
-                eff = num/tot * 100.0;
             }
+            float eff = num/tot * 100.0;
+            
                  cout << TString::Format("%.1f%%\t",eff);
+                 // cout << TString::Format("%.1f%%\t",TMath::Sqrt(num)/tot * 100);
+                 
                  // cout << TString::Format("(%f,%f)\t",num,tot);
         }
         cout << endl;
@@ -376,7 +409,7 @@ cout << endl;
                 mean = h->GetMean();
                 std  = h->GetStdDev();
             }
-                 cout << TString::Format("%.2e\t",std);
+                 cout << TString::Format("%.1e\t",std);
         }
         cout << endl;
     }

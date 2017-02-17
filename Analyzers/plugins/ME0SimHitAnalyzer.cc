@@ -28,75 +28,8 @@
 
 #include "Geometry/GEMGeometry/interface/ME0EtaPartitionSpecs.h"
 
-
+#include "../interface/ME0Helper.h"
 using namespace std;
-
-
-struct SimTrackProperties{
-	double cenEta = -1;
-	double lay1Eta = -1;
-	double dPhi = -1;
-	int nLaysHit = 0;
-	bool inFirst= false;
-};
-SimTrackProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vector<std::pair<const PSimHit*,ME0DetId> >& simHits) {
-
-	SimTrackProperties prop;
-
-    std::vector<std::vector<const PSimHit*> > laysHit(6);
-    for(const auto& h : simHits){
-      laysHit[h.second.layer()  - 1].push_back(h.first);
-    }
-    std::vector<const PSimHit *> prunedHits;
-    for(auto& l : laysHit){
-      if(l.size() >0) {
-    	  prop.nLaysHit++;
-        prunedHits.push_back(l.front());
-      }
-    }
-
-    auto getGlobal = [&](const PSimHit * sh) -> GlobalPoint {
-    	return mgeom->etaPartition(sh->detUnitId())->toGlobal(sh->entryPoint());
-    };
-
-    if(laysHit[0].size()){
-    	prop.inFirst = true;
-    	prop.lay1Eta = getGlobal(laysHit[0].front()).eta();
-    }
-
-
-    if(prop.nLaysHit > 2){
-        const double beginOfDet  = 527;
-        const double centerOfDet = 539.5;
-        const double endOfDet    = 552;
-        auto getProj = [](double zValue, const GlobalPoint& up, const GlobalPoint& down) -> GlobalPoint {
-
-          auto getCenter = [](double v1,double v2,double z1,double z2,double zc)->double{
-            if(z2 == z1) return -99;
-            double m = (v2 - v1)/(z2 - z1);
-            double b =  (z2*v1 - z1*v2)/(z2 - z1);
-            return m*zc+b;
-          };
-
-          const double zc = up.z() > 0 ? zValue : -1*zValue;
-          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zc);
-          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zc);
-          return GlobalPoint(xc,yc,zc);
-        };
-
-        const int upInd = floor(prunedHits.size()/2);
-        GlobalPoint centerUp = getGlobal(prunedHits[upInd]);
-        GlobalPoint centerDown = getGlobal(prunedHits[upInd-1]);
-        GlobalPoint centerPt = getProj(centerOfDet, centerUp, centerDown);
-        GlobalPoint upPt = getProj(endOfDet, getGlobal(prunedHits[prunedHits.size() - 1]), getGlobal(prunedHits[prunedHits.size() - 2]));
-        GlobalPoint downPt = getProj(beginOfDet, getGlobal(prunedHits[1]), getGlobal(prunedHits[0]));
-
-        prop.cenEta = centerPt.eta();
-        prop.dPhi = TVector2::Phi_mpi_pi(upPt.phi() - downPt.phi());
-
-    }
-    return prop;
-}
 
 
 class ME0SimHitAnalyzer : public edm::EDAnalyzer {
@@ -235,7 +168,9 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 
       //Numbers special plots;
-      SimTrackProperties props = getSimTrackProperties(mgeom, it->second);
+      std::vector<const PSimHit *> shForProp;
+      for(const auto& h : it->second) shForProp.push_back(h.first);
+      auto props = ME0Helper::getSimTrackProperties(mgeom, shForProp);
       if(props.inFirst)                                                                           hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(1);
       if(props.nLaysHit  && TMath::Abs(props.lay1Eta) > 2.4)                                      hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(2);
       if(props.nLaysHit >= 3)                                                                     hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(3);
@@ -244,6 +179,49 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       if(props.nLaysHit >= 3 && TMath::Abs(props.dPhi) < 0.013 && TMath::Abs(props.cenEta) > 2.4) hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI",10   ,.5,10.5)->Fill(6);
       if(props.nLaysHit >= 6 && TMath::Abs(props.dPhi) < 0.013)                                   hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI,6lDPHI",10   ,.5,10.5)->Fill(7);
       if(props.nLaysHit >= 6 && TMath::Abs(props.dPhi) < 0.013 && TMath::Abs(props.cenEta) > 2.4) hists.getOrMake1D(TString::Format("%s_specialYields",prefix.Data()),";1l,3l,3lDPHI,6lDPHI",10   ,.5,10.5)->Fill(8);
+
+
+
+      hists.getOrMake1D(TString::Format("%s_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+      if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("%s_nLays_geq3_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("%s_nLays_geq4_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("%s_nLays_geq5_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("%s_nLays_geq6_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+
+      hists.getOrMake1D(TString::Format("all_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+      if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+      hists.getOrMake1D(TString::Format("all_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+      if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+      if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+
+      if(props.oneChamber){
+          hists.getOrMake1D(TString::Format("%s_tr1_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+          if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("%s_nLays_geq3_tr1_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("%s_nLays_geq4_tr1_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("%s_nLays_geq5_tr1_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("%s_nLays_geq6_tr1_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+
+          hists.getOrMake1D(TString::Format("all_tr1_dPhi"),";#Delta#phi",400,0,0.1)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+          if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr1_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr1_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr1_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr1_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+          hists.getOrMake1D(TString::Format("all_tr1_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
+          if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr1_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr1_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr1_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+          if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr1_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));
+      }
+
 
 
 
@@ -329,6 +307,7 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
         if(type == 1) hists.getOrMake1D(TString::Format("%s_pi_nLays_geq3_dPhi",prefix.Data()),";#Delta#phi",20,0,0.05)->Fill(dPhi);
       }
+
 
 
 

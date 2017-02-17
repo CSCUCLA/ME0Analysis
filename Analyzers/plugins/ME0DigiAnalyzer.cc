@@ -234,6 +234,10 @@ void ME0DigiAnalyzer::getDigiCuts(const ME0Geometry* mgeom,edm::Handle<std::vect
 		if(!inOneChamber || !withinTimeBins) continue;
 		if(nHits < 3) continue;
 
+	      auto props = ME0Helper::getSimTrackProperties(mgeom, simHits);
+	      hists.getOrMake1D(TString::Format("%s_tr_dPhi",ptName.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+
 		TString hitName = ptName;
 		if(nHits == 3 ) hitName += "nHits3_";
 		else if(nHits == 4 || nHits == 5 ) hitName += "nHits4to5_";

@@ -5,8 +5,6 @@ process = cms.Process("TEST")
 
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
-options.inputFiles = 'csc_forsync.root'
-options.outputFile = 'evttree.root'
 options.parseArguments()
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -14,7 +12,8 @@ process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
 
 process.source = cms.Source ("PoolSource",
-        fileNames = cms.untracked.vstring(options.inputFiles )        
+        fileNames = cms.untracked.vstring(options.inputFiles ),
+        duplicateCheckMode = cms.untracked.string("noDuplicateCheck")               
 
 )
 process.MessageLogger = cms.Service("MessageLogger",
@@ -90,11 +89,11 @@ process.newdigiseq  = cms.Sequence()
 # doAnalysis(process,process.newdigiseq,"p64s4Merge",4,64,0.0,cms.vint32(1,1,1,1,1,1), True,True)
 # doAnalysis(process,process.newdigiseq,"p4s4Merge",4,4,0.0,cms.vint32(1,1,1,1,1,1), True,True)
 # doAnalysis(process,process.newdigiseq,"p4s768Merge",768,4,0.0,cms.vint32(1,1,1,1,1,1), True,True)
-doAnalysis(process,process.newdigiseq,"p8s128Merge",128,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
-doAnalysis(process,process.newdigiseq,"p8s256Merge",256,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
-doAnalysis(process,process.newdigiseq,"p8s512Merge",512,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
-doAnalysis(process,process.newdigiseq,"p4s512Merge",512,4,0.0,cms.vint32(1,1,1,1,1,1), True,True)
-doAnalysis(process,process.newdigiseq,"p8s1024Merge",1024,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+# doAnalysis(process,process.newdigiseq,"p8s128Merge",128,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+# doAnalysis(process,process.newdigiseq,"p8s256Merge",256,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+# doAnalysis(process,process.newdigiseq,"p8s512Merge",512,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+# doAnalysis(process,process.newdigiseq,"p4s512Merge",512,4,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+doAnalysis(process,process.newdigiseq,"p8s768",1024,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
 # doAnalysis(process,process.newdigiseq,"p16s768Merge",768,16,0.0,cms.vint32(1,1,1,1,1,1), True,True)
 # doAnalysis(process,process.newdigiseq,"p8s640Merge",640,8,True,True)
 # doAnalysis(process,process.newdigiseq,"p8s512Merge",512,8,True,True)

@@ -262,12 +262,21 @@ private:
 				int nHits = segment ? segment->nRecHits() : 0 ;
 				hists.getOrMake1D(TString::Format("%s_nHits",prefix.Data()),";# of hits",7,-0.5,6.5)->Fill(nHits);
 
+
 				if(!segment) return;
+				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),&*segment);
+				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+				const bool passTime = std::fabs(segment->time()) <11.0;
+				if(passDPhi)hists.getOrMake1D(TString::Format("%s_passDPhi_nHits",prefix.Data()),";# of hits",7,-0.5,6.5)->Fill(nHits);
+				if(passTime)hists.getOrMake1D(TString::Format("%s_passTime_nHits",prefix.Data()),";# of hits",7,-0.5,6.5)->Fill(nHits);
+				if(passDPhi&&passTime)hists.getOrMake1D(TString::Format("%s_passDPhiTime_nHits",prefix.Data()),";# of hits",7,-0.5,6.5)->Fill(nHits);
+
+
+
 				float chi2 = segment->chi2();
 				int ndof = segment->degreesOfFreedom();
 				hists.getOrMake1D(TString::Format("%s_chi2",prefix.Data()),";#chi^{2}",200,0,100)->Fill(chi2);
 				hists.getOrMake1D(TString::Format("%s_chi2ondof",prefix.Data()),";#chi^{2}/dof",200,0,100)->Fill(chi2/ndof);
-				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),&*segment);
 				hists.getOrMake1D(TString::Format("%s_dPhi",prefix.Data()),";#Delta#phi",200,0,.1)->Fill(std::fabs(prop.dPhi));
 
 				auto stp = ME0Helper::getSimTrackProperties(mgeom,muon.simHits);
@@ -277,12 +286,21 @@ private:
 				hists.getOrMake1D(TString::Format("%s_simMreco_deta",prefix.Data()),";#Delta#eta_{sim} - #Delta#eta_{seg}",200,-0.25,0.25)->Fill(stp.dEta - prop.dEta);
 
 
+				hists.getOrMake1D(TString::Format("%s_tof",prefix.Data()),";segment tof",400,-200,200)->Fill(segment->time());
+				int nNon0 = 0;
+				for(const auto& rh : segment->specificRecHits()) if(std::fabs(rh.tof()) > 2 ) nNon0++;
+				hists.getOrMake1D(TString::Format("%s_nNon0",prefix.Data()),";# of out of time hits",7,-0.5,6.5)->Fill(nNon0);
+
+
 
 
 
 
 			};
 			doShortTypePlots(TString::Format("%sall_muon_seg",sname.Data()));
+			doShortTypePlots(TString::Format("%s%sall_muon_seg",sname.Data(),(ptstr).c_str()));
+
+
 			doShortTypePlots(TString::Format("%s%s_muon_seg",sname.Data(),shortCatstr.c_str()));
 			doShortTypePlots(TString::Format("%s%s_muon_seg",sname.Data(),(ptstr + shortCatstr).c_str()));
 
@@ -295,6 +313,9 @@ private:
 		if(nGM == 2){
 
 			int nFakes = 0;
+			int nFakes_passTime = 0;
+			int nFakes_passDPhi = 0;
+			int nFakes_passTime_dPhi = 0;
 			for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
 				auto ch_segs = segments.get(*iC);
 				auto& ch_cats = segmentCats[*iC];
@@ -319,9 +340,38 @@ private:
 					hists.getOrMake1D(TString::Format("%s%s_fake_seg_dPhi",sname.Data(),(catstr).c_str()),";#Delta#phi",50,0,.025)->Fill(std::fabs(prop.dPhi));
 					hists.getOrMake1D(TString::Format("%sall_fake_seg_dPhi",sname.Data()),";#Delta#phi",50,0,.025)->Fill(std::fabs(prop.dPhi));
 
+					hists.getOrMake1D(TString::Format("%sall_fake_seg_tof",sname.Data()),";segment tof",400,-200,200)->Fill(iS->time());
+					hists.getOrMake1D(TString::Format("%s%s_fake_seg_tof",sname.Data(),catstr.c_str()),";segment tof",400,-200,200)->Fill(iS->time());
+					int nNon0 = 0;
+					for(const auto& rh : iS->specificRecHits())
+						if(std::fabs(rh.tof()) > 2 )
+							nNon0++;
+
+					hists.getOrMake1D(TString::Format("%sall_fake_seg_nNon0",sname.Data()),";# of out of time hits",7,-0.5,6.5)->Fill(nNon0);
+					hists.getOrMake1D(TString::Format("%s%s_fake_seg_nNon0",sname.Data(),catstr.c_str()),";# of out of time hits",7,-0.5,6.5)->Fill(nNon0);
+
+					const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+					const bool passTime = std::fabs(iS->time()) <11.0;
+					if(passTime) nFakes_passTime++;
+					if(passDPhi) nFakes_passDPhi++;
+					if(passTime && passDPhi) nFakes_passTime_dPhi++;
 				}
 			}
 			hists.getOrMake1D(TString::Format("%sfake_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes);
+			hists.getOrMake1D(TString::Format("%sfake_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes);
+
+			hists.getOrMake1D(TString::Format("%sfake_passDPhi_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passDPhi);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhi_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passDPhi);
+
+			hists.getOrMake1D(TString::Format("%sfake_passTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime);
+			hists.getOrMake1D(TString::Format("%sfake_passTime_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passTime);
+
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime_dPhi);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passTime_dPhi);
+
+
+
+
 
 		}
 	}

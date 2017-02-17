@@ -53,6 +53,44 @@
          // p->draw(true,TString::Format("plots/%s.pdf",vars[iV].Data()));
 }
 
+//PU plot without abs
+{
+    TFile * f = new TFile("trackDensity.root");
+    TString etas[] = {"tracks_gt0p5_eta","tracks_gt3p0_eta","tracks_gt5p0_eta","","tracks_gt10_eta","","tracks_gt20_eta",""};
+    TString etaNames[]= {"p_{T} > 0.5 GeV","p_{T} > 3.0 GeV","p_{T} > 5.0 GeV","p_{T} > 10 GeV","p_{T} > 20 GeV"};
+    TH1 * hNorm;
+    f->GetObject("nEvents",hNorm);
+    double nE = hNorm->GetBinContent(1);
+    Plotter * p = new Plotter;
+    
+
+
+
+     for(unsigned int iE =  0 ; etas[iE][0]; ++iE){
+         TH1 * h;
+         f->GetObject(etas[iE],h);
+
+         h->Rebin(20);
+         for(unsigned int iB = 0; iB <= h->GetNbinsX(); ++iB){
+             double count = h->GetBinContent(iB);
+             double error = h->GetBinError(iB);
+             double width = h->GetBinWidth(iB);
+             // double norm = width*2*TMath::Pi()*nE*2;
+             double norm = nE;
+             // double norm = width*nE*2;
+             h->SetBinContent(iB,count/norm);
+             h->SetBinError(iB,error/norm);
+             h->SetYTitle("# of inner tracks from PU per BX / 0.2");
+             // h->SetYTitle("dN/d#eta");
+             h->SetXTitle("#eta");
+         }
+         p->addHist(h,etaNames[iE]);
+         }
+
+                  p->draw();
+         // p->normalize();
+         // p->draw(true,TString::Format("plots/%s.pdf",vars[iV].Data()));
+}
 
 
 //Gen DPHI
@@ -699,4 +737,93 @@ p->draw();
         double two = (hists[iH]->GetBinContent(5)+hists[iH]->GetBinContent(6))/hists[iH]->GetBinContent(4);
         cout << one <<"  " << two <<" "<< hists[iH]->GetBinError(5)/hists[iH]->GetBinContent(4) <<endl;
     }
+}
+
+
+// factor of 10 plot
+{
+    TFile * ff = new TFile("simHitAnalyzer.root");
+    TH1 * hfa = 0;
+    TH1 * hf3= 0; 
+    TH1 * hf4= 0;
+    TH1 * hf4m= 0;
+    TH1 * hf5= 0;
+    TH1 * hf6= 0;
+    TH1 * hf6m= 0;
+    ff->GetObject("all_tr_dPhi",hfa);
+    ff->GetObject("all_nLays_geq3_tr_dPhi",hf3);
+    ff->GetObject("all_nLays_geq4_tr_dPhi",hf4);
+    ff->GetObject("muon_nLays_geq4_tr_dPhi",hf4m);
+    ff->GetObject("all_nLays_geq5_tr_dPhi",hf5);
+    ff->GetObject("all_nLays_geq6_tr_dPhi",hf6);
+    ff->GetObject("muon_nLays_geq6_tr_dPhi",hf6m);
+
+    TH1 * hf6o = (TH1*)hf6->Clone();
+
+    TH1 * hf5o = (TH1*)hf5->Clone();
+    hf5o->Add(hf6,-1);
+    
+    TH1 * hf4o = (TH1*)hf4->Clone();
+    hf4o->Add(hf5,-1);
+    
+    TH1 * hf3o = (TH1*)hf3->Clone();
+    hf3o->Add(hf4,-1);
+    
+    TH1 * hflt = (TH1*)hfa->Clone();
+    hflt->Add(hf3,-1);
+    
+    
+    TH1 * hf34o = (TH1*)hf3->Clone();
+    hf34o->Add(hf5,-1);
+    
+    TH1 * hf56o = (TH1*)hf5->Clone();
+    
+    TH1 * hflt4 = (TH1*)hfa->Clone();
+    hflt4->Add(hf4,-1);
+    
+    TH1 * hf4nonM = (TH1*)hf4->Clone();
+    hf4nonM->Add(hf4m,-1);
+    
+    TH1 * hf6nonM = (TH1*)hf6->Clone();
+    hf6nonM->Add(hf6m,-1);
+    
+    
+    TFile * fs = new TFile("digiAnalyzer_p8s768.root");
+    TH1 * hr1 =0;
+    TH1 * hr3=0;
+    TH1 * hr5=0;
+    TH1 * hr20=0;
+    fs->GetObject("p8s768_ptleq3__tr_dPhi",hr1);
+    fs->GetObject("p8s768_pteq3to5__tr_dPhi",hr3);
+    fs->GetObject("p8s768_pteq5to20__tr_dPhi",hr5);
+    fs->GetObject("p8s768_ptgeq20__tr_dPhi",hr20);
+    
+    hflt->SetXTitle("SimHit #Delta#phi");
+    hflt->SetYTitle("a.u.");
+    
+    hf4nonM->SetXTitle("SimHit #Delta#phi");
+    hf4nonM->SetYTitle("a.u.");
+    
+    p = new Plotter;
+    // p->addStackHist(hflt ,"bkg, < 3 layers hit");
+    // p->addStackHist(hf34o,"bkg, 3-4 layers hit");
+    // p->addStackHist(hf56o,"bkg, 5-6 layers hit");
+        // p->addStackHist(hfa,"bkg, 5-6 layers hit");
+    
+    p->addStackHist(hf4nonM,"non-#mu PU bkg, #geq 4 layers hit");
+        p->addStackHist(hf4m,"#mu PU bkg, #geq 4 layers hit");
+    
+    
+        // p->addHistLine(hf4,"bkg, >= 4 layers hit");
+        // p->addHistLine(hflt4,"bkg, < 4 layers hit");
+    
+    // p->addHistLine(hr1 ,"muon, p_{T} 1-3");
+    p->addHistLine(hr3 ,"#mu signal, p_{T} 3-5 GeV");
+    // p->addHistLine(hr5 ,"muon, p_{T} 5-20");
+    // p->addHistLine(hr20,"muon, p_{T} 20-30");
+    p->rebin(10);
+    p->normalize();
+
+    p->draw();
+        
 }

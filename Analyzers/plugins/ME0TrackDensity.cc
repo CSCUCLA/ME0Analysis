@@ -51,8 +51,7 @@ ME0TrackDensity::ME0TrackDensity(const edm::ParameterSet& iConfig) :
 {
   track_token = consumes<reco::TrackCollection>( edm::InputTag("generalTracks") );
   vtxToken_   = consumes<reco::VertexCollection>( edm::InputTag("offlinePrimaryVertices") );
-  dToken_     = consumes<ME0DigiPreRecoCollection>( edm::InputTag("simMuonME0Digis") );
-
+//  dToken_     = consumes<ME0DigiPreRecoCollection>( edm::InputTag("simMuonME0Digis") );
 }
 
 
@@ -69,13 +68,13 @@ ME0TrackDensity::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   edm::Handle <reco::VertexCollection > verts;
   iEvent.getByToken(vtxToken_,verts);
 
-  edm::Handle<ME0DigiPreRecoCollection> digisH;
-  iEvent.getByToken(dToken_,digisH);
+//  edm::Handle<ME0DigiPreRecoCollection> digisH;
+//  iEvent.getByToken(dToken_,digisH);
 
 
-  edm::ESHandle<ME0Geometry> me0g;
-  iSetup.get<MuonGeometryRecord>().get(me0g);
-  const ME0Geometry* mgeom = &*me0g;
+//  edm::ESHandle<ME0Geometry> me0g;
+//  iSetup.get<MuonGeometryRecord>().get(me0g);
+//  const ME0Geometry* mgeom = &*me0g;
 
   hists.getOrMake1D("nEvents",";# of events",1,0,2)->Fill(1.0);
 
@@ -126,25 +125,25 @@ ME0TrackDensity::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   }
 
-  for(auto iD = digisH->begin(); iD != digisH->end(); ++iD){
-    auto detID = (*iD).first;
-    if(detID.layer() != 1) continue;
-    const ME0DigiPreRecoCollection::Range& range = (*iD).second;
-    for (ME0DigiPreRecoCollection::const_iterator idigi = range.first;
-        idigi != range.second;idigi++) {
-      float eta = mgeom->etaPartition(detID)->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).eta();
-      if(TMath::Abs(idigi->pdgid()) == 13){
-        hists.getOrMake1D("me0hits_muons_eta",";#eta",800,-4.0,4.0)->Fill(eta);
-        hists.getOrMake1D("me0hits_muons_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(eta));
-      }
-      else{
-        hists.getOrMake1D("me0hits_nonmuons_eta",";#eta",800,-4.0,4.0)->Fill(eta);
-        hists.getOrMake1D("me0hits_nonmuons_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(eta));
-      }
-
-    }
-
-  }
+//  for(auto iD = digisH->begin(); iD != digisH->end(); ++iD){
+//    auto detID = (*iD).first;
+//    if(detID.layer() != 1) continue;
+//    const ME0DigiPreRecoCollection::Range& range = (*iD).second;
+//    for (ME0DigiPreRecoCollection::const_iterator idigi = range.first;
+//        idigi != range.second;idigi++) {
+//      float eta = mgeom->etaPartition(detID)->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).eta();
+//      if(TMath::Abs(idigi->pdgid()) == 13){
+//        hists.getOrMake1D("me0hits_muons_eta",";#eta",800,-4.0,4.0)->Fill(eta);
+//        hists.getOrMake1D("me0hits_muons_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(eta));
+//      }
+//      else{
+//        hists.getOrMake1D("me0hits_nonmuons_eta",";#eta",800,-4.0,4.0)->Fill(eta);
+//        hists.getOrMake1D("me0hits_nonmuons_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(eta));
+//      }
+//
+//    }
+//
+//  }
 
 
 }
