@@ -11,6 +11,12 @@
 #include <TMath.h>
 #include "../interface/MuonSegFit.h"
 
+#include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
+#include "TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h"
+#include "TrackingTools/GeomPropagators/interface/Propagator.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+#include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 namespace ME0Helper{
 const double beginOfDet  = 527;
@@ -24,6 +30,9 @@ struct SimMuon {
 	std::vector<const PSimHit*> simHits;
 	std::vector<std::pair<ME0DetId,unsigned int >> digiInfos;
 	std::vector< std::pair<std::pair<ME0DetId,int>, int >  > segments;
+
+	TrackingParticleRef trPart;
+	edm::RefToBase<reco::Track> recoTrack;
 };
 typedef std::vector<SimMuon> SimMuons;
 SimMuons fillSimMuons(const std::vector<SimTrack>& simTracks, const std::vector<PSimHit>&  simHits);
@@ -72,8 +81,20 @@ struct SimHitProperties{
 	double dPhi = -1;
 	double dEta = -1;
 	int nLaysHit = 0;
+	int nPrimLaysHit = 0;
 	bool oneChamber = true;
 	bool inFirst= false;
+
+	//For seg comps
+	const ME0Chamber * chamber = 0;
+	LocalPoint localPosition() const { return theOrigin; }
+	LocalVector localDirection() const { return theLocalDirection; }
+	AlgebraicSymMatrix parametersError() const { return theCovMatrix; }
+
+	LocalPoint theOrigin;
+	LocalVector theLocalDirection;
+	AlgebraicSymMatrix theCovMatrix = AlgebraicSymMatrix(4);
+
 };
 SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vector<const PSimHit* >& simHits);
 
@@ -100,6 +121,33 @@ struct SegmentProperties{
 	double dEta     = -1;
 };
 SegmentProperties getSegmentProperties(const GeomDet* loc, const ME0Segment * segment);
+
+void associateSimMuonsToTracks(SimMuons& simMuons, const edm::Handle<TrackingParticleCollection>& trParticles, const reco::SimToRecoCollection& simToReco  );
+
+struct PropogatedTrack {
+	bool isValid = false;
+	AlgebraicSymMatrix66 covFinalReco;
+	int chargeReco = 0;
+	GlobalVector p3FinalReco_glob;
+	GlobalVector r3FinalReco_globv;
+};
+
+PropogatedTrack propogateTrack(const edm::ESHandle<MagneticField>& bField,const edm::ESHandle<Propagator>& ThisshProp, const reco::Track * thisTrack, const float zPropValue);
+
+FreeTrajectoryState getFTS(const GlobalVector& p3, const GlobalVector& r3,
+			   int charge, const AlgebraicSymMatrix55& cov,
+			   const MagneticField* field);
+
+void getFromFTS(const FreeTrajectoryState& fts,
+				    GlobalVector& p3, GlobalVector& r3,
+				    int& charge, AlgebraicSymMatrix66& cov);
+
+
+struct LocalPropogatedTrack{
+	LocalTrajectoryParameters ltp;
+	AlgebraicMatrix55 cov;
+};
+LocalPropogatedTrack getLocalPropogateTrack(const PropogatedTrack& prpTrack, const ME0Chamber* chamber);
 
 
 }

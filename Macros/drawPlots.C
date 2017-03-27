@@ -798,32 +798,66 @@ p->draw();
     fs->GetObject("p8s768_pteq5to20__tr_dPhi",hr5);
     fs->GetObject("p8s768_ptgeq20__tr_dPhi",hr20);
     
-    hflt->SetXTitle("SimHit #Delta#phi");
+    hflt->SetXTitle("SimTrack #Delta#phi");
     hflt->SetYTitle("a.u.");
     
-    hf4nonM->SetXTitle("SimHit #Delta#phi");
+    hf4nonM->SetXTitle("SimTrack #Delta#phi");
     hf4nonM->SetYTitle("a.u.");
     
-    p = new Plotter;
-    // p->addStackHist(hflt ,"bkg, < 3 layers hit");
-    // p->addStackHist(hf34o,"bkg, 3-4 layers hit");
-    // p->addStackHist(hf56o,"bkg, 5-6 layers hit");
-        // p->addStackHist(hfa,"bkg, 5-6 layers hit");
+    hf4m->SetXTitle("SimTrack #Delta#phi");
+    hf4m->SetYTitle("a.u.");
     
+    p = new Plotter;
+
+    // p->addStackHist(hf56o,"bkg, 5-6 layers hit");
+    // p->addStackHist(hf34o,"bkg, 3-4 layers hit");
+    // p->addStackHist(hflt ,"bkg, < 3 layers hit");
+
+
+        // p->addStackHist(hfa,"bkg, 5-6 layers hit");
+
+    p->addStackHist(hf4m,"#mu PU bkg, #geq 4 layers hit");
     p->addStackHist(hf4nonM,"non-#mu PU bkg, #geq 4 layers hit");
-        p->addStackHist(hf4m,"#mu PU bkg, #geq 4 layers hit");
+
     
     
         // p->addHistLine(hf4,"bkg, >= 4 layers hit");
         // p->addHistLine(hflt4,"bkg, < 4 layers hit");
     
-    // p->addHistLine(hr1 ,"muon, p_{T} 1-3");
+    p->addHistLine(hr1 ,"#mu signal, p_{T} 1-3 GeV");
     p->addHistLine(hr3 ,"#mu signal, p_{T} 3-5 GeV");
-    // p->addHistLine(hr5 ,"muon, p_{T} 5-20");
-    // p->addHistLine(hr20,"muon, p_{T} 20-30");
-    p->rebin(10);
+    p->addHistLine(hr5 ,"#mu signal, p_{T} 5-20 GeV");
+    p->addHistLine(hr20,"#mu signal, p_{T} 20-30 GeV");
+    p->rebin(4);
     p->normalize();
 
+    p->draw();
+        
+}
+
+// Stack simhit
+{
+    TFile * ff = new TFile("simHitAnalyzer.root");
+    TH1 * hEv = 0;
+    ff->GetObject("nEvents",hEv);
+    float nEvents = hEv->GetBinContent(1);
+    
+    TH1 * hM= 0; 
+    TH1 * hE= 0; 
+    TH1 * hH= 0; 
+
+    ff->GetObject("muon_nLaysHit",hM);  hM->Scale(200./nEvents);
+    ff->GetObject("ele_nLaysHit",hE);   hE->Scale(200./nEvents);
+    ff->GetObject("hadron_nLaysHit",hH);hH->Scale(200./nEvents);
+ 
+    hE->SetXTitle("# of ME0 layers hit by SimTrack");
+    hE->SetYTitle("# of SimTracks / 200 MinBias int.");
+    
+    
+    p = new Plotter;    
+    p->addStackHist(hE,"electrons");
+    p->addStackHist(hH,"hadrons");
+    p->addStackHist(hM,"muons");
     p->draw();
         
 }

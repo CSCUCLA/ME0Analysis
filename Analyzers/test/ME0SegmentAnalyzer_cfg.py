@@ -7,7 +7,7 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 options.parseArguments()
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
 
@@ -18,7 +18,7 @@ process.source = cms.Source('PoolSource',
 
 process.MessageLogger = cms.Service("MessageLogger",
     cout = cms.untracked.PSet(
-        default = cms.untracked.PSet( limit = cms.untracked.int32(100) ),
+        default = cms.untracked.PSet( limit = cms.untracked.int32(-1) ),
         FwkJob = cms.untracked.PSet( limit = cms.untracked.int32(0) )
     ),
     categories = cms.untracked.vstring('FwkJob'),
@@ -37,7 +37,7 @@ process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
-def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4, onlyDigis = False) :
+def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
     from SimMuon.GEMDigitizer.muonME0NewGeoDigis_cfi import simMuonME0NewGeoDigis
     
     digi_name          = name + "Digis"
@@ -86,7 +86,7 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
                 maxPhiSeeds = cms.double(1.2*0.35/nStrips),
                 maxPhiAdditional = cms.double(1.2*0.35/nStrips),
                 maxETASeeds = cms.double(0.8/nPartitions),
-                maxTOFDiff = cms.double(25),
+                maxTOFDiff = cms.double(timeWindow),
                 minNumberOfHits = cms.uint32(minSegmentLayers),
             )
         )),
@@ -103,8 +103,8 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
 #     setattr( process, me0Muon_name, process.me0MuonConverting.clone(me0SegmentTag = cms.InputTag(segM_name)))
 #     seq += getattr(process, me0Muon_name)
     
-def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4, onlyDigis = False) :
-    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,onlyDigis)
+def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
+    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,timeWindow,onlyDigis)
     anName = name + "Analysis"
     setattr( process, anName, cms.EDAnalyzer("ME0SegmentAnalyzer",
         outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
@@ -176,31 +176,153 @@ process.newdigiseq  = cms.Sequence()
 
 
 #std
-doAnalysis(process,process.newdigiseq,"p12s256",128,12,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p6s512" ,512,6 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p4s768" ,768,4 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p12s256",128,12,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s512" ,512,6 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p4s768" ,768,4 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# 
+# #test removeing layer, looser layer reqs
+# doAnalysis(process,process.newdigiseq,"p8s768M6" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s768M6L3" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p8s768L3" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,3)
+# 
+# #do fine grain...comment out already processed
+# doAnalysis(process,process.newdigiseq,"p2s768"  ,768,2 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# #doAnalysis(process,process.newdigiseq,"p4s768"  ,768,4 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s768"  ,768,6 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# #doAnalysis(process,process.newdigiseq,"p8s768"  ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p10s768" ,768,10 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# 
+# doAnalysis(process,process.newdigiseq,"p8s256" ,256,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# #doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s512" ,512,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s640" ,640,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# #doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 
-#test removeing layer, looser layer reqs
-doAnalysis(process,process.newdigiseq,"p8s768M6" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,0),True,4)
-doAnalysis(process,process.newdigiseq,"p8s768M6L3" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,0),True,3)
-doAnalysis(process,process.newdigiseq,"p8s768L3" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,3)
+#neutron stress test
+#for full 112.5 sample
+# doAnalysis(process,process.newdigiseq,"p6s51275NL3"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL3" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL3" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL3"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL3"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51275NL4"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL4" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL4" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL4"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL4"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51275NL5"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL5" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL5" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL5"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL5"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51275NL6"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL6" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL6" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL6"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL6"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM6L3"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM6L3" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM6L3" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L3"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L3"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM6L4"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM6L4" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM6L4" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L4"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L4"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM6L5"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM6L5" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM6L5" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L5"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L5"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM56L3"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM56L3" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM56L3" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM56L3"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM56L3"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM56L4"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM56L4" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM56L4" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM56L4"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM56L4"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM456L3"   ,512,6 ,2.0   ,cms.vint32(1,1,1,0,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM456L3" ,512,6 ,0.5   ,cms.vint32(1,1,1,0,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM456L3" ,512,6 ,0.3   ,cms.vint32(1,1,1,0,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM456L3"   ,512,6 ,0.1333,cms.vint32(1,1,1,0,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM456L3"  ,512,6 ,0.1   ,cms.vint32(1,1,1,0,0,0),True,3)
 
-#do fine grain...comment out already processed
-doAnalysis(process,process.newdigiseq,"p2s768"  ,768,2 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-#doAnalysis(process,process.newdigiseq,"p4s768"  ,768,4 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p6s768"  ,768,6 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-#doAnalysis(process,process.newdigiseq,"p8s768"  ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p10s768" ,768,10 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 
-doAnalysis(process,process.newdigiseq,"p8s256" ,256,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-#doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p8s512" ,512,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p8s640" ,640,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-#doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51275NL4T0"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL4T0" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL4T0" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL4T0"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL4T0"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51275NL5T0"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5,0)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NL5T0" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5,0)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NL5T0" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5,0)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL5T0"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5,0)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL5T0"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,5,0)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM6L3T0"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,0),True,3,0)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM6L3T0" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,0),True,3,0)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM6L3T0" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,0),True,3,0)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L3T0"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,0),True,3,0)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L3T0"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,0),True,3,0)
+# doAnalysis(process,process.newdigiseq,"p6s51275NM6L4T0"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,0),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51237p5NM6L4T0" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,0),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51222p5NM6L4T0" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,0),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L4T0"   ,512,6 ,0.1333,cms.vint32(1,1,1,1,1,0),True,4,0)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L4T0"  ,512,6 ,0.1   ,cms.vint32(1,1,1,1,1,0),True,4,0)
+
+# doAnalysis(process,process.newdigiseq,"p12s51275NL4"   ,512,12 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p12s51237p5NL4" ,512,12 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p12s51222p5NL4" ,512,12 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p12s51210NL4"   ,512,12 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p12s5127p5NL4"  ,512,12 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4)
+doAnalysis(process,process.newdigiseq,"p12s51275NL5"   ,512,12 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p12s51237p5NL5" ,512,12 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p12s51222p5NL5" ,512,12 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p12s51210NL5"   ,512,12 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p12s5127p5NL5"  ,512,12 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,5)
+
+# doAnalysis(process,process.newdigiseq,"p8s76875NL4"   ,768,8 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s76837p5NL4" ,768,8 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s76822p5NL4" ,768,8 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s76810NL4"   ,768,8 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s7687p5NL4"  ,768,8 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4)
+
+# doAnalysis(process,process.newdigiseq,"p8s76875NL5"   ,768,8 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s76837p5NL5" ,768,8 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s76822p5NL5" ,768,8 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s76810NL5"   ,768,8 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s7687p5NL5"  ,768,8 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,5)
 
 
+
+
+
+#for the 15 sample
+# doAnalysis(process,process.newdigiseq,"p6s51210NL3"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL3"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,1),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL4"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL4"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL5"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL5"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51210NL6"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NL6"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,1),True,6)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L3"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L3"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L4"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L4"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM6L5"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM6L5"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,1,0),True,5)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM56L3"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM56L3"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM56L4"     ,512,6 ,2.0000,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM56L4"    ,512,6 ,0.75  ,cms.vint32(1,1,1,1,0,0),True,4)
+# doAnalysis(process,process.newdigiseq,"p6s51210NM456L3"     ,512,6 ,2.0000,cms.vint32(1,1,1,0,0,0),True,3)
+# doAnalysis(process,process.newdigiseq,"p6s5127p5NM456L3"    ,512,6 ,0.75  ,cms.vint32(1,1,1,0,0,0),True,3)
 
 
 process.p = cms.Path(process.newdigiseq)

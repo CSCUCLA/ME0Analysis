@@ -1,5 +1,8 @@
 #include "../interface/ME0Helper.h"
 
+#include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
+#include "TrackingTools/AnalyticalJacobians/interface/JacobianCartesianToLocal.h"
+#include "TrackingTools/AnalyticalJacobians/interface/JacobianLocalToCartesian.h"
 
 namespace ME0Helper{
 std::vector<const PSimHit*> getMatchedSimHits(const SimTrack * simTrack, const std::vector<PSimHit>&  simHitH){
@@ -284,7 +287,7 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
     }
 
     if(nChHit.size() > 1) prop.oneChamber = false;
-
+    prop.nPrimLaysHit = prunedHits.size();
 
 
 //    std::vector<const PSimHit *> prunedHits;
@@ -321,11 +324,9 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
             double b =  (z2*v1 - z1*v2)/(z2 - z1);
             return m*zc+b;
           };
-
-          const double zc = up.z() > 0 ? zValue : -1*zValue;
-          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zc);
-          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zc);
-          return GlobalPoint(xc,yc,zc);
+          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zValue);
+          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zValue);
+          return GlobalPoint(xc,yc,zValue);
         };
 
         const int upInd = floor(prunedHits.size()/2);
@@ -340,6 +341,16 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
         prop.dPhi = TVector2::Phi_mpi_pi(upPt.phi() - downPt.phi());
         prop.dEta = upPt.eta() - downPt.eta();
 
+        prop.chamber =  mgeom->chamber(  ME0DetId(prunedHits[upInd]->detUnitId()).chamberId());
+        LocalPoint upLocPt = prop.chamber->toLocal(upPt);
+        LocalPoint downLocPt = prop.chamber->toLocal(downPt);
+        GlobalPoint centerPtForComp = getProj(prop.chamber->position().z(), centerUp, centerDown);
+        prop.theOrigin = prop.chamber->toLocal(centerPtForComp);
+        prop.theLocalDirection = LocalVector( upLocPt.x() - downLocPt.x(), upLocPt.y() - downLocPt.y(), upLocPt.z() - downLocPt.z()   );
+        prop.theCovMatrix(1,1) = .00001;
+        prop.theCovMatrix(2,2) = .00001;
+        prop.theCovMatrix(3,3) = .00001;
+        prop.theCovMatrix(4,4) = .00001;
     }
     return prop;
 }
@@ -428,7 +439,6 @@ auto ld = segment->localDirection();
 	  SegmentProperties properties;
 
 	  properties.segAtCenter = loccen;
-	  properties.initialPoint = lp;
 	  properties.cenEta   =  globcen.eta();
 	  properties.cenPhi   =  globcen.phi();
 	  properties.beginEta =  globlow.eta();
@@ -440,6 +450,111 @@ auto ld = segment->localDirection();
 	  return properties;
 }
 
+void associateSimMuonsToTracks(SimMuons& simMuons, const edm::Handle<TrackingParticleCollection>& trParticles, const reco::SimToRecoCollection& simToReco  ){
+	for(auto& sMuon : simMuons){
+		for (TrackingParticleCollection::size_type iTP=0; iTP<trParticles->size(); iTP++) {
+			TrackingParticleRef trpart(trParticles, iTP);
+			for(unsigned int iST = 0; iST <  trpart->g4Tracks().size(); ++iST){
+				if(trpart->g4Tracks()[iST].eventId() != sMuon.track->eventId()  ) continue;
+				if(trpart->g4Tracks()[iST].trackId() != sMuon.track->trackId()  ) continue;
+				sMuon.trPart = trpart;
+				break;
+			}
+			if(!sMuon.trPart.isNull()) break;
+		}
+	    if(sMuon.trPart.isNull()) continue;
+
+	    edm::RefToBase<reco::Track> track;
+	    std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
+	    if(simToReco.find(sMuon.trPart) != simToReco.end()) {
+	    	simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) simToReco[sMuon.trPart];
+	    }
+        if(simRecAsso.begin() != simRecAsso.end() ) sMuon.recoTrack = simRecAsso.begin()->first;
+	}
+}
+
+PropogatedTrack propogateTrack(const edm::ESHandle<MagneticField>& bField,const edm::ESHandle<Propagator>& ThisshProp, const reco::Track * thisTrack, const float zPropValue){
+	PropogatedTrack prop;
+
+	float zSign = thisTrack->pz() > 0 ? 1.0f : -1.0f;
+	const float zValue = zPropValue * zSign;
+	Plane *plane = new Plane(Surface::PositionType(0,0,zValue),Surface::RotationType());
+
+    int chargeReco = thisTrack->charge();
+    GlobalVector p3reco(thisTrack->outerPx(), thisTrack->outerPy(), thisTrack->outerPz());
+    GlobalVector r3reco(thisTrack->outerX(), thisTrack->outerY(), thisTrack->outerZ());
+
+    AlgebraicSymMatrix66 covReco;
+    AlgebraicSymMatrix55 covReco_curv;
+    covReco_curv = thisTrack->outerStateCovariance();
+    FreeTrajectoryState initrecostate = getFTS(p3reco, r3reco, chargeReco, covReco_curv, &*bField);
+    getFromFTS(initrecostate, p3reco, r3reco, chargeReco, covReco);
+
+    TrajectoryStateOnSurface lastrecostate;
+    lastrecostate = ThisshProp->propagate(initrecostate,*plane);
+    if (!lastrecostate.isValid()) return prop;
+
+    FreeTrajectoryState finalrecostate(*lastrecostate.freeTrajectoryState());
+
+    AlgebraicSymMatrix66 covFinalReco;
+    GlobalVector p3FinalReco_glob, r3FinalReco_globv;
+	getFromFTS(finalrecostate, p3FinalReco_glob, r3FinalReco_globv, chargeReco, covFinalReco);
+
+
+	prop.covFinalReco = covFinalReco;
+	prop.p3FinalReco_glob = p3FinalReco_glob;
+	prop.r3FinalReco_globv = r3FinalReco_globv;
+	prop.chargeReco = chargeReco;
+	prop.isValid = true;
+
+	return prop;
+}
+
+
+FreeTrajectoryState getFTS(const GlobalVector& p3, const GlobalVector& r3,
+		   int charge, const AlgebraicSymMatrix55& cov,
+		   const MagneticField* field){
+
+GlobalVector p3GV(p3.x(), p3.y(), p3.z());
+GlobalPoint r3GP(r3.x(), r3.y(), r3.z());
+GlobalTrajectoryParameters tPars(r3GP, p3GV, charge, field);
+
+CurvilinearTrajectoryError tCov(cov);
+
+return cov.kRows == 5 ? FreeTrajectoryState(tPars, tCov) : FreeTrajectoryState(tPars) ;
+}
+
+void getFromFTS(const FreeTrajectoryState& fts,
+				    GlobalVector& p3, GlobalVector& r3,
+				    int& charge, AlgebraicSymMatrix66& cov){
+  GlobalVector p3GV = fts.momentum();
+  GlobalPoint r3GP = fts.position();
+
+  GlobalVector p3T(p3GV.x(), p3GV.y(), p3GV.z());
+  GlobalVector r3T(r3GP.x(), r3GP.y(), r3GP.z());
+  p3 = p3T;
+  r3 = r3T;
+  // p3.set(p3GV.x(), p3GV.y(), p3GV.z());
+  // r3.set(r3GP.x(), r3GP.y(), r3GP.z());
+
+  charge = fts.charge();
+  cov = fts.hasError() ? fts.cartesianError().matrix() : AlgebraicSymMatrix66();
+
+}
+
+LocalPropogatedTrack getLocalPropogateTrack(const PropogatedTrack& prpTrack, const ME0Chamber* chamber) {
+	LocalPropogatedTrack localProp;
+
+	GlobalPoint r3FinalReco_glob(prpTrack.r3FinalReco_globv.x(),prpTrack.r3FinalReco_globv.y(),prpTrack.r3FinalReco_globv.z());
+	LocalPoint r3FinalReco = chamber->toLocal(r3FinalReco_glob);
+	LocalVector p3FinalReco=chamber->toLocal(prpTrack.p3FinalReco_glob);
+
+	localProp.ltp = LocalTrajectoryParameters(r3FinalReco,p3FinalReco,prpTrack.chargeReco);
+	JacobianCartesianToLocal jctl(chamber->surface(),localProp.ltp);
+	AlgebraicMatrix56 jacobGlbToLoc = jctl.jacobian();
+	localProp.cov = (jacobGlbToLoc * prpTrack.covFinalReco) * ROOT::Math::Transpose(jacobGlbToLoc);
+	return localProp;
+}
 
 }
 

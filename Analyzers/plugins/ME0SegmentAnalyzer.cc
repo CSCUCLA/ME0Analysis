@@ -204,7 +204,6 @@ private:
 			if(absETA > 2.8 || absETA < 2.0 ) continue;
 			std::map<ME0DetId,int> chMap;
 			for(const auto& di :muon.simHits ) chMap[ME0DetId(di->detUnitId()).chamberId()]++;
-			if(chMap.size() > 1) continue;
 			nGM++;
 			std::string ptstr = "pteq1to3_";
 			if(pt >= 3 && pt < 5 ) ptstr  = "pteq3to5_";
@@ -253,8 +252,34 @@ private:
 //			}
 
 
+			hists.getOrMake1D(TString::Format("%sall_mCh_muon_pt",sname.Data()),";muon p_{T}",60,0,30)->Fill(pt);
+			hists.getOrMake1D(TString::Format("%s%s_mCh_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+			const ME0Segment * tsegment =  muon.segments.size() ?  &*(segments.get(muon.segments[0].first.first).first + muon.segments[0].first.second) : 0;
+			if(tsegment){
+				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),&*tsegment);
+				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+				const bool passTime = std::fabs(tsegment->time()) <11.0;
+				if(passDPhi)			hists.getOrMake1D(TString::Format("%s%s_mCh_passDPhi_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+				if(passTime)			hists.getOrMake1D(TString::Format("%s%s_mCh_passTime_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+				if(passDPhi&&passTime)	hists.getOrMake1D(TString::Format("%s%s_mCh_passDPhiTime_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+
+			}
+
+
+			if(chMap.size() > 1) continue;
+
 			hists.getOrMake1D(TString::Format("%sall_muon_pt",sname.Data()),";muon p_{T}",60,0,30)->Fill(pt);
 			hists.getOrMake1D(TString::Format("%s%s_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+			if(tsegment){
+				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),&*tsegment);
+				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+				const bool passTime = std::fabs(tsegment->time()) <11.0;
+				if(passDPhi)			hists.getOrMake1D(TString::Format("%s%s_passDPhi_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+				if(passTime)			hists.getOrMake1D(TString::Format("%s%s_passTime_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+				if(passDPhi&&passTime)	hists.getOrMake1D(TString::Format("%s%s_passDPhiTime_muon_pt",sname.Data(),catstr.c_str()),";muon p_{T}",60,0,30)->Fill(pt);
+			}
+
+
 
 
 			auto doShortTypePlots = [&] (TString prefix){
@@ -357,17 +382,17 @@ private:
 					if(passTime && passDPhi) nFakes_passTime_dPhi++;
 				}
 			}
-			hists.getOrMake1D(TString::Format("%sfake_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes);
-			hists.getOrMake1D(TString::Format("%sfake_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes);
-
-			hists.getOrMake1D(TString::Format("%sfake_passDPhi_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passDPhi);
-			hists.getOrMake1D(TString::Format("%sfake_passDPhi_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passDPhi);
-
-			hists.getOrMake1D(TString::Format("%sfake_passTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime);
-			hists.getOrMake1D(TString::Format("%sfake_passTime_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passTime);
+//			hists.getOrMake1D(TString::Format("%sfake_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes);
+//			hists.getOrMake1D(TString::Format("%sfake_ext_nSegs",sname.Data()),";# of segments",100000,-0.5,99999.5)->Fill(nFakes);
+//
+//			hists.getOrMake1D(TString::Format("%sfake_passDPhi_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passDPhi);
+//			hists.getOrMake1D(TString::Format("%sfake_passDPhi_ext_nSegs",sname.Data()),";# of segments",100000,-0.5,99999.5)->Fill(nFakes_passDPhi);
+//
+//			hists.getOrMake1D(TString::Format("%sfake_passTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime);
+//			hists.getOrMake1D(TString::Format("%sfake_passTime_ext_nSegs",sname.Data()),";# of segments",100000,-0.5,99999.5)->Fill(nFakes_passTime);
 
 			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime_dPhi);
-			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_ext_nSegs",sname.Data()),";# of segments",1000,-0.5,999.5)->Fill(nFakes_passTime_dPhi);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_ext_nSegs",sname.Data()),";# of segments",100000,-0.5,99999.5)->Fill(nFakes_passTime_dPhi);
 
 
 
@@ -433,6 +458,34 @@ ME0SegmentAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 //	printSegmentInfo(mgeom,*segH,*rechitsH,*tracks,*simHitH,*digisH,*digisNH,*digisM);
 	segmentEfficiencyPlots(mgeom,*segH,*rechitsH,*tracks,*simHitH,*digisH,*digisNH,*digisM,TString::Format("%s_",runName.Data()));
 
+
+
+	for(const auto& ch_digis: *digisH ){
+		int nNeutronHits = 0;
+		int nNeutronHitsBX0 = 0;
+		for (ME0DigiPreRecoCollection::const_iterator idigi = ch_digis.second.first;
+				idigi != ch_digis.second.second;idigi++) {
+			if(idigi->prompt()) continue;
+			nNeutronHits++;
+			if(idigi->tof() > 12.5 || idigi->tof() < -12.5) continue;
+			nNeutronHitsBX0++;
+		}
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHits);
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_BX0_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHitsBX0);
+	}
+	for(const auto& ch_digis: *digisNH ){
+		int nNeutronHits = 0;
+		int nNeutronHitsBX0 = 0;
+		for (ME0DigiPreRecoCollection::const_iterator idigi = ch_digis.second.first;
+				idigi != ch_digis.second.second;idigi++) {
+			if(idigi->prompt()) continue;
+			nNeutronHits++;
+			if(idigi->tof() > 12.5 || idigi->tof() < -12.5) continue;
+			nNeutronHitsBX0++;
+		}
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_newDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHits);
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_BX0_newDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHitsBX0);
+	}
 }
 
 
