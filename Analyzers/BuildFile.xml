@@ -15,9 +15,8 @@
 <use   name="root"/>
 <use   name="rootcore"/>
 <use   name="DataFormats/L1GlobalMuonTrigger"/>
-<!-- <use   name="EventFilter/CSCRawToDigi"/> -->
 <use   name="RecoMuon/TrackingTools"/>
-<use   name="RecoLocalMuon/GEMRecHit"/>
+<use   name="DataFormats/GEMRecHit"/>
 <export>
   <lib   name="1"/>
 </export>

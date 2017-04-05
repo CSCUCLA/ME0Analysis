@@ -236,20 +236,22 @@ void doMatching(bool applyMatching = false) {
 	}
   };
 
-bool isAMatch(int idx){
+bool isAMatch(int idx, bool doExtra = false){
 	  if(me0Muon_pt->at(idx) < 1) return false;
-	  double dPhi = std::fabs(me0Muon_track_dphi->at(idx) - me0Muon_segment_dphi->at(idx));
-	  double phi  = std::fabs(me0Muon_track_phi->at(idx) - me0Muon_segment_phi->at(idx));
-	  double eta  = std::fabs(me0Muon_track_eta->at(idx) - me0Muon_segment_eta->at(idx));
+	  const double dPhi = std::fabs(me0Muon_track_dphi->at(idx) - me0Muon_segment_dphi->at(idx));
+	  const double phi  = std::fabs(me0Muon_track_phi->at(idx) - me0Muon_segment_phi->at(idx));
+	  const double eta  = std::fabs(me0Muon_track_eta->at(idx) - me0Muon_segment_eta->at(idx));
 
 
 
-	  double dPhiS2C  = std::min(std::max(.3/me0Muon_p->at(idx),maxPhi2SC),dPhiC);
-	  double phiS2C  = std::min(std::max(1.2/me0Muon_p->at(idx),maxPhi2SC),phiC);
+	  const double dPhiS2C  = std::min(std::max(.3/me0Muon_p->at(idx),maxPhi2SC),dPhiC);
+	  const double phiS2C  = std::min(std::max(1.2/me0Muon_p->at(idx),maxPhi2SC),phiC);
 
 
-
-	  return eta < etaC && phi < phiC && dPhi < dPhiC;
+	  if(doExtra)
+		  return eta < etaC && phi < phiC && dPhi < dPhiC && dPhi < dPhiS2C && phi < phiS2C ;
+	  else
+		  return eta < etaC && phi < phiC && dPhi < dPhiC;
 }
   void makeOneDCutPlots(const int idx, TString prefix ){
 
@@ -348,8 +350,8 @@ bool isAMatch(int idx){
 	  double phi  = std::fabs(me0Muon_track_phi->at(idx) - me0Muon_segment_phi->at(idx));
 	  double eta  = std::fabs(me0Muon_track_eta->at(idx) - me0Muon_segment_eta->at(idx));
 
-	  double dPhiS2C  = std::min(std::max(.3/me0Muon_p->at(idx),dPhiS2C),dPhiC);
-	  double phiS2C  = std::min(std::max(1.2/me0Muon_p->at(idx),dPhiS2C),phiC);
+	  double dPhiS2C  = std::min(std::max(.3/me0Muon_p->at(idx),maxPhi2SC),dPhiC);
+	  double phiS2C  = std::min(std::max(1.2/me0Muon_p->at(idx),maxPhi2SC),phiC);
 
 
 	  auto doInt = [&] (TString name, float pt){
@@ -407,7 +409,6 @@ bool isAMatch(int idx){
 		    	goodMatch = true;
 		    	break;
 		    }
-
 		    if(goodTrackPT) plotter.getOrMake1D(TString::Format("%s_real_muon_goodTrackPT_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(pt);
 		    if(goodTrackPT && goodSegment) plotter.getOrMake1D(TString::Format("%s_real_muon_goodSegmentAndGoodPT_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(pt);
 		    if(goodTrackPT && passCut)     plotter.getOrMake1D(TString::Format("%s_real_muon_passCutsAndGoodPT_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(pt);
@@ -440,7 +441,7 @@ bool isAMatch(int idx){
 
 	  }
 if(true){
-	//	  if(nSM==2){
+//		  if(nSM==2){
 		  plotter.getOrMake1D(TString::Format("%s_nEvtsForFakes",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
 		  for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
 			  if(me0Muon_truthType->at(goodMatches[iRM]) == 0) continue;
@@ -450,6 +451,55 @@ if(true){
 	  }
 
 
+  }
+
+  void makeAnnaPlot(TString prefix) {
+	  //eff
+	  int nSM = 0;
+	  for(unsigned int iM = 0; iM < simMuon_pt->size(); ++iM ){
+
+		    bool goodTrack   = simMuon_trackIDX->at(iM) >= 0;
+		    bool goodSegment = simMuon_segmentQuality->at(iM) != 3;
+		    bool goodTrackPT = goodTrack && std::fabs(simMuon_track_pt->at(iM)/simMuon_pt->at(iM) - 1) <= 0.2;
+		    int  goodNearSegment = -1;
+		    for(unsigned int iRM = 0; iRM < me0Muon_pt->size(); ++iRM){
+		    	if(me0Muon_segIDX->at(iRM) != simMuon_segmentIDX->at(iM)) continue;
+		    	if(me0Muon_trackIDX->at(iRM) != simMuon_trackIDX->at(iM)) continue;
+		    	goodNearSegment = iRM;
+		    	break;
+
+		    }
+		    bool passCut = goodNearSegment >= 0 && isAMatch(goodNearSegment);
+		    bool goodMatch = false;
+		    if(goodNearSegment >= 0)
+		    for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
+		    	if(goodMatches[iRM] != goodNearSegment) continue;
+		    	goodMatch = true;
+		    	break;
+		    }
+		    if(!goodTrackPT) continue;
+		    float pt = simMuon_track_pt->at(iM);
+		    if(pt < 2) continue;
+		    plotter.getOrMake1D(TString::Format("%s_real_muon_passTrack_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    if(goodSegment) plotter.getOrMake1D(TString::Format("%s_real_muon_passSegment_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    if(passCut && goodMatch)   plotter.getOrMake1D(TString::Format("%s_real_muon_passME0Muon_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    if(passCut && goodMatch && isAMatch(goodNearSegment,true) )   plotter.getOrMake1D(TString::Format("%s_real_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    if(goodTrackPT && goodMatch) nSM++;
+
+
+	  }
+if(true){
+//		  if(nSM==2){
+		  plotter.getOrMake1D(TString::Format("%s_nEvtsForFakesA",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
+		  for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
+			  if((me0Muon_pt->at(goodMatches[iRM]) < 2)) continue;
+			  if(me0Muon_truthType->at(goodMatches[iRM]) == 0) continue;
+			  if(!isAMatch(goodMatches[iRM])) continue;
+			  plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(me0Muon_pt->at(goodMatches[iRM]));
+			  if(isAMatch(goodMatches[iRM], true)) plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(me0Muon_pt->at(goodMatches[iRM]));
+		  }
+
+	  }
   }
 
 //  void checkUniqueness(TString prefix) {
@@ -623,6 +673,7 @@ if(true){
 	  doMatching(false);
 	  oneDCutPlots(glbPrefix);
 	  effCuts(glbPrefix);
+	  makeAnnaPlot(glbPrefix);
 //	  checkUniqueness(glbPrefix);
 //	  quickTest(glbPrefix);
   }
