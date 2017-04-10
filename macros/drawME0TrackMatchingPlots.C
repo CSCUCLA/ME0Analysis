@@ -129,7 +129,8 @@
   TFile * f = new TFile(filename,"READ");
   TFile * fF = new TFile(filenameF,"READ");
 
-  TString extr = "";
+  TString extr = "_pt3to5_";
+  TString var = "eta";
   
 
   TString efftypes [] = {"passME0Muon","passSegment",""  ,""};
@@ -145,14 +146,14 @@
     
     //eff
     TH1 * hd = 0;
-    f->GetObject(TString::Format("%s_real_muon_passTrack_pt",prefix.Data()),hd);
+    f->GetObject(TString::Format("%s_real_muon%spassTrack_%s",prefix.Data(),extr.Data(),var.Data()),hd);
     // hd = hd->Rebin(nBins,"",bins);
     PlotTools::toOverflow(hd);
     PlotTools::toUnderflow(hd);
     
         for(unsigned int iT = 0; efftypes[iT][0]; ++iT){
           TH1 * hn = 0;
-          f->GetObject(TString::Format("%s_real_muon_%s_pt",prefix.Data(), efftypes[iT].Data()),hn);
+          f->GetObject(TString::Format("%s_real_muon%s%s_%s",prefix.Data(),extr.Data(), efftypes[iT].Data(),var.Data()),hn);
           // hn = hn->Rebin(nBins,"",bins);
           PlotTools::toOverflow(hn);
           PlotTools::toUnderflow(hn);
@@ -167,19 +168,19 @@
           p->addDrawable(drawable);
         }
         
-        // FR
-        TH1 * hnF = 0;
-        fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefix.Data()),hnF);
-        if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefix.Data()) << endl;
-        TH1 *hf = 0;
-        fF->GetObject(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),hf);
-        if(hf==0) cout << TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()) << endl;
-        // hf = hf->Rebin(nBins,"",bins);
-        PlotTools::toOverflow(hf);
-        PlotTools::toUnderflow(hf);
-        hf->Scale(1./hnF->GetBinContent(1));
-        
-        p->addStackHist(hf,"# of background muons per event");
+        // // FR
+        // TH1 * hnF = 0;
+        // fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefix.Data()),hnF);
+        // if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefix.Data()) << endl;
+        // TH1 *hf = 0;
+        // fF->GetObject(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),hf);
+        // if(hf==0) cout << TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()) << endl;
+        // // hf = hf->Rebin(nBins,"",bins);
+        // PlotTools::toOverflow(hf);
+        // PlotTools::toUnderflow(hf);
+        // hf->Scale(1./hnF->GetBinContent(1));
+        //
+        // p->addStackHist(hf,"# of background muons per event");
         
         //         TGraphAsymmErrors* gr = new TGraphAsymmErrors(hf);
         // gr->SetLineColor  (StyleInfo::getLineColor(2));
@@ -203,7 +204,13 @@
   TString filenameF = "trackMatchingTree_NU_p8s384_plots.root";
   TString prefix = "p8s384";
   TFile * fF = new TFile(filenameF,"READ");
-
+  TString extr = "_pt3to5_";
+  TString var = "eta";
+  TString xTitle = "pixel track |#eta|";
+  
+  
+  // TString xTitle = "pixel track p_{T} [GeV]";
+  
   // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
   // int nBins = 10;
   
@@ -223,7 +230,7 @@
         auto addBKGGraph = [&](TString histName, TString title, int inColor) -> Drawing::Drawable1D {
           TH1 *hf = 0;
           fF->GetObject(histName,hf);
-          if(hf==0) cout << TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()) << endl;
+          if(hf==0) cout << TString::Format("%s_fake_muon%spassME0Muon_%s",prefix.Data(),extr.Data(),var.Data()) << endl;
           // hf = hf->Rebin(nBins,"",bins);
           PlotTools::toOverflow(hf);
           PlotTools::toUnderflow(hf);
@@ -241,13 +248,13 @@
           return drawableF;
 
         };
-        auto d1 = addBKGGraph(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),"|p| independent matching",0);
+        auto d1 = addBKGGraph(TString::Format("%s_fake_muon%spassME0Muon_%s",prefix.Data(),extr.Data(),var.Data()),"|p| independent matching",0);
         p->addDrawable(d1);          
-        auto d2 = addBKGGraph(TString::Format("%s_fake_muon_passME0MuonExtra_pt",prefix.Data()),"|p| dependent matching",1);
+        auto d2 = addBKGGraph(TString::Format("%s_fake_muon%spassME0MuonExtra_%s",prefix.Data(),extr.Data(),var.Data()),"|p| dependent matching",1);
         p->addDrawable(d2);          
         p->setMinMax(0.0,1.0);
         p->setYTitle("# of background muons per event");
-        p->setXTitle("pixel track p_{T} [GeV]");
+        p->setXTitle(xTitle);
         p->draw(false,"tot");
         
     

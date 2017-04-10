@@ -19,6 +19,7 @@ public:
 	  double phiC=0;
 	  double dPhiC=0;
 	  double etaC= 0;
+	  bool isPureBKG = false;
 
   Analyzer(std::string fileName, std::string treeName) : BaseTupleAnalyzer(fileName,treeName){
 	  simMuon_pt             = new std::vector<float> ;
@@ -440,8 +441,7 @@ bool isAMatch(int idx, bool doExtra = false){
 
 
 	  }
-if(true){
-//		  if(nSM==2){
+		  if(isPureBKG || nSM==2){
 		  plotter.getOrMake1D(TString::Format("%s_nEvtsForFakes",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
 		  for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
 			  if(me0Muon_truthType->at(goodMatches[iRM]) == 0) continue;
@@ -479,24 +479,50 @@ if(true){
 		    }
 		    if(!goodTrackPT) continue;
 		    float pt = simMuon_track_pt->at(iM);
+		    float eta = simMuon_track_eta->at(iM);
 		    if(pt < 2) continue;
 		    plotter.getOrMake1D(TString::Format("%s_real_muon_passTrack_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
-		    if(goodSegment) plotter.getOrMake1D(TString::Format("%s_real_muon_passSegment_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
-		    if(passCut && goodMatch)   plotter.getOrMake1D(TString::Format("%s_real_muon_passME0Muon_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
-		    if(passCut && goodMatch && isAMatch(goodNearSegment,true) )   plotter.getOrMake1D(TString::Format("%s_real_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    plotter.getOrMake1D(TString::Format("%s_real_muon_passTrack_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_real_muon_pt3to5_passTrack_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+
+		    if(goodSegment){
+		    	if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_real_muon_pt3to5_passSegment_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passSegment_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passSegment_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    }
+		    if(passCut && goodMatch){
+		    	if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_real_muon_pt3to5_passME0Muon_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passME0Muon_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passME0Muon_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    }
+		    if(passCut && goodMatch && isAMatch(goodNearSegment,true) ){
+		    	if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_real_muon_pt3to5_passME0MuonExtra_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passME0MuonExtra_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
+		    }
 		    if(goodTrackPT && goodMatch) nSM++;
 
 
 	  }
-if(true){
-//		  if(nSM==2){
+
+		  if(isPureBKG || nSM==2){
 		  plotter.getOrMake1D(TString::Format("%s_nEvtsForFakesA",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
 		  for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
 			  if((me0Muon_pt->at(goodMatches[iRM]) < 2)) continue;
 			  if(me0Muon_truthType->at(goodMatches[iRM]) == 0) continue;
 			  if(!isAMatch(goodMatches[iRM])) continue;
+
+			  const float pt = me0Muon_pt->at(goodMatches[iRM]);
+			  const float eta = me0Muon_eta->at(goodMatches[iRM]);
+
 			  plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(me0Muon_pt->at(goodMatches[iRM]));
-			  if(isAMatch(goodMatches[iRM], true)) plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(me0Muon_pt->at(goodMatches[iRM]));
+			  plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0Muon_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+			  if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_fake_muon_pt3to5_passME0Muon_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+			  if(isAMatch(goodMatches[iRM], true)){
+				  plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(me0Muon_pt->at(goodMatches[iRM]));
+				  plotter.getOrMake1D(TString::Format("%s_fake_muon_passME0MuonExtra_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+				  if(pt >= 3 && pt < 5) plotter.getOrMake1D(TString::Format("%s_fake_muon_pt3to5_passME0MuonExtra_eta",prefix.Data()),";pixel track |#eta|; ",12,1.8,3.0)->Fill(std::fabs(eta));
+			  }
 		  }
 
 	  }
@@ -684,8 +710,9 @@ if(true){
 
 #endif
 
-void AnalyzeME0TrackMatchingTree(std::string fileName,unsigned int nP, unsigned int nS, std::string outFileName){
+void AnalyzeME0TrackMatchingTree(std::string fileName,unsigned int nP, unsigned int nS, std::string outFileName, bool isPureBKG){
 	Analyzer a(fileName,"Events");
+	a.isPureBKG = isPureBKG;
 	a.nP = nP;
 	a.nS = nS;
 	  a.maxPhi2SC = 2*.35/float(nS);
