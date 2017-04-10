@@ -86,24 +86,27 @@ ME0DigiAnalyzer::~ME0DigiAnalyzer() {
 void ME0DigiAnalyzer::makeGeneralDigiPlots(const ME0Geometry* mgeom, const ME0DigiPreRecoCollection& digis, TString sname){
 	for(const auto& d: digis ){
 		const auto* epart = mgeom->etaPartition(d.first);
-
+		const auto* chamber = mgeom->chamber(d.first.chamberId());
+		float disp = epart->position().perp()  - chamber->position().perp();
 		for (ME0DigiPreRecoCollection::const_iterator idigi = d.second.first;
 				idigi != d.second.second;idigi++) {
+
+			const float locY = idigi->y() + disp;
 
 			hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(0);
 			if(idigi->prompt())hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(1);
 			else hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(2);
 
 			hists.getOrMake1D(TString::Format("%stof",sname.Data()),";time of flight [ns]",400,-200,200)->Fill(idigi->tof());
-			hists.getOrMake2D(TString::Format("%shitLoc",sname.Data()),";local x position [cm] ;local y position [cm]",4000,-30,30,100,-50,50)->Fill(idigi->x(),idigi->y());
+			hists.getOrMake2D(TString::Format("%shitLoc",sname.Data()),";local x position [cm] ;local y position [cm]",4000,-30,30,100,-50,50)->Fill(idigi->x(),locY);
 
 			TString loc;
 			if(idigi->x() < -15.0 )loc = "x_leqm15";
 			else if (idigi->x() < 15.0 )loc = "x_m15to15";
 			else if (idigi->x() < 15.0 )loc = "x_m15to15";
 			else loc = "x_geq15";
-			if (idigi->y() < -6 ) loc += "y_leqm6";
-			else if (idigi->y() < 6 ) loc += "y_m6to6";
+			if (locY < -6 ) loc += "y_leqm6";
+			else if (locY < 6 ) loc += "y_m6to6";
 			else loc += "y_geq6";
 
 			hists.getOrMake1D(TString::Format("%s%s_xError",sname.Data(),loc.Data()),";local x position error [cm]",2000,0,5)->Fill(idigi->ex());
@@ -124,11 +127,11 @@ void ME0DigiAnalyzer::makeGeneralDigiPlots(const ME0Geometry* mgeom, const ME0Di
 			hists.getOrMake2D(TString::Format("%s%s_byLay_tof",sname.Data(),prefix.Data()),";tof ;layer",400,-200,200,8,-0.5,7.5)->Fill(idigi->tof(),d.first.layer());
 			hists.getOrMake1D(TString::Format("%s%s_hits",sname.Data(),prefix.Data()),";layer",8,-0.5,7.5)->Fill(d.first.layer());
 			;
-			hists.getOrMake2D(TString::Format("%s%s_byLay_hitsByETA",sname.Data(),prefix.Data()),";|eta| ;layer",500,0,5,8,-0.5,7.5)->Fill(TMath::Abs(epart->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).eta()),d.first.layer());
+			hists.getOrMake2D(TString::Format("%s%s_byLay_hitsByETA",sname.Data(),prefix.Data()),";|eta| ;layer",500,0,5,8,-0.5,7.5)->Fill(TMath::Abs(epart->toGlobal(LocalPoint(idigi->x(),locY,0)).eta()),d.first.layer());
 			if(d.first.layer() == 1)
-				hists.getOrMake1D(TString::Format("%s%s_hitsByRadius",sname.Data(),prefix.Data()),";radius",1000,0,200)->Fill(epart->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).perp());
+				hists.getOrMake1D(TString::Format("%s%s_hitsByRadius",sname.Data(),prefix.Data()),";radius",1000,0,200)->Fill(epart->toGlobal(LocalPoint(idigi->x(),locY,0)).perp());
 			if(d.first.layer() == 1)
-				hists.getOrMake1D(TString::Format("%s%s_hitsByETA",sname.Data(),prefix.Data()),";|eta|",500,0,5)->Fill(TMath::Abs(epart->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).eta()));
+				hists.getOrMake1D(TString::Format("%s%s_hitsByETA",sname.Data(),prefix.Data()),";|eta|",500,0,5)->Fill(TMath::Abs(epart->toGlobal(LocalPoint(idigi->x(),locY,0)).eta()));
 
 		}
 
@@ -387,84 +390,84 @@ void ME0DigiAnalyzer::getDigiCuts(const ME0Geometry* mgeom,edm::Handle<std::vect
 
 void ME0DigiAnalyzer::fitSegment(const ME0Geometry* mgeom,  edm::Handle<std::vector<SimTrack>>&  simTrackH, edm::Handle<std::vector<PSimHit> >&  simHitH,
 		const ME0DigiPreRecoCollection& oldDigis,const ME0DigiPreRecoCollection& newDigis,const ME0DigiPreRecoMap& digiMap, TString sname){
-	for (const auto& simTrack : *simTrackH) {
-		if(TMath::Abs(simTrack.type()) != 13) continue;
-
-		//collect simhits
-		std::vector<const PSimHit* > simHits = ME0Helper::getMatchedSimHits(&simTrack,*simHitH);
-
-		//Now get simhit segment info
-		ME0Helper::ME0DigiList origMatchedDigis;
-		ME0Helper::ME0DigiList newMatchedDigis = ME0Helper::getMatchedDigis(simHits,oldDigis,&newDigis,&digiMap,&origMatchedDigis);
-
-		//Get the simtrack info...w/o any fitting or digitizing
-		auto origSimHitProp = ME0Helper::getSimTrackProperties(mgeom,simHits);
-		//basic filtering
-		if(origSimHitProp.nLaysHit != 6 || !origSimHitProp.oneChamber) continue;
-
-		//Fit the digis
-		auto * origSegment = ME0Helper::buildSegment(mgeom,origMatchedDigis);
-		auto * newSegment  = ME0Helper::buildSegment(mgeom,newMatchedDigis);
-		//And get properties
-		ME0Helper::SegmentProperties origSegmentProp =origSegment  ? ME0Helper::getSegmentProperties(mgeom->etaPartition(origSegment->recHits()[0]->rawId()),origSegment) : ME0Helper::SegmentProperties();
-		ME0Helper::SegmentProperties newSegmentProp  =newSegment   ? ME0Helper::getSegmentProperties(mgeom->etaPartition(newSegment->recHits()[0]->rawId()),newSegment)  : ME0Helper::SegmentProperties();
-//		ME0Helper::SegmentProperties origSegmentProp =ME0Helper::SegmentProperties();
-//		ME0Helper::SegmentProperties newSegmentProp  =ME0Helper::SegmentProperties();
-
-		//pt regions
-		TString name = sname;
-		if(simTrack.momentum().pt() < 3 ) name += "ptleq3_";
-		else if(simTrack.momentum().pt() < 5 ) name += "pteq3to5_";
-		else if(simTrack.momentum().pt() < 20 ) name += "pteq5to20_";
-		else name += "ptgeq20_";
-		if(origSegment == 0){
-			std::cout <<"GGGG "<< origSimHitProp.nLaysHit <<" "<< origMatchedDigis.size() << std::endl;
-		}
-		if(origSegment)
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_chi2",name.Data()),";chi2",1000,0,100)
-				->Fill(origSegment->chi2());
-		if(origSegment)
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_chi2Prob",name.Data()),";chi2",1000,0,1)
-				->Fill(TMath::Prob(origSegment->chi2(),2*6-4));
-
-		if(origSegment && TMath::Abs(TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - origSegmentProp.cenPhi)) > 0.01){
-			hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_fail_chi2",name.Data()),";chi2",1000,0,100)
-					->Fill(origSegment->chi2());
-			hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_fail_chi2Prob",name.Data()),";chi2",1000,0,1)
-					->Fill(TMath::Prob(origSegment->chi2(),2*6-4));
-
-			cout << endl<< "("<<origSegmentProp.beginEta<<","<<origSegmentProp.beginPhi<<") ("<<origSegmentProp.cenEta<<","<<origSegmentProp.cenPhi
-					<<") ("<<origSegmentProp.endEta<<","<<origSegmentProp.endPhi<<") "
-					<<origSegmentProp.segAtCenter.point.x()<<","<<origSegmentProp.segAtCenter.point.y()<<" :: "<<origSegmentProp.initialPoint.x()<<","<<origSegmentProp.initialPoint.y()<<endl;
-			for(unsigned int iH = 0; iH < origMatchedDigis.size(); ++iH){
-//				cout <<"("<<origMatchedDigis[iH].first.layer()<<","<<mgeom->etaPartition(origMatchedDigis[iH].first)->surface().position()<<","<< mgeom->etaPartition(origMatchedDigis[iH].first)->surface().normalVector() <<","<<origMatchedDigis[iH].second->x()<<","<<origMatchedDigis[iH].second->y()<<") ";
-				cout <<"("<<origMatchedDigis[iH].first.layer()<<","<<origMatchedDigis[iH].second->x()<<","<<origMatchedDigis[iH].second->y()<<") ";
-
-			}
-
-
-		}
-
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_dphi",name.Data()),";#Delta#phi (SimHit)",1000,-1,1)
-				->Fill(origSimHitProp.dPhi);
-
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_phidiff",name.Data()),";#phi position (SimHit - orig. seg)",100000,-.3,.3)
-				->Fill(origSegment ? TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - origSegmentProp.cenPhi) : 99.0 );
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_etadiff",name.Data()),";#eta position (SimHit - orig. seg)",1000,-1,1)
-				->Fill(origSegment ? origSimHitProp.cenEta - origSegmentProp.cenEta : 99.0 );
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_dphidiff",name.Data()),";#Delta#phi (SimHit - orig. seg)",1000,-.003,.003)
-				->Fill(origSegment ? origSimHitProp.dPhi - origSegmentProp.dPhi : 99.0 );
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_detadiff",name.Data()),";#Delta#eta  (SimHit - orig. seg)",1000,-1,1)
-				->Fill(origSegment ? origSimHitProp.dEta - origSegmentProp.dEta : 99.0 );
-
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_newSeg_phidiff",name.Data()),";#phi position (SimHit - new. seg)",1000,-.003,.003)
-				->Fill(newSegment ? TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - newSegmentProp.cenPhi) : 99.0 );
-		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_newSeg_dphidiff",name.Data()),";#Delta#phi (SimHit - new. seg)",1000,-.003,.003)
-				->Fill(newSegment ? origSimHitProp.dPhi - newSegmentProp.dPhi : 99.0 );
-
-		delete origSegment;
-		delete newSegment;
-	}
+//	for (const auto& simTrack : *simTrackH) {
+//		if(TMath::Abs(simTrack.type()) != 13) continue;
+//
+//		//collect simhits
+//		std::vector<const PSimHit* > simHits = ME0Helper::getMatchedSimHits(&simTrack,*simHitH);
+//
+//		//Now get simhit segment info
+//		ME0Helper::ME0DigiList origMatchedDigis;
+//		ME0Helper::ME0DigiList newMatchedDigis = ME0Helper::getMatchedDigis(simHits,oldDigis,&newDigis,&digiMap,&origMatchedDigis);
+//
+//		//Get the simtrack info...w/o any fitting or digitizing
+//		auto origSimHitProp = ME0Helper::getSimTrackProperties(mgeom,simHits);
+//		//basic filtering
+//		if(origSimHitProp.nLaysHit != 6 || !origSimHitProp.oneChamber) continue;
+//
+//		//Fit the digis
+//		auto * origSegment = ME0Helper::buildSegment(mgeom,origMatchedDigis);
+//		auto * newSegment  = ME0Helper::buildSegment(mgeom,newMatchedDigis);
+//		//And get properties
+//		ME0Helper::SegmentProperties origSegmentProp =origSegment  ? ME0Helper::getSegmentProperties(mgeom->etaPartition(origSegment->recHits()[0]->rawId()),origSegment) : ME0Helper::SegmentProperties();
+//		ME0Helper::SegmentProperties newSegmentProp  =newSegment   ? ME0Helper::getSegmentProperties(mgeom->etaPartition(newSegment->recHits()[0]->rawId()),newSegment)  : ME0Helper::SegmentProperties();
+////		ME0Helper::SegmentProperties origSegmentProp =ME0Helper::SegmentProperties();
+////		ME0Helper::SegmentProperties newSegmentProp  =ME0Helper::SegmentProperties();
+//
+//		//pt regions
+//		TString name = sname;
+//		if(simTrack.momentum().pt() < 3 ) name += "ptleq3_";
+//		else if(simTrack.momentum().pt() < 5 ) name += "pteq3to5_";
+//		else if(simTrack.momentum().pt() < 20 ) name += "pteq5to20_";
+//		else name += "ptgeq20_";
+//		if(origSegment == 0){
+//			std::cout <<"GGGG "<< origSimHitProp.nLaysHit <<" "<< origMatchedDigis.size() << std::endl;
+//		}
+//		if(origSegment)
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_chi2",name.Data()),";chi2",1000,0,100)
+//				->Fill(origSegment->chi2());
+//		if(origSegment)
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_chi2Prob",name.Data()),";chi2",1000,0,1)
+//				->Fill(TMath::Prob(origSegment->chi2(),2*6-4));
+//
+//		if(origSegment && TMath::Abs(TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - origSegmentProp.cenPhi)) > 0.01){
+//			hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_fail_chi2",name.Data()),";chi2",1000,0,100)
+//					->Fill(origSegment->chi2());
+//			hists.getOrMake1D(TString::Format("%ssegmentcheck_origSeg_fail_chi2Prob",name.Data()),";chi2",1000,0,1)
+//					->Fill(TMath::Prob(origSegment->chi2(),2*6-4));
+//
+//			cout << endl<< "("<<origSegmentProp.beginEta<<","<<origSegmentProp.beginPhi<<") ("<<origSegmentProp.cenEta<<","<<origSegmentProp.cenPhi
+//					<<") ("<<origSegmentProp.endEta<<","<<origSegmentProp.endPhi<<") "
+//					<<origSegmentProp.segAtCenter.point.x()<<","<<origSegmentProp.segAtCenter.point.y()<<" :: "<<origSegmentProp.initialPoint.x()<<","<<origSegmentProp.initialPoint.y()<<endl;
+//			for(unsigned int iH = 0; iH < origMatchedDigis.size(); ++iH){
+////				cout <<"("<<origMatchedDigis[iH].first.layer()<<","<<mgeom->etaPartition(origMatchedDigis[iH].first)->surface().position()<<","<< mgeom->etaPartition(origMatchedDigis[iH].first)->surface().normalVector() <<","<<origMatchedDigis[iH].second->x()<<","<<origMatchedDigis[iH].second->y()<<") ";
+//				cout <<"("<<origMatchedDigis[iH].first.layer()<<","<<origMatchedDigis[iH].second->x()<<","<<origMatchedDigis[iH].second->y()<<") ";
+//
+//			}
+//
+//
+//		}
+//
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_dphi",name.Data()),";#Delta#phi (SimHit)",1000,-1,1)
+//				->Fill(origSimHitProp.dPhi);
+//
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_phidiff",name.Data()),";#phi position (SimHit - orig. seg)",100000,-.3,.3)
+//				->Fill(origSegment ? TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - origSegmentProp.cenPhi) : 99.0 );
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_etadiff",name.Data()),";#eta position (SimHit - orig. seg)",1000,-1,1)
+//				->Fill(origSegment ? origSimHitProp.cenEta - origSegmentProp.cenEta : 99.0 );
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_dphidiff",name.Data()),";#Delta#phi (SimHit - orig. seg)",1000,-.003,.003)
+//				->Fill(origSegment ? origSimHitProp.dPhi - origSegmentProp.dPhi : 99.0 );
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_origSeg_detadiff",name.Data()),";#Delta#eta  (SimHit - orig. seg)",1000,-1,1)
+//				->Fill(origSegment ? origSimHitProp.dEta - origSegmentProp.dEta : 99.0 );
+//
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_newSeg_phidiff",name.Data()),";#phi position (SimHit - new. seg)",1000,-.003,.003)
+//				->Fill(newSegment ? TVector2::Phi_mpi_pi(origSimHitProp.cenPhi - newSegmentProp.cenPhi) : 99.0 );
+//		hists.getOrMake1D(TString::Format("%ssegmentcheck_simHit_newSeg_dphidiff",name.Data()),";#Delta#phi (SimHit - new. seg)",1000,-.003,.003)
+//				->Fill(newSegment ? origSimHitProp.dPhi - newSegmentProp.dPhi : 99.0 );
+//
+//		delete origSegment;
+//		delete newSegment;
+//	}
 
 }
 void

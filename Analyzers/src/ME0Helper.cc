@@ -355,46 +355,46 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
     return prop;
 }
 
-ME0Segment * buildSegment(const ME0Geometry* mgeom, const std::vector<std::pair<ME0DetId,const ME0DigiPreReco*> >& hits){
-	if(hits.size() < 2) return 0;
-
-	MuonSegFit::MuonRecHitContainer muonRecHits;
-	std::vector<const ME0RecHit*> muonRH;
-
-	const ME0DetId refID=hits[0].first;
-	const ME0EtaPartition * refPart = mgeom->etaPartition(refID);
-	for(const auto& hp : hits ){
-	    const ME0EtaPartition * thePartition   =   mgeom->etaPartition(hp.first);
-
-	    GlobalPoint gp = thePartition->toGlobal(LocalPoint(hp.second->x(),hp.second->y(),0));
-	    const LocalPoint lp = refPart->toLocal(gp);
-
-	    double errorXX = hp.second->ex()*hp.second->ex();
-	    double errorYY = hp.second->ex()*hp.second->ex();
-	    double errorXY = hp.second->corr()*hp.second->ex()*hp.second->ey();
-	    LocalError le(std::max(errorXX,1.6E-5), std::max(errorXY,1.6E-6), std::max(errorYY,1.6E-5));
-
-	    ME0RecHit* recHit = new ME0RecHit(refID,hp.second->tof(),lp,le);
-	    muonRH.push_back(recHit);
-	    MuonSegFit::MuonRecHitPtr trkRecHit(recHit);
-	    muonRecHits.push_back(trkRecHit);
-	}
-	  MuonSegFit  * sfit_ = new MuonSegFit(muonRecHits);
-	  sfit_->fit();
-
-	  // obtain all information necessary to make the segment:
-	  LocalPoint protoIntercept      = sfit_->intercept();
-	  LocalVector protoDirection     = sfit_->localdir();
-	  AlgebraicSymMatrix protoErrors = sfit_->covarianceMatrix();
-	  double protoChi2               = sfit_->chi2();
-
-	  ME0Segment * segment =new ME0Segment(muonRH, protoIntercept, protoDirection, protoErrors, protoChi2, 0.0, 5.0);
-
-	  for (auto rh:muonRecHits) rh.reset();
-	  delete sfit_;
-
-	  return segment;
-}
+//ME0Segment * buildSegment(const ME0Geometry* mgeom, const std::vector<std::pair<ME0DetId,const ME0DigiPreReco*> >& hits){
+//	if(hits.size() < 2) return 0;
+//
+//	MuonSegFit::MuonRecHitContainer muonRecHits;
+//	std::vector<const ME0RecHit*> muonRH;
+//
+//	const ME0DetId refID=hits[0].first;
+//	const ME0EtaPartition * refPart = mgeom->etaPartition(refID);
+//	for(const auto& hp : hits ){
+//	    const ME0EtaPartition * thePartition   =   mgeom->etaPartition(hp.first);
+//
+//	    GlobalPoint gp = thePartition->toGlobal(LocalPoint(hp.second->x(),hp.second->y(),0));
+//	    const LocalPoint lp = refPart->toLocal(gp);
+//
+//	    double errorXX = hp.second->ex()*hp.second->ex();
+//	    double errorYY = hp.second->ex()*hp.second->ex();
+//	    double errorXY = hp.second->corr()*hp.second->ex()*hp.second->ey();
+//	    LocalError le(std::max(errorXX,1.6E-5), std::max(errorXY,1.6E-6), std::max(errorYY,1.6E-5));
+//
+//	    ME0RecHit* recHit = new ME0RecHit(refID,hp.second->tof(),lp,le);
+//	    muonRH.push_back(recHit);
+//	    MuonSegFit::MuonRecHitPtr trkRecHit(recHit);
+//	    muonRecHits.push_back(trkRecHit);
+//	}
+//	  MuonSegFit  * sfit_ = new MuonSegFit(muonRecHits);
+//	  sfit_->fit();
+//
+//	  // obtain all information necessary to make the segment:
+//	  LocalPoint protoIntercept      = sfit_->intercept();
+//	  LocalVector protoDirection     = sfit_->localdir();
+//	  AlgebraicSymMatrix protoErrors = sfit_->covarianceMatrix();
+//	  double protoChi2               = sfit_->chi2();
+//
+//	  ME0Segment * segment =new ME0Segment(muonRH, protoIntercept, protoDirection, protoErrors, protoChi2, 0.0, 5.0);
+//
+//	  for (auto rh:muonRecHits) rh.reset();
+//	  delete sfit_;
+//
+//	  return segment;
+//}
 
 SegmentProperties getSegmentProperties(const GeomDet* loc, const ME0Segment * segment){
 

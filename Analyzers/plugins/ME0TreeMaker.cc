@@ -373,68 +373,69 @@ auto params = mgeom->etaPartition(hits.detIDs[upInd])->specs()->parameters();
 
 std::pair<ME0DetId,ME0Segment*> ME0TreeMaker::buildSegment(const ME0Geometry* mgeom, const HitCollection& hits) const
 {
-  std::vector<ME0DetId>         detIDs; detIDs.reserve(hits.recHits.size());
-  std::vector<const ME0RecHit*> rechits; rechits.reserve(hits.recHits.size());
-  for(unsigned int iH = 0; iH < hits.recHits.size(); ++iH) {
-    detIDs.push_back(hits.detIDs[iH]);
-    rechits.push_back(hits.recHits[iH]);
-  }
-  if(rechits.size() < 2) return std::pair<ME0DetId,ME0Segment*>(ME0DetId(),0);
-
-  MuonSegFit::MuonRecHitContainer muonRecHits;
-
-//  uint32_t refid = ensemble.second.begin()->first;
-  const ME0EtaPartition * refPart = mgeom->etaPartition(detIDs[0]);
-  // select hits from the ensemble and sort it
-  for (unsigned int rh=0; rh < rechits.size();rh++){
-    // for segFit - using local point in first partition frame
-    const ME0EtaPartition * thePartition   =   mgeom->etaPartition(detIDs[rh]);
-    GlobalPoint gp = thePartition->toGlobal(rechits[rh]->localPosition());
-    const LocalPoint lp = refPart->toLocal(gp);
-    ME0RecHit *newRH = rechits[rh]->clone();
-    LocalError le(newRH->localPositionError().xx() <= 0 ? 0.01 : newRH->localPositionError().xx(),
-        newRH->localPositionError().yy() <= 0 ? 0.01 : newRH->localPositionError().yy(),
-            newRH->localPositionError().xy() <= 0 ? 0.01 : newRH->localPositionError().xy());
-
-    newRH->setError(le);
-    newRH->setPosition(lp);
-
-//    std::cout<< "("<< lp.x() <<" "<<lp.y() <<","<<lp.z()<<") ";
-
-    MuonSegFit::MuonRecHitPtr trkRecHit(newRH);
-    muonRecHits.push_back(trkRecHit);
-  }
-
-  // The actual fit on all hits of the vector of the selected Tracking RecHits:
-  MuonSegFit  * sfit_ = new MuonSegFit(muonRecHits);
-  sfit_->fit();
-
-  // obtain all information necessary to make the segment:
-  LocalPoint protoIntercept      = sfit_->intercept();
-  LocalVector protoDirection     = sfit_->localdir();
-  AlgebraicSymMatrix protoErrors = sfit_->covarianceMatrix();
-  double protoChi2               = sfit_->chi2();
-
-//  std::cout<< " --> ("<< protoIntercept.x() <<" "<<protoIntercept.y() <<","<<protoIntercept.z()<<") ";
-
-
-  // Calculate the central value and uncertainty of the segment time
-  float averageTime=0.;
-  for (auto rh=rechits.begin(); rh!=rechits.end(); ++rh){
-    averageTime += (*rh)->tof();
-  }
-  if(rechits.size() != 0) averageTime=averageTime/(rechits.size());
-  float timeUncrt=0.;
-  for (auto rh=rechits.begin(); rh!=rechits.end(); ++rh){
-    timeUncrt += pow((*rh)->tof()-averageTime,2);
-  }
-  if(rechits.size() > 1) timeUncrt=timeUncrt/(rechits.size()-1);
-  timeUncrt = sqrt(timeUncrt);
-
-  for (auto rh:muonRecHits) rh.reset();
-  delete sfit_;
-
-  return std::pair<ME0DetId,ME0Segment*>(detIDs[0], new ME0Segment(rechits, protoIntercept, protoDirection, protoErrors, protoChi2, averageTime, timeUncrt));
+	return std::pair<ME0DetId,ME0Segment*>(ME0DetId(),0);
+//  std::vector<ME0DetId>         detIDs; detIDs.reserve(hits.recHits.size());
+//  std::vector<const ME0RecHit*> rechits; rechits.reserve(hits.recHits.size());
+//  for(unsigned int iH = 0; iH < hits.recHits.size(); ++iH) {
+//    detIDs.push_back(hits.detIDs[iH]);
+//    rechits.push_back(hits.recHits[iH]);
+//  }
+//  if(rechits.size() < 2) return std::pair<ME0DetId,ME0Segment*>(ME0DetId(),0);
+//
+//  MuonSegFit::MuonRecHitContainer muonRecHits;
+//
+////  uint32_t refid = ensemble.second.begin()->first;
+//  const ME0EtaPartition * refPart = mgeom->etaPartition(detIDs[0]);
+//  // select hits from the ensemble and sort it
+//  for (unsigned int rh=0; rh < rechits.size();rh++){
+//    // for segFit - using local point in first partition frame
+//    const ME0EtaPartition * thePartition   =   mgeom->etaPartition(detIDs[rh]);
+//    GlobalPoint gp = thePartition->toGlobal(rechits[rh]->localPosition());
+//    const LocalPoint lp = refPart->toLocal(gp);
+//    ME0RecHit *newRH = rechits[rh]->clone();
+//    LocalError le(newRH->localPositionError().xx() <= 0 ? 0.01 : newRH->localPositionError().xx(),
+//        newRH->localPositionError().yy() <= 0 ? 0.01 : newRH->localPositionError().yy(),
+//            newRH->localPositionError().xy() <= 0 ? 0.01 : newRH->localPositionError().xy());
+//
+//    newRH->setError(le);
+//    newRH->setPosition(lp);
+//
+////    std::cout<< "("<< lp.x() <<" "<<lp.y() <<","<<lp.z()<<") ";
+//
+//    MuonSegFit::MuonRecHitPtr trkRecHit(newRH);
+//    muonRecHits.push_back(trkRecHit);
+//  }
+//
+//  // The actual fit on all hits of the vector of the selected Tracking RecHits:
+//  MuonSegFit  * sfit_ = new MuonSegFit(muonRecHits);
+//  sfit_->fit();
+//
+//  // obtain all information necessary to make the segment:
+//  LocalPoint protoIntercept      = sfit_->intercept();
+//  LocalVector protoDirection     = sfit_->localdir();
+//  AlgebraicSymMatrix protoErrors = sfit_->covarianceMatrix();
+//  double protoChi2               = sfit_->chi2();
+//
+////  std::cout<< " --> ("<< protoIntercept.x() <<" "<<protoIntercept.y() <<","<<protoIntercept.z()<<") ";
+//
+//
+//  // Calculate the central value and uncertainty of the segment time
+//  float averageTime=0.;
+//  for (auto rh=rechits.begin(); rh!=rechits.end(); ++rh){
+//    averageTime += (*rh)->tof();
+//  }
+//  if(rechits.size() != 0) averageTime=averageTime/(rechits.size());
+//  float timeUncrt=0.;
+//  for (auto rh=rechits.begin(); rh!=rechits.end(); ++rh){
+//    timeUncrt += pow((*rh)->tof()-averageTime,2);
+//  }
+//  if(rechits.size() > 1) timeUncrt=timeUncrt/(rechits.size()-1);
+//  timeUncrt = sqrt(timeUncrt);
+//
+//  for (auto rh:muonRecHits) rh.reset();
+//  delete sfit_;
+//
+//  return std::pair<ME0DetId,ME0Segment*>(detIDs[0], new ME0Segment(rechits, protoIntercept, protoDirection, protoErrors, protoChi2, averageTime, timeUncrt));
 }
 
 void ME0TreeMaker::getSegmentProperties(const ME0Segment * seg, const ME0EtaPartition* partition,

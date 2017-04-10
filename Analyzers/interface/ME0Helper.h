@@ -98,7 +98,7 @@ struct SimHitProperties{
 };
 SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vector<const PSimHit* >& simHits);
 
-ME0Segment * buildSegment(const ME0Geometry* mgeom, const std::vector<std::pair<ME0DetId,const ME0DigiPreReco*> >& hits);
+//ME0Segment * buildSegment(const ME0Geometry* mgeom, const std::vector<std::pair<ME0DetId,const ME0DigiPreReco*> >& hits);
 struct SegmentExtrapPoint {
 	LocalPoint point;
 	LocalError pointError;
