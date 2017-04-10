@@ -198,6 +198,62 @@
   
 }
 
+//Effplot++ : Add fakes for Anna, seperate fakes
+{
+  TString filenameF = "trackMatchingTree_NU_p8s384_plots.root";
+  TString prefix = "p8s384";
+  TFile * fF = new TFile(filenameF,"READ");
+
+  // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
+  // int nBins = 10;
+  
+  // double bins[] = {2,3,4,5,7,10,15,20,25,30};
+  // int nBins = 9;
+  
+    p = new Plotter;
+
+    
+        // FR
+        TH1 * hnF = 0;
+        fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefix.Data()),hnF);
+        if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefix.Data()) << endl;
+        
+        
+    
+        auto addBKGGraph = [&](TString histName, TString title, int inColor) -> Drawing::Drawable1D {
+          TH1 *hf = 0;
+          fF->GetObject(histName,hf);
+          if(hf==0) cout << TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()) << endl;
+          // hf = hf->Rebin(nBins,"",bins);
+          PlotTools::toOverflow(hf);
+          PlotTools::toUnderflow(hf);
+          hf->Scale(1./hnF->GetBinContent(1));
+          
+          TGraphAsymmErrors* gr = new TGraphAsymmErrors(hf);
+          gr->SetLineColor  (StyleInfo::getLineColor(inColor));
+          gr->SetLineWidth  (3);
+          gr->SetLineStyle  (1);
+          gr->SetMarkerStyle(20);
+          gr->SetMarkerColor(StyleInfo::getLineColor(inColor));
+          gr->SetMarkerSize (1);
+          Drawing::Drawable1D drawableF("P 0",title,Drawing::GRAPH,gr,false);
+          drawableF.graphAxisHist = hf;
+          return drawableF;
+
+        };
+        auto d1 = addBKGGraph(TString::Format("%s_fake_muon_passME0Muon_pt",prefix.Data()),"|p| independent matching",0);
+        p->addDrawable(d1);          
+        auto d2 = addBKGGraph(TString::Format("%s_fake_muon_passME0MuonExtra_pt",prefix.Data()),"|p| dependent matching",1);
+        p->addDrawable(d2);          
+        p->setMinMax(0.0,1.0);
+        p->setYTitle("# of background muons per event");
+        p->setXTitle("pixel track p_{T} [GeV]");
+        p->draw(false,"tot");
+        
+    
+  
+}
+
 
 {
   TString fN[] ={"trackMatchingTree_p6s512_plots.root","trackMatchingTree_p8s384_plots.root",""};
