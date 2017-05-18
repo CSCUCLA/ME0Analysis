@@ -36,9 +36,9 @@ using ASTypes::size;
 
 using namespace std;
 
-class ME0TrackMatchingTreeMaker : public edm::EDAnalyzer {
+class ME0TrackMatchingTreeMakerForPOG : public edm::EDAnalyzer {
 public:
-	explicit ME0TrackMatchingTreeMaker(const edm::ParameterSet& iConfig) : outFileName(iConfig.getUntrackedParameter<std::string>("outFileName")),
+	explicit ME0TrackMatchingTreeMakerForPOG(const edm::ParameterSet& iConfig) : outFileName(iConfig.getUntrackedParameter<std::string>("outFileName")),
 	  runName(iConfig.getUntrackedParameter<std::string>("runName")),
 	  tree (outFileName,"Events","")
 	{
@@ -54,7 +54,7 @@ public:
 
 		  strToken_   = consumes<reco::SimToRecoCollection>( edm::InputTag("trackingParticleRecoTrackAsssociation") );
 		  tpToken_    = consumes<TrackingParticleCollection>( edm::InputTag("mix","MergedTrackTruth","HLT") );
-		  retrack_token_ = consumes<reco::TrackCollection>( edm::InputTag("generalTracks") );
+		  retrack_token_ = consumes<reco::TrackCollection>( edm::InputTag(iConfig.getParameter<std::string>("trackCollection")) );
 
 		  muonsToken = consumes<std::vector<reco::ME0Muon>>(iConfig.getParameter<edm::InputTag>("muonsTag"));
 
@@ -122,7 +122,7 @@ public:
 
 	}
 
-	~ME0TrackMatchingTreeMaker() {
+	~ME0TrackMatchingTreeMakerForPOG() {
 //		hists.write(outFileName);
 		  tree.write();
 
@@ -143,15 +143,14 @@ void fillTree(const ME0Geometry* mgeom, const ME0SegmentCollection& segments, co
 		const edm::Handle<TrackingParticleCollection>& trParticles, const reco::SimToRecoCollection& simToReco , const edm::ESHandle<MagneticField>& bField,const edm::ESHandle<Propagator>& ThisshProp,
 		const std::vector<reco::ME0Muon> & me0Muons, const reco::TrackCollection& retracks ){
 
-	auto simMuons = ME0Helper::fillSimMuons(simTrackH,simHitH);
+	auto simMuons = ME0Helper::fillSimMuonsByTP(trParticles,simTrackH,simHitH);
 	ME0Helper::DigiInfoMap digiInfo;
 	ME0Helper::fillDigiInfoMap(newDigis,digiMap,oldDigis,simHitH,digiInfo);
 	ME0Helper::associateSimMuons(simMuons,digiInfo);
 	ME0Helper::SegmentCatMap segmentCats;
 	ME0Helper::fillSegmentCategories(segments,recHits,digiInfo,simMuons,segmentCats);
-	ME0Helper::associateSimMuonsToTracks(simMuons, trParticles, simToReco);
-//	auto trackTruths = ME0Helper::assignTrackTruth(trParticles,verts,simToReco);
-
+	ME0Helper::associateSimMuonsToTracksByTP(simMuons, simToReco);
+	auto trackTruths = ME0Helper::assignTrackTruth(trParticles,verts,simToReco);
 	  tree.reset();
 
 	  std::vector<int> goodSeg  (segments.size(),0);
@@ -160,13 +159,13 @@ void fillTree(const ME0Geometry* mgeom, const ME0SegmentCollection& segments, co
 
 	  for(unsigned int iM = 0; iM < simMuons.size(); ++iM){
 			const auto& muon = simMuons[iM];
-			const float absETA = TMath::Abs(muon.track->momentum().eta());
+			const float absETA = TMath::Abs(muon.trPart->eta());
 			if(absETA > 2.8 || absETA < 2.0 ) continue;
 
-		    tree.fillMulti(simMuon_pt             ,float(muon.track->momentum().pt()));
-		    tree.fillMulti(simMuon_eta            ,float(muon.track->momentum().eta()));
-		    tree.fillMulti(simMuon_phi            ,float(muon.track->momentum().phi()));
-		    tree.fillMulti(simMuon_q              ,  int(muon.track->charge()));
+		    tree.fillMulti(simMuon_pt             ,float(muon.trPart->pt()));
+		    tree.fillMulti(simMuon_eta            ,float(muon.trPart->eta()));
+		    tree.fillMulti(simMuon_phi            ,float(muon.trPart->phi()));
+		    tree.fillMulti(simMuon_q              ,  int(muon.trPart->charge()));
 
 		    bool foundTrack = !muon.recoTrack.isNull();
 
@@ -224,14 +223,14 @@ void fillTree(const ME0Geometry* mgeom, const ME0SegmentCollection& segments, co
 	    	tree.fillMulti(me0Muon_phi           ,float(me0Muon.innerTrack()->phi()));
 	    	tree.fillMulti(me0Muon_q             ,int(me0Muon.innerTrack()->charge()));
 
-//	    	auto trkTruthInfo = trackTruths.find(me0Muon.innerTrack().key());
-//	    	auto trkTruth = trkTruthInfo == trackTruths.end() ? ME0Helper::OTHER : trkTruthInfo->second.second;
-//	    	tree.fillMulti(me0Muon_trackTruthType     ,int(trkTruth	));
-	    	tree.fillMulti(me0Muon_trackTruthType     ,int(0	));
+	    	auto trkTruthInfo = trackTruths.find(me0Muon.innerTrack().key());
+	    	auto trkTruth = trkTruthInfo == trackTruths.end() ? ME0Helper::OTHER : trkTruthInfo->second.second;
+	    	tree.fillMulti(me0Muon_trackTruthType     ,int(trkTruth	));
+//	    	tree.fillMulti(me0Muon_trackTruthType     ,int(0	));
 
 	    	ME0Helper::SegmentTrackTruthType segTrkTruth = ME0Helper::NEUTRON_SEG;
-//	    	if(trkTruthInfo != trackTruths.end() && trkTruthInfo->second.first >= 0 )
-//	    		segTrkTruth = getSegmentMatch(digiInfo,recHits,me0Muon.me0segment(),TrackingParticleRef(trParticles, trkTruthInfo->second.first));
+	    	if(trkTruthInfo != trackTruths.end() && trkTruthInfo->second.first >= 0 )
+	    		segTrkTruth = getSegmentMatch(digiInfo,recHits,me0Muon.me0segment(),TrackingParticleRef(trParticles, trkTruthInfo->second.first));
 	    	tree.fillMulti(me0Muon_segTrackTruthType  ,int(segTrkTruth));
 
 
@@ -385,7 +384,7 @@ private:
 
 
 void
-ME0TrackMatchingTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+ME0TrackMatchingTreeMakerForPOG::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
 	edm::Handle<ME0DigiPreRecoCollection> digisH;
@@ -444,4 +443,4 @@ ME0TrackMatchingTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSet
 
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ME0TrackMatchingTreeMaker);
+DEFINE_FWK_MODULE(ME0TrackMatchingTreeMakerForPOG);

@@ -742,7 +742,7 @@ p->draw();
 
 // factor of 10 plot
 {
-    TFile * ff = new TFile("simHitAnalyzer.root");
+    TFile * ff = new TFile("simHitTestForTDR.root");
     TH1 * hfa = 0;
     TH1 * hf3= 0; 
     TH1 * hf4= 0;
@@ -788,15 +788,15 @@ p->draw();
     hf6nonM->Add(hf6m,-1);
     
     
-    TFile * fs = new TFile("digiAnalyzer_p8s768.root");
+    TFile * fs = new TFile("digiTestForTDR_p8s384.root");
     TH1 * hr1 =0;
     TH1 * hr3=0;
     TH1 * hr5=0;
     TH1 * hr20=0;
-    fs->GetObject("p8s768_ptleq3__tr_dPhi",hr1);
-    fs->GetObject("p8s768_pteq3to5__tr_dPhi",hr3);
-    fs->GetObject("p8s768_pteq5to20__tr_dPhi",hr5);
-    fs->GetObject("p8s768_ptgeq20__tr_dPhi",hr20);
+    fs->GetObject("p8s384_ptleq3__tr_dPhi",hr1);
+    fs->GetObject("p8s384_pteq3to5__tr_dPhi",hr3);
+    fs->GetObject("p8s384_pteq5to20__tr_dPhi",hr5);
+    fs->GetObject("p8s384_ptgeq20__tr_dPhi",hr20);
     
     hflt->SetXTitle("SimTrack #Delta#phi");
     hflt->SetYTitle("a.u.");
@@ -824,16 +824,116 @@ p->draw();
         // p->addHistLine(hf4,"bkg, >= 4 layers hit");
         // p->addHistLine(hflt4,"bkg, < 4 layers hit");
     
-    p->addHistLine(hr1 ,"#mu signal, p_{T} 1-3 GeV");
+    // p->addHistLine(hr1 ,"#mu signal, p_{T} 1-3 GeV");
     p->addHistLine(hr3 ,"#mu signal, p_{T} 3-5 GeV");
-    p->addHistLine(hr5 ,"#mu signal, p_{T} 5-20 GeV");
+    // p->addHistLine(hr5 ,"#mu signal, p_{T} 5-20 GeV");
     p->addHistLine(hr20,"#mu signal, p_{T} 20-30 GeV");
-    p->rebin(4);
+    p->rebin(10);
     p->normalize();
 
     p->draw();
         
 }
+
+
+//Factor of 10 for TDR
+{
+    TFile * ff = new TFile("simHitTestForTDR.root");
+    TH1 * hfa = 0;
+    TH1 * hf3= 0; 
+    TH1 * hf4= 0;
+    TH1 * hf4m= 0;
+    TH1 * hf5= 0;
+    TH1 * hf6= 0;
+    TH1 * hf6m= 0;
+    ff->GetObject("all_tr_signed_dPhi",hfa);
+    ff->GetObject("all_nLays_geq3_tr_signed_dPhi",hf3);
+    ff->GetObject("all_nLays_geq4_tr_signed_dPhi",hf4);
+    ff->GetObject("muon_nLays_geq4_tr_signed_dPhi",hf4m);
+    ff->GetObject("all_nLays_geq5_tr_signed_dPhi",hf5);
+    ff->GetObject("all_nLays_geq6_tr_signed_dPhi",hf6);
+    ff->GetObject("muon_nLays_geq6_tr_signed_dPhi",hf6m);
+
+    TH1 * hf6o = (TH1*)hf6->Clone();
+
+    TH1 * hf5o = (TH1*)hf5->Clone();
+    hf5o->Add(hf6,-1);
+    
+    TH1 * hf4o = (TH1*)hf4->Clone();
+    hf4o->Add(hf5,-1);
+    
+    TH1 * hf3o = (TH1*)hf3->Clone();
+    hf3o->Add(hf4,-1);
+    
+    TH1 * hflt = (TH1*)hfa->Clone();
+    hflt->Add(hf3,-1);
+    
+    
+    TH1 * hf34o = (TH1*)hf3->Clone();
+    hf34o->Add(hf5,-1);
+    
+    TH1 * hf56o = (TH1*)hf5->Clone();
+    
+    TH1 * hflt4 = (TH1*)hfa->Clone();
+    hflt4->Add(hf4,-1);
+    
+    TH1 * hf4nonM = (TH1*)hf4->Clone();
+    hf4nonM->Add(hf4m,-1);
+    
+    TH1 * hf6nonM = (TH1*)hf6->Clone();
+    hf6nonM->Add(hf6m,-1);
+    
+    
+    TFile * fs = new TFile("digiTestForTDR_p8s384.root");
+    TH1 * hr0 =0;
+    TH1 * hr1 =0;
+    TH1 * hr3=0;
+    TH1 * hr5=0;
+    TH1 * hr20=0;
+    // fs->GetObject("p8s384_ptleq2__tr_geq4_signed_dPhi",hr0);
+    fs->GetObject("p8s384_pteq2to3__tr_geq4_signed_dPhi",hr1);
+    fs->GetObject("p8s384_pteq3to5__tr_geq4_signed_dPhi",hr3);
+    fs->GetObject("p8s384_pteq10to15__tr_geq4_signed_dPhi",hr5);
+    fs->GetObject("p8s384_ptgeq20__tr_geq4_signed_dPhi",hr20);
+    
+    hflt->SetXTitle("generated particle #Delta#phi");
+    hflt->SetYTitle("a.u.");
+    
+    hf4nonM->SetXTitle("generated particle #Delta#phi");
+    hf4nonM->SetYTitle("a.u.");
+    
+    hf4m->SetXTitle("generated particle #Delta#phi");
+    hf4m->SetYTitle("a.u.");
+    
+    p = new Plotter;
+
+    // p->addStackHist(hf56o,"bkg, 5-6 layers hit");
+    // p->addStackHist(hf34o,"bkg, 3-4 layers hit");
+    // p->addStackHist(hflt ,"bkg, < 3 layers hit");
+
+
+        // p->addStackHist(hfa,"bkg, 5-6 layers hit");
+
+    p->addStackHist(hf4m,"PU muon bkg");
+    p->addStackHist(hf4nonM,"PU non-muon bkg");
+
+    
+    
+        // p->addHistLine(hf4,"bkg, >= 4 layers hit");
+        // p->addHistLine(hflt4,"bkg, < 4 layers hit");
+    
+    // p->addHistLine(hr0 ,"muon signal, p_{T} 1-2 GeV");
+    p->addHistLine(hr1 ,"muon signal, p_{T} 2-3 GeV");
+    p->addHistLine(hr3 ,"muon signal, p_{T} 3-5 GeV");
+    p->addHistLine(hr5 ,"muon signal, p_{T} 10-15 GeV");
+    p->addHistLine(hr20,"muon signal, p_{T} 20-30 GeV");
+    p->rebin(5);
+    p->normalize();
+
+    p->draw();
+        
+}
+
 
 // Stack simhit
 {
@@ -850,8 +950,8 @@ p->draw();
     ff->GetObject("ele_nLaysHit",hE);   hE->Scale(200./nEvents);
     ff->GetObject("hadron_nLaysHit",hH);hH->Scale(200./nEvents);
  
-    hE->SetXTitle("# of ME0 layers hit by SimTrack");
-    hE->SetYTitle("# of SimTracks / 200 MinBias int.");
+    hE->SetXTitle("# of ME0 layers crossed by particle");
+    hE->SetYTitle("<# of PU particles> / event");
     
     
     p = new Plotter;    

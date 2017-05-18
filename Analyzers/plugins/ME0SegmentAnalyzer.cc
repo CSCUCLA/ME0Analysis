@@ -28,13 +28,14 @@
 
 #include <TVector2.h>
 #include <TMath.h>
+#include <TRandom3.h>
 
 using namespace std;
 
 class ME0SegmentAnalyzer : public edm::EDAnalyzer {
 public:
 	explicit ME0SegmentAnalyzer(const edm::ParameterSet& iConfig) : outFileName(iConfig.getUntrackedParameter<std::string>("outFileName")),
-	  runName(iConfig.getUntrackedParameter<std::string>("runName"))
+	  runName(iConfig.getUntrackedParameter<std::string>("runName")), rand (new TRandom3(0))
 	{
 		dToken_        = consumes<ME0DigiPreRecoCollection>( edm::InputTag("simMuonME0Digis") );
 		  newDToken_         = consumes<ME0DigiPreRecoCollection>( edm::InputTag(iConfig.getParameter<std::string>("newDigiCollection")) );
@@ -45,6 +46,7 @@ public:
 		  rhToken_    = consumes<ME0RecHitCollection>( edm::InputTag(iConfig.getParameter<std::string>("recHitCollection")) );
 
 	}
+
 
 	~ME0SegmentAnalyzer() {
 		hists.write(outFileName);
@@ -336,11 +338,21 @@ private:
 		}
 
 		if(nGM == 2){
-
+			hists.getOrMake1D(TString::Format("%s_fake_nEvents",sname.Data()),";nEvents",1,0,2.0)->Fill(1);
 			int nFakes = 0;
 			int nFakes_passTime = 0;
 			int nFakes_passDPhi = 0;
 			int nFakes_passTime_dPhi = 0;
+
+			const bool check_positive = rand->Uniform() > 0.5;
+			const double check_phi = rand->Uniform(-TMath::Pi(),TMath::Pi());
+
+			int nRMatches = 0;
+			int nMatches = 0;
+			int nMatches3 = 0;
+			int nMatchesR = 0;
+			int nMatchesD = 0;
+
 			for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
 				auto ch_segs = segments.get(*iC);
 				auto& ch_cats = segmentCats[*iC];
@@ -379,7 +391,72 @@ private:
 					const bool passTime = std::fabs(iS->time()) <11.0;
 					if(passTime) nFakes_passTime++;
 					if(passDPhi) nFakes_passDPhi++;
-					if(passTime && passDPhi) nFakes_passTime_dPhi++;
+					if(passTime && std::fabs(prop.dPhi) < (3.6 - std::fabs(prop.cenEta))/80 ) nMatchesD++;
+					if(passTime && passDPhi){
+						if((prop.cenEta > 0 && check_positive) || (prop.cenEta < 0 && !check_positive)  ){
+							if(TMath::Abs(TVector2::Phi_mpi_pi(prop.cenPhi - check_phi )) < 0.2)
+								nMatchesR++;
+						}
+
+						auto getDR2 = [](const ME0Helper::SegmentProperties& prop1,const ME0Helper::SegmentProperties& prop2)->double {
+							const double deltaPhi = TVector2::Phi_mpi_pi(prop1.cenPhi - prop2.cenPhi );
+							const double deltaEta = prop1.cenEta - prop2.cenEta;
+							return deltaPhi*deltaPhi + deltaEta*deltaEta;
+						};
+
+						nFakes_passTime_dPhi++;
+
+						for(auto iC2 = iC; iC2 != segments.id_end(); ++iC2){
+							auto ch_segs2 = segments.get(*iC2);
+							auto& ch_cats2 = segmentCats[*iC2];
+							auto iS2 = ch_segs2.first;
+							if(iC2 == iC) iS2 = iS +1;
+							for(; iS2 != ch_segs2.second; ++iS2){
+								auto cat2 =ch_cats2[iS2-ch_segs2.first].first;
+								if(cat2 <= ME0Helper::MUON_MISS_DIRTY_NEUT) continue;
+								auto prop2 = ME0Helper::getSegmentProperties(mgeom->chamber(*iC2),&*iS2);
+								const bool passDPhi2 = std::fabs(prop2.dPhi) <0.013;
+								const bool passTime2 = std::fabs(iS2->time()) <11.0;
+								if(!passTime2) continue;
+								if(!passDPhi2) continue;
+								if(getDR2(prop,prop2) < 0.4*0.4){
+									nMatches++;
+
+
+									for(auto iC3 = iC2; iC3 != segments.id_end(); ++iC3){
+										auto ch_segs3 = segments.get(*iC3);
+										auto& ch_cats3 = segmentCats[*iC3];
+										auto iS3 = ch_segs3.first;
+										if(iC3 == iC2) iS3 = iS2 +1;
+										for(; iS3 != ch_segs3.second; ++iS3){
+											auto cat3 =ch_cats3[iS3-ch_segs3.first].first;
+											if(cat3 <= ME0Helper::MUON_MISS_DIRTY_NEUT) continue;
+											auto prop3 = ME0Helper::getSegmentProperties(mgeom->chamber(*iC3),&*iS3);
+											const bool passDPhi3 = std::fabs(prop3.dPhi) <0.013;
+											const bool passTime3 = std::fabs(iS3->time()) <11.0;
+											if(!passTime3) continue;
+											if(!passDPhi3) continue;
+											if(getDR2(prop,prop3) < 0.4*0.4 && getDR2(prop2,prop3) < 0.4*0.4  ) nMatches3++;
+										}
+									}
+
+
+								}
+							}
+						}
+
+					}
+
+					if(passTime){
+						hists.getOrMake1D(TString::Format("%s_fake_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(std::fabs(prop.dPhi) <0.013)  hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p013_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(std::fabs(prop.dPhi) <0.004)  hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p004_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(std::fabs(prop.dPhi) <0.002)  hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p002_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(std::fabs(prop.dPhi) < (3.6 - std::fabs(prop.cenEta))/80)
+							hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p002scaled_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+					}
+
+
 				}
 			}
 //			hists.getOrMake1D(TString::Format("%sfake_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes);
@@ -393,6 +470,11 @@ private:
 
 			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegs",sname.Data()),";# of segments",100,-0.5,99.5)->Fill(nFakes_passTime_dPhi);
 			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_ext_nSegs",sname.Data()),";# of segments",100000,-0.5,99999.5)->Fill(nFakes_passTime_dPhi);
+
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegMatches",sname.Data()),";# of segment matches",100,-0.5,99.5)->Fill(nMatches);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegMatches3",sname.Data()),";# of segment matches",100,-0.5,99.5)->Fill(nMatches3);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegMatchesR",sname.Data()),";# of segment matches",100,-0.5,99.5)->Fill(nMatchesR);
+			hists.getOrMake1D(TString::Format("%sfake_passDPhiTime_nSegMatchesD",sname.Data()),";# of segment matches",100,-0.5,99.5)->Fill(nMatchesD);
 
 
 
@@ -416,6 +498,8 @@ private:
 	TString outFileName;
 	TString runName;
 	HistGetter hists;
+	TRandom3 * rand = 0;
+
 };
 
 

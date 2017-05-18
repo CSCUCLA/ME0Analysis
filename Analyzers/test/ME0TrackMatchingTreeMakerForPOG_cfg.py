@@ -7,7 +7,7 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 options.parseArguments()
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
 
@@ -24,7 +24,6 @@ process.MessageLogger = cms.Service("MessageLogger",
     categories = cms.untracked.vstring('FwkJob'),
     destinations = cms.untracked.vstring('cout')
 )
-
 process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
@@ -37,7 +36,7 @@ process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
-def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
+def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, trackName = "generalTracks") :
     from SimMuon.GEMDigitizer.muonME0NewGeoDigis_cfi import simMuonME0NewGeoDigis
     
     digi_name          = name + "Digis"
@@ -52,7 +51,6 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
                                                              layerReadout = layerRO))
     seq += getattr(process, digi_name)    
     
-    if onlyDigis : return
     
     rh_name          = name + "RecHits"
     setattr( process, rh_name, process.me0RecHits.clone(me0DigiLabel = cms.InputTag(digi_name)))
@@ -96,74 +94,58 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
     seq += getattr(process, seg_name)
     
     segM_name          = name + "SegmentMatching"
-    setattr( process, segM_name, process.me0SegmentMatching.clone(me0SegmentTag = cms.InputTag(seg_name),maxDiffX = cms.double(15.0),maxDiffY = cms.double(15.0),  ))
+    setattr( process, segM_name, process.me0SegmentMatching.clone(me0SegmentTag = cms.InputTag(seg_name),maxDiffX = cms.double(15.0),maxDiffY = cms.double(15.0),tracksTag = cms.InputTag(trackName)  ))
     seq += getattr(process, segM_name)
       
     me0Muon_name          = name + "Me0Muon"
     setattr( process, me0Muon_name, process.me0MuonConverting.clone(me0SegmentTag = cms.InputTag(segM_name)))
     seq += getattr(process, me0Muon_name)
     
-def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
-    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,timeWindow,onlyDigis)
+def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, trackName = "generalTracks") :
+    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,timeWindow,trackName)
     anName = name + "Analysis"
-    setattr( process, anName, cms.EDAnalyzer("ME0TrackMatchingTreeMaker",
+    setattr( process, anName, cms.EDAnalyzer("ME0TrackMatchingTreeMakerForPOG",
         outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
         newDigiCollection = cms.string(name+"Digis"),
         segmentCollection = cms.string(name+"Segments"),
         recHitCollection = cms.string(name+"RecHits"),
         muonsTag = cms.string(name+"SegmentMatching"),
-        runName           = cms.untracked.string(name+"_")
+        runName           = cms.untracked.string(name+"_"),
+        trackCollection   = cms.string(trackName)
         )
     )
     seq += getattr(process, anName)
-process.load('SimTracker.TrackAssociatorProducers.trackAssociatorByHits_cfi')
-process.load('SimTracker.TrackAssociation.trackingParticleRecoTrackAsssociation_cfi')
-# process.load("Validation.RecoMuon.associators_cff")
-# process.load('Validation.RecoMuon.MuonTrackValidator_cfi')
-# process.load('Validation.RecoMuon.RecoMuonValidator_cfi')
 
-# process.load("SimMuon.MCTruth.MuonAssociatorByHits_cfi")
-# process.muonAssociatorByHits.tracksTag = cms.InputTag("generalTracks")
-# process.muonAssociatorByHits.UseTracker = cms.bool(True)
-# process.muonAssociatorByHits.PurityCut_track = cms.double(0.75)
-# process.muonAssociatorByHits.EfficiencyCut_track = cms.double(0.5)
-# process.muonAssociatorByHits.UseMuon = cms.bool(False)
-
-process.tpClusterProducer = cms.EDProducer("ClusterTPAssociationProducer",
-    phase2OTClusterSrc = cms.InputTag("siPhase2Clusters"),
-    phase2OTSimLinkSrc = cms.InputTag("simSiPixelDigis","Tracker"),
-    pixelClusterSrc = cms.InputTag("siPixelClusters"),
-    pixelSimLinkSrc = cms.InputTag("simSiPixelDigis","Pixel"),
-    simTrackSrc = cms.InputTag("g4SimHits"),
-    stripClusterSrc = cms.InputTag("siStripClusters"),
-    stripSimLinkSrc = cms.InputTag("simSiStripDigis"),
-    trackingParticleSrc = cms.InputTag("mix","MergedTrackTruth")
-)
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '90X_upgrade2023_realistic_v1', '')
 
 
-process.quickTrackAssociatorByHits = cms.EDProducer("QuickTrackAssociatorByHitsProducer",
-    AbsoluteNumberOfHits = cms.bool(False),
-    Cut_RecoToSim = cms.double(0.5),
-    PixelHitWeight = cms.double(1.0),
-    Purity_SimToReco = cms.double(0),
-    Quality_SimToReco = cms.double(0),
-    SimToRecoDenominator = cms.string('reco'),
-    ThreeHitTracksAreSpecial = cms.bool(True),
-    associatePixel = cms.bool(True),
-    associateStrip = cms.bool(True),
-    cluster2TPSrc = cms.InputTag("tpClusterProducer"),
-    pixelSimLinkSrc = cms.InputTag("simSiPixelDigis","Pixel"),
-    stripSimLinkSrc = cms.InputTag("simSiPixelDigis","Tracker"),
-    useClusterTPAssociation = cms.bool(True)
-)
 
+import PhysicsTools.RecoAlgos.recoTrackSelector_cfi
+process.probeTracks = PhysicsTools.RecoAlgos.recoTrackSelector_cfi.recoTrackSelector.clone()
+process.probeTracks.quality = cms.vstring('highPurity')
+process.probeTracks.tip = cms.double(3.5)
+process.probeTracks.lip = cms.double(30.)
+process.probeTracks.ptMin = cms.double(2.0)
+process.probeTracks.minRapidity = cms.double(-3.0)
+process.probeTracks.maxRapidity = cms.double(3.0)
 
+import SimMuon.MCTruth.MuonAssociatorByHits_cfi
+process.trackingParticleRecoTrackAsssociation = SimMuon.MCTruth.MuonAssociatorByHits_cfi.muonAssociatorByHits.clone()
+process.trackingParticleRecoTrackAsssociation.tpTag = 'mix:MergedTrackTruth'
+process.trackingParticleRecoTrackAsssociation.tracksTag = 'generalTracks'
+process.trackingParticleRecoTrackAsssociation.UseTracker = True
+process.trackingParticleRecoTrackAsssociation.UseMuon = False
+process.trackingParticleRecoTrackAsssociation.pixelSimLinkSrc =  cms.InputTag("simSiPixelDigis","Pixel")
+process.trackingParticleRecoTrackAsssociation.stripSimLinkSrc = cms.InputTag("simSiPixelDigis","Tracker")
 
 process.newdigiseq  = cms.Sequence()
-# doAnalysis(process,process.newdigiseq,"p6s512" ,512,6 ,2.0,cms.vint32(1,1,1,1,1,1),True)
+#run with general tracks
 # doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True)
-doAnalysis(process,process.newdigiseq,"p16s192" ,192,16 ,2.0,cms.vint32(1,1,1,1,1,1),True)
-# doAnalysis(process,process.newdigiseq,"p6s384" ,384,6 ,2.0,cms.vint32(1,1,1,1,1,1),True)
-# doAnalysis(process,process.newdigiseq,"p8s256" ,256,8 ,2.0,cms.vint32(1,1,1,1,1,1),True)
-process.p = cms.Path(process.tpClusterProducer* process.quickTrackAssociatorByHits * process.trackingParticleRecoTrackAsssociation * process.newdigiseq)
+# process.p = cms.Path(process.trackingParticleRecoTrackAsssociation* process.newdigiseq)
 
+#run with HP tracks:
+doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4,25,"probeTracks")
+process.trackingParticleRecoTrackAsssociation.tracksTag = cms.InputTag('probeTracks')
+process.p = cms.Path(process.probeTracks * process.trackingParticleRecoTrackAsssociation* process.newdigiseq)

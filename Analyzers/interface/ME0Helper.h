@@ -36,6 +36,7 @@ struct SimMuon {
 };
 typedef std::vector<SimMuon> SimMuons;
 SimMuons fillSimMuons(const std::vector<SimTrack>& simTracks, const std::vector<PSimHit>&  simHits);
+SimMuons fillSimMuonsByTP(const edm::Handle<TrackingParticleCollection>& trParticles, const std::vector<SimTrack>& simTracks, const std::vector<PSimHit>&  simHits);
 
 struct DigiInfo {
 	const ME0DigiPreReco* digi = 0;
@@ -121,8 +122,14 @@ struct SegmentProperties{
 	double dEta     = -1;
 };
 SegmentProperties getSegmentProperties(const GeomDet* loc, const ME0Segment * segment);
-
 void associateSimMuonsToTracks(SimMuons& simMuons, const edm::Handle<TrackingParticleCollection>& trParticles, const reco::SimToRecoCollection& simToReco  );
+void associateSimMuonsToTracksByTP(SimMuons& simMuons, const reco::SimToRecoCollection& simToReco  );
+
+
+enum TruthType {PROMPT_MU, OTHER_MU, HADRON, ELECTRON, NEUTRON, OTHER, PU_PROMPT_MU, PU_OTHER_MU, PU_HADRON, PU_ELECTRON, PU_NEUTRON, PU_OTHER};
+std::map<unsigned int, std::pair<int,TruthType> > assignTrackTruth(const edm::Handle<TrackingParticleCollection>& trParticles, const std::vector<SimVertex>& verts, const reco::SimToRecoCollection& simToReco  );
+enum SegmentTrackTruthType {SEG_TRK_MATCH, OTHER_MUON_TRK, OTHER_TRK, NEUTRON_SEG};
+SegmentTrackTruthType getSegmentMatch(const DigiInfoMap& digiInfo, const ME0RecHitCollection& recHits,const ME0Segment& segment, TrackingParticleRef trkPrtcl);
 
 struct PropogatedTrack {
 	bool isValid = false;

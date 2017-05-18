@@ -10,6 +10,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
 
+
+
 process.source = cms.Source ("PoolSource",
         fileNames = cms.untracked.vstring(options.inputFiles ),
         duplicateCheckMode = cms.untracked.string("noDuplicateCheck")        
@@ -25,6 +27,11 @@ process.MessageLogger = cms.Service("MessageLogger",
 )
 
 process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+
+process.HepPDTESSource = cms.ESSource("HepPDTESSource",
+    pdtFileName = cms.FileInPath('SimGeneral/HepPDTESSource/data/pythiaparticle.tbl')
+)
+
 
 
 process.analyze = cms.EDAnalyzer("ME0SimHitAnalyzer",

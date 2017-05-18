@@ -7,7 +7,7 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
 options.parseArguments()
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.options = cms.untracked.PSet( SkipEvent =
 cms.untracked.vstring('ProductNotFound') )
 
@@ -180,7 +180,7 @@ process.newdigiseq  = cms.Sequence()
 # doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p6s512" ,512,6 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p4s768" ,768,4 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-# doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # 
 # #test removeing layer, looser layer reqs
 # doAnalysis(process,process.newdigiseq,"p8s768M6" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,0),True,4)
@@ -195,13 +195,29 @@ process.newdigiseq  = cms.Sequence()
 # doAnalysis(process,process.newdigiseq,"p10s768" ,768,10 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # 
 # doAnalysis(process,process.newdigiseq,"p8s256" ,256,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-# #doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p8s512" ,512,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p8s640" ,640,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 # #doAnalysis(process,process.newdigiseq,"p8s768" ,768,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
 
 #neutron stress test
 #for full 112.5 sample
+##FOR TDR
+
+# doAnalysis(process,process.newdigiseq,"p8s38475NL4"   ,384,8 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s38437p5NL4" ,384,8 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s38422p5NL4" ,384,8 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s38410NL4"   ,384,8 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s3847p5NL4"  ,384,8 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4)
+# doAnalysis(process,process.newdigiseq,"p8s38475NL5"   ,384,8 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s38437p5NL5" ,384,8 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s38422p5NL5" ,384,8 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s38410NL5"   ,384,8 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p8s3847p5NL5"  ,384,8 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,5)
+
+
+
+
 # doAnalysis(process,process.newdigiseq,"p6s51275NL3"   ,512,6 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,3)
 # doAnalysis(process,process.newdigiseq,"p6s51237p5NL3" ,512,6 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,3)
 # doAnalysis(process,process.newdigiseq,"p6s51222p5NL3" ,512,6 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,3)
@@ -280,7 +296,7 @@ process.newdigiseq  = cms.Sequence()
 # doAnalysis(process,process.newdigiseq,"p12s51222p5NL4" ,512,12 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p12s51210NL4"   ,512,12 ,0.1333,cms.vint32(1,1,1,1,1,1),True,4)
 # doAnalysis(process,process.newdigiseq,"p12s5127p5NL4"  ,512,12 ,0.1   ,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p12s51275NL5"   ,512,12 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
+# doAnalysis(process,process.newdigiseq,"p12s51275NL5"   ,512,12 ,2.0   ,cms.vint32(1,1,1,1,1,1),True,5)
 # doAnalysis(process,process.newdigiseq,"p12s51237p5NL5" ,512,12 ,0.5   ,cms.vint32(1,1,1,1,1,1),True,5)
 # doAnalysis(process,process.newdigiseq,"p12s51222p5NL5" ,512,12 ,0.3   ,cms.vint32(1,1,1,1,1,1),True,5)
 # doAnalysis(process,process.newdigiseq,"p12s51210NL5"   ,512,12 ,0.1333,cms.vint32(1,1,1,1,1,1),True,5)

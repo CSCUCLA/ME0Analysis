@@ -169,6 +169,47 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
 }
 
 
+// Fake TDR plot by eta
+
+{
+    TFile * f = new TFile("segmentAnalyzerForTDR_p8s384.root");
+    
+    TString digi = "p8s384";
+    
+        // TString dPhis[] = {"_","_dPhi_lt0p013_","_dPhi_lt0p004_","_dPhi_lt0p002_","","","",""};
+        // TString dPhiNs[] = {"|#Delta#phi| < 0.02 (p_{T} > 2 GeV)","|#Delta#phi| < 0.013 (p_{T} > 3 GeV)","|#Delta#phi| < 0.004 (p_{T} > 10 GeV)","|#Delta#phi| < 0.002 (p_{T} > 20 GeV)","","",""};
+        
+        TString dPhis[] = {"_","_dPhi_lt0p002scaled_","_dPhi_lt0p013_","_dPhi_lt0p004_","_dPhi_lt0p002_","","",""};
+        TString dPhiNs[] = {"|#Delta#phi| < 0.02 (p_{T} > 2 GeV)","|#Delta#phi| < C(#eta) (p_{T} > 2 GeV)","|#Delta#phi| < 0.013 (p_{T} > 3 GeV)","|#Delta#phi| < 0.004 (p_{T} > 10 GeV)","|#Delta#phi| < 0.002 (p_{T} > 20 GeV)","","",""};
+        
+
+
+    TString vars[] ={ "seg_eta",""};
+    TH1 * hInt = 0;
+    f->GetObject(TString::Format("%s___fake_nEvents",digi.Data()),hInt);
+    float nEvents = hInt->GetBinContent(1);
+    
+
+    for(unsigned int iV = 0; vars[iV][0]; ++iV){
+                Plotter * p = new Plotter;
+                for(unsigned int iD = 0; dPhis[iD][0]; ++iD){
+    TH1 * h;
+    f->GetObject(TString::Format("%s___fake%s%s",digi.Data(),dPhis[iD].Data(),vars[iV].Data()),h);
+    if(h == 0) continue;
+    h->Rebin(10);
+    h->Scale(1./nEvents);
+    // h->SetXTitle("# of bkg. segments per event");
+    h->SetYTitle("<N. of bkg. segments> / event");
+    cout << dPhis[iD].Data()<< " "<< vars[iV].Data()<<" "<<h->Integral(0,-1) <<endl;
+    // if(iV == 0) h->Rebin(2);
+    // h->SetTitle(digis[iD]);
+    p->addHistLine(h,dPhiNs[iD]);
+    }
+        p->draw(false,vars[iV]);
+    }
+}
+
+
 {
     TFile * f = new TFile("testTestSegments.root");
 
@@ -304,7 +345,8 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
 //Table
 
 {
-    TFile * f = new TFile("testSegments_justNeut_112p5_fineP.root");
+    // TFile * f = new TFile("testSegments_justNeut_112p5_fineP.root");
+        TFile * f = new TFile("testSegments_TDR_justNeut_112p5_fineP.root");
 
         // TString digis[] = {"p8s768","p8s768M6","p8s768L3","p8s768M6L3","","","",""};
         // TString digiNs[] = {"6 layers, req. 4 layers per seg.","5 layers, req. 4 layers per seg.","6 layers, req. 3 layers per seg.","5 layers, req. 3 layers per seg.","",""};
@@ -360,18 +402,50 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
        // "10N M456L3" ,
        // "7p5N M456L3",""};
     
-    TString digis[] = {
-   "p6s5127p5NL4"    ,
-   "p6s51210NL4"     ,
-   "p6s51237p5NL4"     ,
-   "p6s51275NL4"     ,
-   ""};
-   TString digiNs[] = {     
-     "p6s5127p5NL4"    ,
-     "p6s51210NL4"     ,
-     "p6s51237p5NL4"     ,
-     "p6s51275NL4"     ,
-  ""};
+  //   TString digis[] = {
+  //  "p6s5127p5NL4"    ,
+  //  "p6s51210NL4"     ,
+  //  "p6s51237p5NL4"     ,
+  //  "p6s51275NL4"     ,
+  //  ""};
+  //  TString digiNs[] = {
+  //    "p6s5127p5NL4"    ,
+  //    "p6s51210NL4"     ,
+  //    "p6s51237p5NL4"     ,
+  //    "p6s51275NL4"     ,
+  // ""};
+        
+        TString digis[] = {
+          "p8s3847p5NL4"  ,
+          "p8s38410NL4"   ,
+          "p8s38422p5NL4" ,
+          "p8s38437p5NL4" ,     
+          "p8s38475NL4"   ,
+          "p8s3847p5NL5"  ,
+          "p8s38410NL5"   ,
+          "p8s38422p5NL5" ,
+          "p8s38437p5NL5" ,
+          "p8s38475NL5"   ,
+       ""};
+       TString digiNs[] = {     
+         "p8s3847p5NL4"  ,
+         "p8s38410NL4"   ,
+         "p8s38422p5NL4" ,
+         "p8s38437p5NL4" ,     
+         "p8s38475NL4"   ,
+         "p8s3847p5NL5"  ,
+         "p8s38410NL5"   ,
+         "p8s38422p5NL5" ,
+         "p8s38437p5NL5" ,
+         "p8s38475NL5"   ,
+      ""};
+
+
+
+
+
+
+        
 
         // TString digis[] = {"p6s512","p6s512M1","p6s512M2","p6s512M3","p6s512M4","p6s512M5","p6s512M6","","",""};
         // TString digiNs[] = {"6 part. 512 strips","6 part. 512 strips, no lay 1","6 part. 512 strips, no lay 2","6 part. 512 strips, no lay 3","6 part. 512 strips, no lay 4","6 part. 512 strips, no lay 5","6 part. 512 strips, no lay 6","","",""};
@@ -394,7 +468,7 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
                 mean = h->GetMean();
                 std  = h->GetStdDev();
             }
-                 cout << TString::Format("%.1f,%.1f\t",mean,std);
+                 cout << TString::Format("%.3f,%.3f\t",mean,std);
         }
         cout <<endl;
         //fake proportions
@@ -629,3 +703,39 @@ cout << endl;
        
        
 }
+
+
+
+//MAKE NEUTRON PLOT
+
+{
+  vector<TString> xTitles{"7.5 (x1)","10 (x1.33)","22.5 (x3)","37.5 (x5)","75 (x10)"};
+  vector<TString> names{"4 out of 6 layers per segment","5 out of 6 layers per segment"};
+  vector<vector<double>> vals{{0.198,0.282,5.298,29.626,195.550},{0.008,0.023,0.214,1.748,39.374}};
+  Plotter * p = new Plotter();
+  
+  TH1F * axisHist = new TH1F("axisHist",";neutron luminosity scale [10^{34} Hz/cm] (safety margin)",xTitles.size(),-0.5,float(xTitles.size()) -.5);
+  for (i=1;i<=xTitles.size();i++) axisHist->GetXaxis()->SetBinLabel(i,xTitles[i-1]);
+  
+  for(unsigned int iN = 0; iN < names.size(); ++iN){
+    TGraph * g = new TGraph();
+    for(unsigned int iP = 0; iP < vals[iN].size(); ++iP){
+      g->SetPoint(iP,iP,vals[iN][iP]);
+    }
+    g->SetLineColor  (StyleInfo::getLineColor(iN));
+    g->SetLineWidth  (3);
+    g->SetLineStyle  (1);
+    g->SetMarkerStyle(20);
+    g->SetMarkerColor(StyleInfo::getLineColor(iN));
+    g->SetMarkerSize (1);
+    Drawing::Drawable1D drawableF("P L",names[iN],Drawing::GRAPH,g,false);
+    drawableF.graphAxisHist = (TH1*)axisHist->Clone();
+    p->addDrawable(drawableF);     
+  }
+  p->setYTitle("<N. of neutron bkg. segments> per event");
+  p->setXTitle("neutron luminosity scale [10^{34}cm^{-2}s^{-1}] (safety margin)");
+  p->draw(false,"tot");
+
+
+}
+

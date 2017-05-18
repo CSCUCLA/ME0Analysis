@@ -6,4 +6,5 @@
     <use name="RecoLocalMuon/GEMRecHit"/>
     <use name="DataFormats/MuonReco"/>    
     <use name="DataFormats/GEMRecHit"/>    
+    <use   name="SimGeneral/HepPDTRecord"/>
 </library>

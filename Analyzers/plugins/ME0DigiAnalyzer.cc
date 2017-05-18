@@ -91,14 +91,15 @@ void ME0DigiAnalyzer::makeGeneralDigiPlots(const ME0Geometry* mgeom, const ME0Di
 		for (ME0DigiPreRecoCollection::const_iterator idigi = d.second.first;
 				idigi != d.second.second;idigi++) {
 
-			const float locY = idigi->y() + disp;
+			LocalPoint newPoint = chamber->toLocal(epart->toGlobal(LocalPoint(idigi->x(),idigi->y())));
+			const float locY = newPoint.y();
 
 			hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(0);
 			if(idigi->prompt())hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(1);
 			else hists.getOrMake1D(TString::Format("%sdigiNumber",sname.Data()),";Total, Prompt, NonPrompt",3,-.5,2.5)->Fill(2);
 
 			hists.getOrMake1D(TString::Format("%stof",sname.Data()),";time of flight [ns]",400,-200,200)->Fill(idigi->tof());
-			hists.getOrMake2D(TString::Format("%shitLoc",sname.Data()),";local x position [cm] ;local y position [cm]",4000,-30,30,100,-50,50)->Fill(idigi->x(),locY);
+			hists.getOrMake2D(TString::Format("%shitLoc",sname.Data()),";local x position [cm] ;local y position [cm]",4000,-30,30,200,-100,100)->Fill(idigi->x(),locY);
 
 			TString loc;
 			if(idigi->x() < -15.0 )loc = "x_leqm15";
@@ -193,10 +194,18 @@ void ME0DigiAnalyzer::getDigiCuts(const ME0Geometry* mgeom,edm::Handle<std::vect
 		if(absETA > 2.8 || absETA < 2.0 ) continue;
 
 		TString ptName = sname;
-		if(pt < 3 ) ptName += "ptleq3_";
-		else if(pt < 5 ) ptName += "pteq3to5_";
-		else if(pt < 20 ) ptName += "pteq5to20_";
-		else ptName += "ptgeq20_";
+//		if(pt < 3 ) ptName += "ptleq3_";
+//		else if(pt < 5 ) ptName += "pteq3to5_";
+//		else if(pt < 20 ) ptName += "pteq5to20_";
+//		else ptName += "ptgeq20_";
+				if(pt < 2 ) ptName += "ptleq2_";
+				else if(pt < 3 ) ptName += "pteq2to3_";
+				else if(pt < 5 ) ptName += "pteq3to5_";
+				else if(pt < 10 ) ptName += "pteq5to10_";
+				else if(pt < 15 ) ptName += "pteq10to15_";
+				else if(pt < 20 ) ptName += "pteq15to20_";
+				else ptName += "ptgeq20_";
+
 
 		//collect simhits
 		std::vector<const PSimHit* > simHits = ME0Helper::getMatchedSimHits(&simTrack,*simHitH);
@@ -239,6 +248,10 @@ void ME0DigiAnalyzer::getDigiCuts(const ME0Geometry* mgeom,edm::Handle<std::vect
 
 	      auto props = ME0Helper::getSimTrackProperties(mgeom, simHits);
 	      hists.getOrMake1D(TString::Format("%s_tr_dPhi",ptName.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+
+	      hists.getOrMake1D(TString::Format("%s_tr_signed_dPhi",ptName.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(-1.0*simTrack.charge() * props.dPhi);
+	     if(nHits >= 4) hists.getOrMake1D(TString::Format("%s_tr_geq4_signed_dPhi",ptName.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(-1.0*simTrack.charge() * props.dPhi);
 
 
 		TString hitName = ptName;

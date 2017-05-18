@@ -26,10 +26,72 @@
 #include <TVector2.h>
 #include <TMath.h>
 
-#include "Geometry/GEMGeometry/interface/ME0EtaPartitionSpecs.h"
+#include "FWCore/Framework/interface/global/EDProducer.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/Candidate/interface/CandidateFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "SimDataFormats/CrossingFrame/interface/CrossingFrame.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "PhysicsTools/HepMCCandAlgos/interface/MCTruthHelper.h"
+#include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 
 #include "../interface/ME0Helper.h"
 using namespace std;
+
+
+static constexpr int PDGCacheMax = 32768;
+namespace {
+  struct IDto3Charge {
+    IDto3Charge(HepPDT::ParticleDataTable const&,
+                bool abortOnUnknownPDGCode);
+
+    int chargeTimesThree(int) const;
+
+  private:
+    std::vector<int> chargeP_, chargeM_;
+    std::unordered_map<int, int> chargeMap_;
+    bool abortOnUnknownPDGCode_;
+
+  };
+
+  IDto3Charge::IDto3Charge(HepPDT::ParticleDataTable const& iTable,
+                           bool iAbortOnUnknownPDGCode):
+    chargeP_( PDGCacheMax, 0 ), chargeM_( PDGCacheMax, 0 ),
+    abortOnUnknownPDGCode_(iAbortOnUnknownPDGCode) {
+    for( auto const& p: iTable ) {
+       const HepPDT::ParticleID & id = p.first;
+       int pdgId = id.pid(), apdgId = std::abs( pdgId );
+       int q3 = id.threeCharge();
+       if ( apdgId < PDGCacheMax && pdgId > 0 ) {
+	 chargeP_[ apdgId ] = q3;
+	 chargeM_[ apdgId ] = -q3;
+       } else if ( apdgId < PDGCacheMax ) {
+	 chargeP_[ apdgId ] = -q3;
+	 chargeM_[ apdgId ] = q3;
+       } else {
+	 chargeMap_.emplace( pdgId, q3);
+	 chargeMap_.emplace( -pdgId, -q3);
+       }
+     }
+  }
+
+  int IDto3Charge::chargeTimesThree( int id ) const {
+    if( std::abs( id ) < PDGCacheMax )
+      return id > 0 ? chargeP_[ id ] : chargeM_[ - id ];
+    auto f = chargeMap_.find( id );
+    if ( f == chargeMap_.end() )  {
+      if ( abortOnUnknownPDGCode_ )
+        throw edm::Exception( edm::errors::LogicError )
+          << "invalid PDG id: " << id;
+      else
+        return HepPDT::ParticleID(id).threeCharge();
+    }
+    return f->second;
+}
+
+}
+
+
 
 
 class ME0SimHitAnalyzer : public edm::EDAnalyzer {
@@ -38,7 +100,13 @@ class ME0SimHitAnalyzer : public edm::EDAnalyzer {
         ~ME0SimHitAnalyzer();
 
 
+  	std::shared_ptr<IDto3Charge> pdtptr;
     private:
+        virtual void beginRun(edm::Run const& run, edm::EventSetup const& es){
+        	edm::ESHandle<HepPDT::ParticleDataTable> pdt;
+        		es.getData( pdt );
+        		pdtptr = std::make_shared<IDto3Charge>(*pdt, false);
+        }
         virtual void beginJob() {};
         virtual void analyze(const edm::Event&, const edm::EventSetup&);
         virtual void endJob() {};
@@ -125,7 +193,7 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
            vertT = vert.processType();
          }
 
-      }
+      } //else {std::cout <<"No track IDX!"<<std::endl;}
 
       int partID = TMath::Abs(it->second.front().first->particleType());
       hists.getOrMake2D("partTypes",";Vertex type;PDGID",303,-1.5,301.5,41,-.5,40.5)->Fill(vertT,partID < 38 ? partID : 40);
@@ -188,12 +256,29 @@ ME0SimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("%s_nLays_geq5_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
       if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("%s_nLays_geq6_tr_dPhi",prefix.Data()),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
 
+      float charge = pdtptr->chargeTimesThree(it->second.front().first->particleType());
+      float signedDPhi = -1.0*(charge >=  0 ? 1.0 : -1.0)*props.dPhi;
+//      cout <<  it->first <<" "<< idx <<" "<< (idx >= 0 ? tracks->at(idx).type() : -10)  <<" "<< partID <<" "<< charge <<endl;
+
+      hists.getOrMake1D(TString::Format("%s_tr_signed_dPhi",prefix.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(props.nLaysHit > 1 ? signedDPhi : 1.0);
+      if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("%s_nLays_geq3_tr_signed_dPhi",prefix.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("%s_nLays_geq4_tr_signed_dPhi",prefix.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("%s_nLays_geq5_tr_signed_dPhi",prefix.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("%s_nLays_geq6_tr_signed_dPhi",prefix.Data()),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+
+
 
       hists.getOrMake1D(TString::Format("all_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
       if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
       if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
       if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
       if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr_dPhi"),";#Delta#phi",400,0,0.1)->Fill(TMath::Abs(props.dPhi));
+
+      hists.getOrMake1D(TString::Format("all_tr_signed_dPhi"),";#Delta#phi",140,-0.005,0.03)->Fill(props.nLaysHit > 1 ? signedDPhi : 1.0);
+      if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr_signed_dPhi"),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 4)hists.getOrMake1D(TString::Format("all_nLays_geq4_tr_signed_dPhi"),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 5)hists.getOrMake1D(TString::Format("all_nLays_geq5_tr_signed_dPhi"),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
+      if(props.nLaysHit >= 6)hists.getOrMake1D(TString::Format("all_nLays_geq6_tr_signed_dPhi"),";#Delta#phi",140,-0.005,0.03)->Fill(signedDPhi);
 
       hists.getOrMake1D(TString::Format("all_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(props.nLaysHit > 1 ? TMath::Abs(props.dPhi) : 1.0);
       if(props.nLaysHit >= 3)hists.getOrMake1D(TString::Format("all_nLays_geq3_tr_ext_dPhi"),";#Delta#phi",400,0,0.5)->Fill(TMath::Abs(props.dPhi));

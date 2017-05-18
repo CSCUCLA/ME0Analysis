@@ -1,12 +1,14 @@
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
-#include "../AnalsysisSupport/macros/BaseTupleAnalyzer.h"
-#include "../AnalsysisSupport/interface/HistGetter.h"
+#include "/Users/nmccoll/Dropbox/Work/GitRepositories/AnalysisSupport/TreeInterface/interface/BaseTupleAnalyzer.h"
+#include "/Users/nmccoll/Dropbox/Work/GitRepositories/AnalysisSupport/Utilities/interface/HistGetter.h"
+#include "/Users/nmccoll/Dropbox/Work/GitRepositories/AnalysisSupport/Utilities/interface/Types.h"
 #include "TVector2.h"
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/PtEtaPhiM4D.h"
 #include "Math/LorentzVector.h"
 using namespace std;
+using ASTypes::size8;
 double deltaPhi(const float phi1, const float phi2) {return TVector2::Phi_mpi_pi(phi1 - phi2);}
 
 class Analyzer : public BaseTupleAnalyzer{

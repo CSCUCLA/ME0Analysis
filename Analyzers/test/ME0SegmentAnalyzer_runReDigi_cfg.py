@@ -25,7 +25,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 
-process.load('Configuration.Geometry.GeometryExtended2023D12Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
 # from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023tilted

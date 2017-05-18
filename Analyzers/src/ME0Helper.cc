@@ -24,6 +24,34 @@ SimMuons fillSimMuons(const std::vector<SimTrack>& simTracks, const std::vector<
 	return simMuons;
 }
 
+SimMuons fillSimMuonsByTP(const edm::Handle<TrackingParticleCollection>& trParticles, const std::vector<SimTrack>& simTracks, const std::vector<PSimHit>&  simHits) {
+	SimMuons simMuons;
+	for (TrackingParticleCollection::size_type iTP=0; iTP<trParticles->size(); iTP++) {
+		TrackingParticleRef trpart(trParticles, iTP);
+		if(trpart->eventId().event() != 0) continue;
+		if(trpart->eventId().bunchCrossing() != 0) continue;
+		if(trpart->genParticles().size() == 0) continue;
+		if(std::abs(trpart->pdgId()) != 13) continue;
+
+		const SimTrack * partTrack = 0;
+		for(unsigned int iST = 0; iST <  trpart->g4Tracks().size(); ++iST){
+			if(TMath::Abs( trpart->g4Tracks()[iST].type()) != 13) continue;
+			for (const auto& simTrack : simTracks) {
+				if(trpart->g4Tracks()[iST].eventId() != simTrack.eventId()  ) continue;
+				if(trpart->g4Tracks()[iST].trackId() != simTrack.trackId()  ) continue;
+				if(partTrack){
+					if(simTrack.momentum().pt() > partTrack->momentum().pt() ) partTrack = &simTrack;
+				} else{
+					partTrack = &simTrack;
+				}
+			}
+		}
+
+		simMuons.emplace_back(partTrack, partTrack ? getMatchedSimHits(partTrack,simHits) : std::vector<const PSimHit*>(0) );
+		simMuons.back().trPart = trpart;
+	}
+	return simMuons;
+}
 
 void fillDigiInfoMap(const  ME0DigiPreRecoCollection& digis, const ME0DigiPreRecoMap& digiMap,
 		const ME0DigiPreRecoCollection& oldDigis, const std::vector<PSimHit>&  simHits, DigiInfoMap& digiInfoMap){
@@ -286,6 +314,19 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
       prunedHits.push_back(l[iMax] );
     }
 
+
+	std::map<ME0DetId,int> nPrimChHit;
+	for(const auto* l : prunedHits){ nPrimChHit[ME0DetId(l->detUnitId()).chamberId()]++; }
+    int chHitMax = -1;
+    ME0DetId mainDetId;
+    for(const auto& chHit : nPrimChHit){
+    	if(chHit.second > chHitMax){
+    		chHitMax = chHit.second;
+    		mainDetId = chHit.first;
+    	}
+    }
+
+
     if(nChHit.size() > 1) prop.oneChamber = false;
     prop.nPrimLaysHit = prunedHits.size();
 
@@ -324,9 +365,10 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
             double b =  (z2*v1 - z1*v2)/(z2 - z1);
             return m*zc+b;
           };
-          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zValue);
-          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zValue);
-          return GlobalPoint(xc,yc,zValue);
+          const double zc = up.z() > 0 ? zValue : -1*zValue;
+          double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zc);
+          double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zc);
+          return GlobalPoint(xc,yc,zc);
         };
 
         const int upInd = floor(prunedHits.size()/2);
@@ -341,7 +383,7 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
         prop.dPhi = TVector2::Phi_mpi_pi(upPt.phi() - downPt.phi());
         prop.dEta = upPt.eta() - downPt.eta();
 
-        prop.chamber =  mgeom->chamber(  ME0DetId(prunedHits[upInd]->detUnitId()).chamberId());
+        prop.chamber =  mgeom->chamber(mainDetId);
         LocalPoint upLocPt = prop.chamber->toLocal(upPt);
         LocalPoint downLocPt = prop.chamber->toLocal(downPt);
         GlobalPoint centerPtForComp = getProj(prop.chamber->position().z(), centerUp, centerDown);
@@ -471,6 +513,100 @@ void associateSimMuonsToTracks(SimMuons& simMuons, const edm::Handle<TrackingPar
 	    }
         if(simRecAsso.begin() != simRecAsso.end() ) sMuon.recoTrack = simRecAsso.begin()->first;
 	}
+}
+
+void associateSimMuonsToTracksByTP(SimMuons& simMuons, const reco::SimToRecoCollection& simToReco  ) {
+	for(auto& sMuon : simMuons){
+		if(sMuon.trPart.isNull()) continue;
+	    edm::RefToBase<reco::Track> track;
+	    std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
+	    if(simToReco.find(sMuon.trPart) != simToReco.end()) {
+	    	simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) simToReco[sMuon.trPart];
+	    }
+        if(simRecAsso.begin() != simRecAsso.end() ) sMuon.recoTrack = simRecAsso.begin()->first;
+	}
+}
+
+std::map<unsigned int, std::pair<int,TruthType> > assignTrackTruth(const edm::Handle<TrackingParticleCollection>& trParticles, const std::vector<SimVertex>& verts, const reco::SimToRecoCollection& simToReco  ) {
+	std::map<unsigned int, std::pair<int,TruthType> > trackTruthMap;
+	for (TrackingParticleCollection::size_type iTP=0; iTP<trParticles->size(); iTP++) {
+		TrackingParticleRef trpart(trParticles, iTP);
+		bool isPU = false;
+		bool isPromptMU = false;
+		if( trpart->eventId().event() != 0 || trpart->eventId().bunchCrossing() != 0 ) isPU=true;
+		if(!isPU && trpart->genParticles().size() && std::abs(trpart->pdgId()) == 13 ) isPromptMU = true;
+
+		TruthType prtclTruthType = isPU ? PU_OTHER : OTHER;
+
+		if(isPromptMU){
+			prtclTruthType = PROMPT_MU;
+		} else {
+			for(unsigned int iST = 0; iST <  trpart->g4Tracks().size(); ++iST){
+				TruthType thisTruthType =  isPU ? PU_OTHER : OTHER;
+				int partID = std::abs(trpart->g4Tracks()[iST].type());
+		         if(partID == 13){
+		        	 thisTruthType =  isPU ? PU_OTHER_MU : OTHER_MU;
+		         } else if(partID >= 38) {
+		        	 thisTruthType = isPU ? PU_HADRON : HADRON;
+		         } else if (partID == 11){
+		        	 thisTruthType = isPU ? PU_ELECTRON : ELECTRON;
+		         }
+		         if(thisTruthType < prtclTruthType){
+		        	 prtclTruthType =thisTruthType;
+		         }
+			}
+		}
+
+		auto simToRecoIt = simToReco.find(trpart);
+		if((simToRecoIt != simToReco.end()) && (simToRecoIt->val.begin() != simToRecoIt->val.end()) ) {
+			auto truIt = trackTruthMap.find(simToRecoIt->val.begin()->first.key());
+			if(truIt != trackTruthMap.end()){
+				if( prtclTruthType < truIt->second.second){
+					 truIt->second.second = prtclTruthType;
+					 truIt->second.first = iTP;
+				}
+			} else {
+				trackTruthMap[simToRecoIt->val.begin()->first.key()] = std::make_pair(iTP,prtclTruthType);
+			}
+		}
+	}
+	return trackTruthMap;
+}
+
+SegmentTrackTruthType getSegmentMatch(const DigiInfoMap& digiInfo,const ME0RecHitCollection& recHits, const ME0Segment& segment, TrackingParticleRef trkPrtcl) {
+
+	int nTT =0;
+	int nOT =0;
+	int nOTM =0;
+	int nN =0;
+	const auto& rh = segment.specificRecHits();
+	const unsigned int nH = rh.size();
+	for(unsigned int iR = 0; iR < nH; ++iR){
+		int rhIDX = getRecHitIndex(recHits,rh[iR]);
+		const DigiInfo& di =  digiInfo.find(rh[iR].me0Id())->second[rhIDX];
+		bool sameTrack = false;
+		bool muonTrack = false;
+		for(const auto* sh : di.simHits){
+			if(std::abs(sh->particleType()) == 13) muonTrack = true;
+			for(unsigned int iST = 0; iST <  trkPrtcl->g4Tracks().size(); ++iST){
+				if(trkPrtcl->g4Tracks()[iST].trackId() != sh->trackId()) continue;
+				if(trkPrtcl->g4Tracks()[iST].eventId() != sh->eventId()) continue;
+				sameTrack = true;
+				break;
+			}
+
+	    if(sameTrack) break;
+		}
+		if(sameTrack)nTT++;
+		else if(muonTrack)nOTM++;
+		else if(di.simHits.size())nOT++;
+		else nN++;
+	}
+	if(nTT > (nOTM + nOT +nN)) return SEG_TRK_MATCH;
+	if(nOTM > (nTT + nOT +nN)) return OTHER_MUON_TRK;
+	if((nTT+ nOT + nOTM) > nN ) return OTHER_TRK;
+	return NEUTRON_SEG;
+
 }
 
 PropogatedTrack propogateTrack(const edm::ESHandle<MagneticField>& bField,const edm::ESHandle<Propagator>& ThisshProp, const reco::Track * thisTrack, const float zPropValue){

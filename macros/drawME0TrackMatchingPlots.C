@@ -20,7 +20,7 @@
   // TString vars [] = {"resid_x","pull_x","resid_y","pull_y","resid_dx","pull_dx","resid_dy","pull_dy","resid_eta","resid_phi","resid_deta","resid_dphi",""};
     // TString vars [] = {"resid_x","pull_x","resid_y","pull_y","resid_eta","resid_phi","resid_deta","resid_dphi",""};
         // TString vars [] = {"resid_eta","resid_phi","resid_deta","resid_dphi","resid_dphiS","resid_x","pull_x","resid_xs",""};
-                TString vars [] = {"resid_eta","resid_phi","resid_dphi",""};
+                TString vars [] = {"resid_eta","resid_phi","resid_dphi","resid_phiS2","resid_dphiS2",""};
                 
                                 // TString vars [] = {"resid_phi","resid_phiS1","resid_phiS2","resid_dphi","resid_dphiS1","resid_dphiS2",""};
   
@@ -56,7 +56,7 @@
             hi2->SetBinContent(hi2->GetNbinsX()+1,0);
             
             
-            if(iP == 3 && iT ==0 ){
+            if(iP == 1 && iT ==0 ){
               cout << vars[iV]<< "\t S \t";
                for(unsigned int iA = 0; values[iA] >= 0; ++iA){
                  for(unsigned int iB = 1; iB <= hi2->GetNbinsX(); ++iB){
@@ -69,7 +69,7 @@
                cout << endl;
              }
              
-             if(iP == 3 && iT ==1 ){
+             if(iP == 1 && iT ==1 ){
                cout << vars[iV]<< "\t B \t";
                 for(unsigned int iA = 0; iA < binS.size(); ++iA){
                   cout << hi2->GetBinContent(binS[iA]) << "\t";
@@ -89,33 +89,48 @@
 
 //Effplot
 {
-  TString filename = "trackMatchingTree_p8s384_plots.root";
+  TString filename = "trackMatchingTree_p8s384_POGHP_plots.root";
   TString prefix = "p8s384";
   TFile * f = new TFile(filename,"READ");
 
   TString extr = "";
-  
+  TString var = "p";
     // TString efftypes [] = {"incl","goodTrack","goodSegment","goodTrackAndSegment","goodME0Muon",""};
         // TString efftypes [] = {"incl","goodSegment"  ,"goodSegmentAndGoodPT","goodME0Muon",""};
         // TString efftypeNs[] = {"incl","segment reco.","+ gen-matched pixel track (20% p_{T} match)","+ exclusive track-segment match",""};
   
   // TString efftypes [] = {"incl","goodME0Muon","goodSegmentAndGoodPT","goodSegment"  ,""};
   // TString efftypeNs[] = {"incl","+ exclusive track-segment match","+ gen-matched pixel track (20% p_{T} match)","segment reco.",""};
-  TString efftypes [] = {"goodTrackPT","goodME0Muon","goodSegmentAndGoodPT",""  ,""};
-  TString efftypeNs[] = {"incl","ME0Muon","ME0Segment",""};
+  // TString efftypes [] = {"incl","goodME0Muon","goodMatch","goodSegmentAndGoodPT","goodTrackPT","goodTrack","",""  ,""};
+  // TString efftypeNs[] = {"incl","ME0Muon","match","ME0Segment","pt","trk","","",""};
+  
+  TString efftypes [] = {"incl","goodMatch","goodSegmentAndGoodPT","goodTrack","",""  ,""};
+  TString efftypeNs[] = {"gen-muons","gen-muon matched ME0Muon","gen-muon matched to track, and ME0Segment","gen-muon matched to track","","",""};
+  
+  // TString efftypes [] = {"incl","ns_goodME0Muon","ns_goodMatch","ns_goodSegmentAndGoodPT","goodTrack","",""  ,""};
+  // TString efftypeNs[] = {"incl","ME0Muon","match","ME0Segment","trk","","",""};
+  
+  // TString efftypes [] = {"incl","goodSegment","",""  ,""};
+  // TString efftypeNs[] = {"incl","ME0Segment","","",""};
+  
+  // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
+  // int nBins = 10;
   
   double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
   int nBins = 10;
+  
     p = new Plotter;
         for(unsigned int iT = 0; efftypes[iT][0]; ++iT){
           TH1 * hd = 0;
-          f->GetObject(TString::Format("%s_real_muon_%s_pt",prefix.Data(), efftypes[iT].Data()),hd);
-          hd = hd->Rebin(nBins,"",bins);
+          f->GetObject(TString::Format("%s_real_muon_%s_%s",prefix.Data(), efftypes[iT].Data(),var.Data()),hd);
+          hd = hd->Rebin(3);
+          // hd = hd->Rebin(nBins,"",bins);
           p->addHist(hd,efftypeNs[iT]);
         }
         
 
         // p->rebin(nBins,bins);
+        p->setYTitle("N(matched)/N(gen-muons)");
         p->drawRatio(0,"stack",true,false);
     
   
@@ -201,13 +216,21 @@
 
 //Effplot++ : Add fakes for Anna, seperate fakes
 {
-  TString filenameF = "trackMatchingTree_NU_p8s384_plots.root";
+  TString filenameF = "trackMatchingTree_NU_p8s384_POGHP_plots.root";
+  TString prefixN = "p8s384";
   TString prefix = "p8s384";
+  // TString prefix = "p8s384";
   TFile * fF = new TFile(filenameF,"READ");
-  TString extr = "_pt3to5_";
-  TString var = "eta";
-  TString xTitle = "pixel track |#eta|";
+  // TString extr = "_pt3to5_";
+  // TString var = "eta";
+  // TString xTitle = "pixel track |#eta|";
   
+  TString extr = "_";
+  TString var = "pt";
+  TString xTitle = "pixel track p_{T}";
+  //
+  // TString var = "p";
+  // TString xTitle = "pixel track |p| [GeV]";
   
   // TString xTitle = "pixel track p_{T} [GeV]";
   
@@ -222,8 +245,8 @@
     
         // FR
         TH1 * hnF = 0;
-        fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefix.Data()),hnF);
-        if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefix.Data()) << endl;
+        fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefixN.Data()),hnF);
+        if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefixN.Data()) << endl;
         
         
     
@@ -248,9 +271,9 @@
           return drawableF;
 
         };
-        auto d1 = addBKGGraph(TString::Format("%s_fake_muon%spassME0Muon_%s",prefix.Data(),extr.Data(),var.Data()),"|p| independent matching",0);
+        auto d1 = addBKGGraph(TString::Format("%s_fake_muon%spassME0Muon_%s",prefix.Data(),extr.Data(),var.Data()),"ME0Muons",0);
         p->addDrawable(d1);          
-        auto d2 = addBKGGraph(TString::Format("%s_fake_muon%spassME0MuonExtra_%s",prefix.Data(),extr.Data(),var.Data()),"|p| dependent matching",1);
+        auto d2 = addBKGGraph(TString::Format("%s_fake_muon%spassME0Muon_GM_%s",prefix.Data(),extr.Data(),var.Data()),"ME0Muons with disambiguation",1);
         p->addDrawable(d2);          
         p->setMinMax(0.0,1.0);
         p->setYTitle("# of background muons per event");
@@ -258,6 +281,121 @@
         p->draw(false,"tot");
         
     
+  
+}
+
+
+//ETA TDR PLOT
+{
+  TString filenameF = "trackMatchingTree_NU_p8s384_POGHP_plots.root";
+  TString prefix = "p8s384";
+  TFile * fF = new TFile(filenameF,"READ");
+  // TString extr = "_pt3to5_";
+  // TString var = "eta";
+  // TString xTitle = "pixel track |#eta|";
+  
+  TString extr = "_";
+  TString var = "eta";
+  TString xTitle = "pixel track |#eta|";
+  // TString pts[] = {"ptgeq2","ptgeq3","ptgeq10","ptgeq20",""};  
+  // TString ptNs[] = {"p_{T} > 2 GeV","p_{T} > 3 GeV",,"p_{T} > 10 GeV","p_{T} > 20 GeV",""};
+  
+  TString pts[] = {"ptgeq2","ptgeq3","ptgeq5","",""};  
+  TString ptNs[] = {"p_{T} > 2 GeV","p_{T} > 3 GeV","p_{T} > 5 GeV","p_{T} > 20 GeV",""};
+  
+  // TString xTitle = "pixel track p_{T} [GeV]";
+  
+  // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
+  // int nBins = 10;
+  
+  // double bins[] = {2,3,4,5,7,10,15,20,25,30};
+  // int nBins = 9;
+  
+    p = new Plotter;
+
+    
+        // FR
+        TH1 * hnF = 0;
+        fF->GetObject(TString::Format("%s_nEvtsForFakesA",prefix.Data()),hnF);
+        if(hnF==0) cout << TString::Format("%s_nEvtsForFakesA",prefix.Data()) << endl;
+        
+        
+    
+        auto addBKGGraph = [&](TString histName, TString title, int inColor) -> Drawing::Drawable1D {
+          TH1 *hf = 0;
+          fF->GetObject(histName,hf);
+          if(hf==0) cout << histName<< endl;
+          // hf = hf->Rebin(nBins,"",bins);
+          PlotTools::toOverflow(hf);
+          PlotTools::toUnderflow(hf);
+          hf->Scale(1./hnF->GetBinContent(1));
+          
+          TGraphAsymmErrors* gr = new TGraphAsymmErrors(hf);
+          gr->SetLineColor  (StyleInfo::getLineColor(inColor));
+          gr->SetLineWidth  (3);
+          gr->SetLineStyle  (1);
+          gr->SetMarkerStyle(20);
+          gr->SetMarkerColor(StyleInfo::getLineColor(inColor));
+          gr->SetMarkerSize (1);
+          Drawing::Drawable1D drawableF("P 0",title,Drawing::GRAPH,gr,false);
+          drawableF.graphAxisHist = hf;
+          return drawableF;
+
+        };
+        
+        for(unsigned int iP = 0; pts[iP][0]; ++ iP){
+          auto d1 = addBKGGraph(TString::Format("%s_fake_muon_%s_passME0Muon_%s",prefix.Data(),pts[iP].Data(),var.Data()),ptNs[iP],iP);
+          p->addDrawable(d1);
+          // TH1 *hf = 0;
+          // fF->GetObject(TString::Format("%s_fake_muon_%s_passME0Muon_%s",prefix.Data(),pts[iP].Data(),var.Data()),hf);
+          // hf->Scale(1./hnF->GetBinContent(1));
+          // p->addHistLine(hf,ptNs[iP]);
+
+        
+        }
+        p->setMinMax(0.0,.065);
+        p->setYTitle("<# of bkg. muons> / event");
+        p->setXTitle(xTitle);
+        p->draw(false,"tot");
+  
+}
+
+////RES ETA plot
+{
+  TString filenameF = "trackMatchingTree_p8s384_plots.root";
+  TString prefix = "p8s384";
+  TFile * fF = new TFile(filenameF,"READ");
+
+  TString vars[] = {"eta","phi","dphi","deta",""};
+  TString recos[] = {"track","segment","gen","",""};
+  TString recoNs[] = {"projected track","segment","gen","",""};
+  TString secVars[] = {"genmreco","","res","value","recomreco","",""};
+
+  TString pts[] = {"pteq3to5","ptgeq20","","",""};  
+  TString ptNs[] = {"p_{T} 3-5 GeV","p_{T} 20-30 GeV",""};
+
+
+        for(unsigned int iV = 0; vars[iV][0]; ++ iV){
+          for(unsigned int iS = 0; secVars[iS][0]; ++ iS){
+            Plotter * p = new Plotter();
+            
+            for(unsigned int iR = 0; recos[iR][0]; ++ iR)
+            for(unsigned int iP = 0; pts[iP][0]; ++ iP){
+              // cout << p <<" :: "<< iV <<" "<< iS << " "<< iR <<" "<< iP << " "<< TString::Format("%s_%s_real_muon_%s_%s_%s",prefix.Data(),pts[iP].Data(),recos[iR].Data(), secVars[iS].Data(),vars[iV].Data())<< endl;
+              TH1 *hf = 0;
+              fF->GetObject(TString::Format("%s_%s_real_muon_%s_%s_%s",prefix.Data(),pts[iP].Data(),recos[iR].Data(), secVars[iS].Data(),vars[iV].Data()),hf);
+              if(hf == 0) continue;
+              p->addHistLine(hf,TString::Format("%s, %s",recoNs[iR].Data(),ptNs[iP].Data()));        
+              cout << TString::Format("%s_%s_real_muon_%s_%s_%s",prefix.Data(),pts[iP].Data(),recos[iR].Data(), secVars[iS].Data(),vars[iV].Data()) <<" "<< hf->GetStdDev()<<endl;
+            }
+            // cout << iV <<" "<< iS << endl;
+            p->normalize();
+            p->rebin(4);
+            p->setYTitle("a.u.");
+            p->draw(false,TString::Format("%s_%s",secVars[iS].Data(),vars[iV].Data()));
+            
+          }
+        }    
   
 }
 
@@ -496,4 +634,81 @@ cout <<                TString::Format("%s_real_muon_%s_pt",prefix[iP].Data(), n
             p->draw(false,"mon");
     //
   
+    }
+
+
+
+    {
+        TFile * f = new TFile("trackMatchingTree_p8s384_plots.root","READ");
+
+      TString vars[] = {"resid_x","resid_y","resid_dx","resid_dy","pull_x","pull_y","pull_dx","pull_dy","resid_phi","resid_eta","resid_dphi","resid_deta",""};
+      int nRebinX[] = {1,1,1,1,1,1,1,1,1,1,1,4};
+      for(unsigned int iV = 0; vars[iV][0]; ++iV){
+
+        auto proc = [&](TString type) -> TH2*{
+          TH2 * hf = 0;
+          f->GetObject(TString::Format("p8s384_%s_%s_byPT",type.Data(),vars[iV].Data()),hf);
+          if(hf == 0) { cout << TString::Format("p8s384_%s_%s_byPT\n",type.Data(),vars[iV].Data()); return hf;}
+          hf->Rebin2D(2,1);
+          for(unsigned int iBY = 1; iBY <= hf->GetNbinsY(); ++iBY){
+            double norm = hf->Integral(0,-1,iBY,iBY);
+            for(unsigned int iBX = 1; iBX <= hf->GetNbinsX(); ++iBX){
+              double nBinC = hf->GetBinContent(iBX,iBY);
+              if(iBX == 1) nBinC+= hf->GetBinContent(0,iBY);
+              if(hf->GetNbinsX() == 1) nBinC+= hf->GetBinContent(iBX + 1,iBY);
+              hf->SetBinContent(iBX,iBY,nBinC/norm);
+          }
+        }
+
+        return hf;
+      };
+
+        TH2 * hf = proc("fake");
+        TH2 * hs = proc("signal");
+        if(hf == 0){ continue;}
+        if(hs == 0){  continue;}
+        Plotter a;
+        hf->SetTitle("Background ME0Muons");
+        hs->SetTitle("Signal ME0Muons");
+        TCanvas * c = new TCanvas();
+        hf->Draw("COLZ");
+        c->Print(TString::Format("fake_%s.pdf",vars[iV].Data()));
+        c = new TCanvas();
+        hs->Draw("COLZ");
+        c->Print(TString::Format("signal_%s.pdf",vars[iV].Data()));
+      }
+
+    }
+
+    {
+      double bins[] = {2,3,4,5,6,7,8,9,10,20,30};
+      int nBins = 10;
+      TFile * f = new TFile("trackMatchingTree_NU_p8s384_POGHP_plots.root","READ");
+      TString prefix = "p8s384_nodisamb_fake_muon";
+      TString var = "pt";
+      // TString cats[] = {"noCuts","dEta_lt0p08","eta_lt0p08_phi_lt0p05","eta_lt0p08_phi_lt0p05_dphi_lt0p0065","eta_lt0p08_phi_lt0p05_dphi_lt0p0065_tPtDP",""};
+      // TString catNs[] = {"All matches (loose 15x15 cm assoc)","#eta assoc","#eta,#phi assoc","#eta,#phi,#Delta#phi assoc","#eta,#phi(|p|),#Delta#phi(|p|) assoc"};
+      TString cats[] = {"eta_lt0p08_phi_lt0p05","eta_lt0p08_phi_lt0p05_dphi_lt0p0065","eta_lt0p08_phi_lt0p05_dphi_lt0p0065_tPtDP",""};
+      TString catNs[] = {"#eta,#phi assoc","#eta,#phi,#Delta#phi assoc","#eta,#phi(|p|),#Delta#phi(|p|) assoc"};
+
+      TH1 * hn = 0;
+      f->GetObject("p8s384_nEvtsForFakes",hn);
+      double norm = hn->GetBinContent(1);
+
+
+      Plotter * p = new Plotter;
+      for(unsigned int iC = 0; cats[iC][0]; ++iC){
+        TH1 * h = 0;
+        f->GetObject(TString::Format("%s_%s_%s",prefix.Data(),cats[iC].Data(),var.Data()),h);
+        if(h == 0) continue;
+        h->Scale(1./norm);
+        h = PlotTools::rebin(h,nBins,bins);
+        p->addHistLine(h,catNs[iC]);
+      }
+      p->setYTitle("N. bkg matches per event");
+      p->draw();
+      // p->drawRatio();
+
+
+
     }
