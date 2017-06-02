@@ -245,6 +245,34 @@ private:
 			}
 
 
+			if(typeC <= 2 ){
+				const auto* chamber = mgeom->chamber(muon.segments[0].first.first);
+				const ME0Segment * segment =  &*(segments.get(muon.segments[0].first.first).first + muon.segments[0].first.second);
+
+//				GlobalPoint glbpt = chamber->toGlobal(segment->localPosition());
+//				GlobalVector glbvec = chamber->toGlobal(segment->localDirection());
+//				double ptsolved = (0.3 * 3.8/2) * (.01)*glbpt.x()*glbpt.x() /(glbpt.y() -glbpt.x()*glbvec.y()/glbvec.x()   );
+				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),segment);
+				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+				double ptsolved = (0.073359 -0.02116*std::fabs(prop.cenEta))/std::fabs(prop.dPhi);
+
+//				cout << pt <<" "<< ptsolved<<" "<< glbpt.x()<<" "<< glbpt.y()<<" "<< glbvec.y()/glbvec.x()<<" "<<glbvec.x()<<" "<< glbvec.y()<<" "<< glbvec.z() << endl;
+				hists.getOrMake1D(TString::Format("%s_recoFitmGen_pt",ptstr.c_str()),";reco/gen",200,0,10)->Fill(std::abs(ptsolved)/pt);
+
+				auto stp = ME0Helper::getSimTrackProperties(mgeom,muon.simHits);
+//				glbpt = chamber->toGlobal(stp.localPosition());
+//				glbvec = chamber->toGlobal(stp.localDirection());
+//				ptsolved = (0.3 * 3.8/2) * (.01)*glbpt.x()*glbpt.x() /(glbpt.y() -glbpt.x()*glbvec.y()/glbvec.x()   );
+//				cout << pt <<" "<< ptsolved<<" "<< glbpt.x()<<" "<< glbpt.y()<<" "<< glbvec.y()/glbvec.x()<<" "<<glbvec.x()<<" "<< glbvec.y()<<" "<< glbvec.z() << endl;
+//				cout << segment->localPosition() <<" "<< stp.localPosition() << endl ;
+//				cout << chamber->position() <<" " <<  chamber->toGlobal(segment->localPosition()) <<" "<<chamber->toGlobal(stp.localPosition())<<endl;
+//				cout << stp.cenPhi <<" "<< stp.dPhi <<" "<< stp.cenGlb.x() <<" "<<stp.cenGlb.y() <<" "<<(stp.upGlb.y() -stp.dwnGlb.y())/(stp.upGlb.x() -stp.dwnGlb.x()) <<endl;
+				double ptsolved2 = (0.073359 -0.02116*std::fabs(stp.cenEta))/std::fabs(stp.dPhi);
+				hists.getOrMake1D(TString::Format("%s_simFitmGen_pt",ptstr.c_str()),";sim/gen",200,0,10)->Fill(std::abs(ptsolved2)/pt);
+				cout << pt <<" "<< ptsolved<< " "<< ptsolved2 <<endl;
+
+			}
+
 //
 //			if(catstr != "perfect"){
 //				int nRD = muon.segments.size() ? (segments.get(muon.segments[0].first.first).first + muon.segments[0].first.second)->nRecHits() : 0;

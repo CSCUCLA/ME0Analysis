@@ -712,3 +712,161 @@ cout <<                TString::Format("%s_real_muon_%s_pt",prefix[iP].Data(), n
 
 
     }
+    
+    
+    // testWorkingPoints
+    
+    
+    {
+
+      TString prefix = "p8s384";
+      TString vars[] = {"pt","p",""};
+      TString efftypes [] = {"incl","wp_std","wp_95","wp_90","",""  ,""};
+      TString efftypeNs[] = {"incl","standard wp","95% eff. wp","90% eff. wp","","",""};
+
+      //signal
+      TFile * sf = new TFile("trackMatchingTree_p8s384_POGHP_plots.root","READ");
+      //1D plots
+      for(unsigned int iV = 0; vars[iV][0]; ++iV){
+        Plotter * p = new Plotter;
+        for(unsigned int iT = 0; efftypes[iT][0]; ++iT){
+          TH1 * hd = 0;
+          sf->GetObject(TString::Format("%s_signal_%s_%s",prefix.Data(), efftypes[iT].Data(),vars[iV].Data()),hd);
+          if(hd == 0) continue;
+          p->addHist(hd,efftypeNs[iT]);
+        }
+        p->setYTitle("muon ID efficiency");
+        p->setMinMax(0.0,1.0);
+              p->setLegendPos(.5,0.6,0.9,0.8);
+              p->addText("2.0 < |#eta| < 2.8",0.54,0.55,0.04);
+        p->addText("200 PU",0.54,0.50,0.04);
+        p->drawRatio(0,"stack",true,true,TString::Format("compwp_signal_%s.pdf",vars[iV].Data()));
+
+      }
+
+      //2DPlots
+           gStyle->SetPaintTextFormat(".0f%%");
+      for(unsigned int iV = 0; vars[iV][0]; ++iV){
+        TH2 * hd = 0;
+        sf->GetObject(TString::Format("%s_signal_%s_%s_v_eta",prefix.Data(), efftypes[0].Data(),vars[iV].Data()),hd);
+        if(hd == 0) continue;
+        for(unsigned int iT = 1; efftypes[iT][0]; ++iT){
+          TH2 * hn = 0;
+          sf->GetObject(TString::Format("%s_signal_%s_%s_v_eta",prefix.Data(), efftypes[iT].Data(),vars[iV].Data()),hn);
+          if(hn == 0) continue;
+          hn = (TH2*)hn->Clone();
+          hn->Divide(hd);
+          hn->Scale(100);
+          TCanvas * c = new TCanvas(TString::Format("compwp_signal_%s_%s_v_eta",efftypes[iT].Data(),vars[iV].Data()),"",1024,600);
+          c->SetLeftMargin(.07);
+          c->SetRightMargin(.10);
+          hn->Draw("COLZTEXT");
+          hn->SetMaximum(100.);
+          hn->SetMinimum(0.);
+          if(iV == 1)hn->GetXaxis()->SetRangeUser(6,50);
+          hn->GetYaxis()->SetTitleOffset(0.55);
+          c->Print(TString::Format("compwp_signal_%s_%s_v_eta.pdf",efftypes[iT].Data(),vars[iV].Data()));
+        }
+
+      }
+      
+      //Background
+      TFile * ff = new TFile("trackMatchingTree_NU_p8s384_POGHP_plots.root","READ");
+      TH1 * hfn = 0;
+      ff->GetObject(TString::Format("%s_nEvtsForTestWP",prefix.Data()),hfn);
+      float numEvent = hfn->GetBinContent(1);
+      
+      //1D plots
+      for(unsigned int iV = 0; vars[iV][0]; ++iV){
+        Plotter * p = new Plotter;
+        Plotter * pI = new Plotter;
+        for(unsigned int iT = 1; efftypes[iT][0]; ++iT){
+          TH1 * hd = 0;
+          ff->GetObject(TString::Format("%s_bkg_%s_%s",prefix.Data(), efftypes[iT].Data(),vars[iV].Data()),hd);
+          if(hd == 0) continue;
+          TH1 * hdI = (TH1*)hd->Clone();
+          if(iT == 1){cout <<"\t"; for(unsigned int iB = 1; iB <= hd->GetNbinsX(); ++iB) cout << hd->GetBinLowEdge(iB) <<"-"<< hd->GetBinLowEdge(iB)+hd->GetBinWidth(iB)<<"\t";}
+          cout << endl;
+          for(unsigned int iB = 0; iB <= hd->GetNbinsX(); ++iB){
+            hdI->SetBinContent(iB, hd->Integral(iB,-1));
+            hdI->SetBinError(iB, TMath::Sqrt(hd->Integral(iB,-1)));
+          }
+          hdI->Scale(1./numEvent);
+          pI->addHist(hdI,efftypeNs[iT]);
+          
+          hd->Scale(1./numEvent);
+          p->addHist(hd,efftypeNs[iT]);
+          cout << efftypeNs[iT]<<"\t";
+          for(unsigned int iB = 1; iB < hd->GetNbinsX(); ++iB) cout << hd->GetBinContent(iB) <<"\t";
+           cout << hd->GetBinContent(hd->GetNbinsX())+hd->GetBinContent(hd->GetNbinsX()+1) <<"\n";
+          
+        }
+        p->setYTitle("<N of bkg matches> per BX / bin");
+        if(iV == 0){
+          p->setMinMax(0.0001,0.4);
+          p->setLegendPos(.5,0.7,0.9,0.9);       
+          p->addText("2.0 < |#eta| < 2.8",0.54,0.65,0.04);
+          p->addText("200 PU",0.54,0.60,0.04);
+        } else {
+          p->setMinMax(0.001,0.3);
+          p->setLegendPos(.6,0.77,0.9,0.92); 
+          p->addText("2.0 < |#eta| < 2.8",0.63,0.73,0.04);
+          p->addText("200 PU",0.63,0.68,0.04);         
+        }
+
+        TCanvas * cp = p->draw(false,TString::Format("compwp_bkg_%s.pdf",vars[iV].Data()));        
+        cp->SetLogy();
+        cp->Print(TString::Format("compwp_bkg_%s.pdf",vars[iV].Data()));
+        
+        pI->setUnderflow(false);
+        pI->setOverflow(false);
+        pI->setYTitle("<N of bkg matches> per BX (#geq bin low edge)");
+        if(iV == 0){
+          pI->setMinMax(0.0001,0.4);
+          pI->setLegendPos(.5,0.7,0.9,0.9);       
+          pI->addText("2.0 < |#eta| < 2.8",0.54,0.65,0.04);
+          pI->addText("200 PU",0.54,0.60,0.04);
+          pI->setAxisTextSize(0.05);
+        } else {
+          pI->setMinMax(0.001,0.4);
+          pI->setLegendPos(.6,0.77,0.9,0.92); 
+          pI->addText("2.0 < |#eta| < 2.8",0.63,0.73,0.04);
+          pI->addText("200 PU",0.63,0.68,0.04);         
+          pI->setAxisTextSize(0.05);
+        }
+        TCanvas * ci = pI->draw(false,TString::Format("compwp_bkg_%s_int.pdf",vars[iV].Data()));
+        ci->SetLogy();
+        ci->Print(TString::Format("compwp_bkg_%s_int.pdf",vars[iV].Data()));
+        
+      
+      }
+      
+      //2DPlots
+      gStyle->SetPaintTextFormat(".2f%");
+      for(unsigned int iV = 0; vars[iV][0]; ++iV){
+        for(unsigned int iT = 1; efftypes[iT][0]; ++iT){
+          TH2 * hn = 0;
+          ff->GetObject(TString::Format("%s_bkg_%s_%s_v_eta",prefix.Data(), efftypes[iT].Data(),vars[iV].Data()),hn);
+          if(hn == 0) continue;
+          hn->Scale(1./numEvent);
+          hn->Scale(1./.01);
+          TCanvas * c = new TCanvas(TString::Format("compwp_bkg_%s_%s_v_eta",efftypes[iT].Data(),vars[iV].Data()),"",1024,600);
+          c->SetLeftMargin(.07);
+          c->SetRightMargin(.105);
+          hn->Draw("COLZTEXT");
+          if(iV == 1)hn->GetXaxis()->SetRangeUser(6,50);
+          hn->GetYaxis()->SetTitleOffset(0.55);
+      	  TLatex latex;
+      	  latex.SetNDC();
+          latex.SetTextSize(0.04);
+          latex.DrawLatex(0.953,0.08,"x10^{-2}");
+          
+          c->Print(TString::Format("compwp_bkg_%s_%s_v_eta.pdf",efftypes[iT].Data(),vars[iV].Data()));
+        }
+
+      }
+  
+        
+
+      
+    }

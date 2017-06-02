@@ -11,6 +11,11 @@
 using namespace std;
 double deltaPhi(const float phi1, const float phi2) {return TVector2::Phi_mpi_pi(phi1 - phi2);}
 double deltaR2(const float  eta1, float phi1,  const float eta2, float phi2) {return TVector2::Phi_mpi_pi(phi1 - phi2)*TVector2::Phi_mpi_pi(phi1 - phi2)  + (eta1-eta2)*(eta1-eta2);}
+float getP(float pt, float eta, float phi){
+	TVector3 mom;mom.SetXYZ(pt*TMath::Cos(phi), pt*TMath::Sin(phi), pt*sinh(eta));
+	return  mom.Mag();
+};
+
 
 class Analyzer : public BaseTupleAnalyzer{
 public:
@@ -318,7 +323,7 @@ bool isAMatch(int idx, bool doExtra = false){
 
 	  auto makePlotGrp= [&] (TString name,TString title,TString unit, int nBins,float varMax,  float value, float error) {
 		    plotter.getOrMake1D(TString::Format("%s_resid_%s",prefix.Data(),name.Data())    ,TString::Format(";track - segment %s %s;a.u."      , title.Data(), unit.Data()),nBins,-1*varMax ,varMax)->Fill(value);
-		    plotter.getOrMake1D(TString::Format("%s_abs_resid_%s",prefix.Data(),name.Data()),TString::Format(";|track - segment %s| %s;a.u."    , title.Data()),nBins,0   ,varMax)->Fill(std::fabs(value));
+		    plotter.getOrMake1D(TString::Format("%s_abs_resid_%s",prefix.Data(),name.Data()),TString::Format(";|track - segment %s| %s;a.u."    , title.Data(),unit.Data()),nBins,0   ,varMax)->Fill(std::fabs(value));
 		    plotter.getOrMake2D(TString::Format("%s_resid_%s_byPT",prefix.Data(),name.Data())    ,TString::Format(";track - segment %s %s; track p_{T}"      , title.Data(), unit.Data()),nBins,-1*varMax ,varMax, nBinsX,xBins)->Fill(value,me0Muon_pt->at(idx));
 
 		    if(error < 0) return;
@@ -476,6 +481,10 @@ bool isAMatch(int idx, bool doExtra = false){
 		    plotter.getOrMake1D(TString::Format("%s_real_muon_incl_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(pt);
 		    plotter.getOrMake1D(TString::Format("%s_real_muon_incl_p",prefix.Data()),";true muon |p| [GeV]; a.u.",30,0,150)->
 		    		Fill(getP(simMuon_pt->at(iM),simMuon_eta->at(iM),simMuon_phi->at(iM)));
+
+		    plotter.getOrMake2D(TString::Format("%s_real_muon_incl_p_v_eta",prefix.Data()),";true muon |p| [GeV];true muon |#eta|",150,0,150,4,1.8,2.8)->Fill(getP(simMuon_pt->at(iM),simMuon_eta->at(iM),simMuon_phi->at(iM)),std::fabs(simMuon_eta->at(iM)));
+		    plotter.getOrMake2D(TString::Format("%s_real_muon_incl_pt_v_eta",prefix.Data()),";true muon p_{T} [GeV];true muon |#eta|",60,0,30,4,1.8,2.8)->Fill(simMuon_pt->at(iM),std::fabs(simMuon_eta->at(iM)));
+
 		    if(pt >= 3) plotter.getOrMake1D(TString::Format("%s_real_muon_incl_eta",prefix.Data()),";true muon |#eta|; a.u.",12,1.8,3.0)->Fill(std::fabs(simMuon_eta->at(iM)));
 		    bool goodTrack   = simMuon_trackIDX->at(iM) >= 0;
 		    bool goodSegment = simMuon_segmentQuality->at(iM) != 3;
@@ -514,8 +523,13 @@ bool isAMatch(int idx, bool doExtra = false){
 
 		    }
 
+		    if(goodNearSegment >= 0){
+				double ptsolved = (0.073359 -0.02116*std::fabs(me0Muon_segment_eta->at(goodNearSegment)))/std::fabs(me0Muon_segment_dphi->at(goodNearSegment));
+			    plotter.getOrMake1D(TString::Format("%s_real_muon_goodSegmentAndTrack_solvedPToPT",prefix.Data()),";segment p_{T} / true muon p_{T}; a.u.",100,0,10)->Fill(ptsolved/pt);
 
-
+		    }
+		    if(goodSegment)   plotter.getOrMake2D(TString::Format("%s_real_muon_goodSegment_pt_v_eta",prefix.Data()),";true muon p_{T} [GeV];true muon |#eta|",60,0,30,4,1.8,2.8)->Fill(simMuon_pt->at(iM),std::fabs(simMuon_eta->at(iM)));
+		    if(goodSegment)   plotter.getOrMake2D(TString::Format("%s_real_muon_goodSegment_p_v_eta",prefix.Data()),";true muon |p| [GeV];true muon |#eta|",150,0,150,4,1.8,2.8)->Fill(getP(simMuon_pt->at(iM),simMuon_eta->at(iM),simMuon_phi->at(iM)),std::fabs(simMuon_eta->at(iM)));
 		    if(goodSegment)   plotter.getOrMake1D(TString::Format("%s_real_muon_goodSegment_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(pt);
 		    if(goodSegment)   plotter.getOrMake1D(TString::Format("%s_real_muon_goodSegment_p",prefix.Data()),";true muon |p| [GeV]; a.u.",30,0,150)->
 		    		Fill(getP(simMuon_pt->at(iM),simMuon_eta->at(iM),simMuon_phi->at(iM)));
@@ -997,49 +1011,89 @@ bool isAMatch(int idx, bool doExtra = false){
 	  }
   }
 
-  void quickTest(TString prefix) {
-	  int nGMuons = 0;
-	  for(unsigned int iM = 0; iM < simMuon_eta->size(); ++iM){
-		  if(simMuon_pt->at(iM) < 2) continue;
-		  if(simMuon_trackIDX->at(iM) < 0 ) continue;
-		  if(std::fabs(simMuon_track_pt->at(iM)/simMuon_pt->at(iM) - 1) > 0.2) continue;
-		  nGMuons++;
-		  plotter.getOrMake1D(TString::Format("%s_real_muon_incl_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(simMuon_pt->at(iM));
-		  bool found = false;
-		  for(int iRM : goodMatches ) {
-			  if(me0Muon_trackIDX->at(iRM) != simMuon_trackIDX->at(iM) ) continue;
-			  if(me0Muon_segIDX->at(iRM) != simMuon_segmentIDX->at(iM) ) continue;
-			  found = true;
+  void testWorkingPoints(TString prefix) {
+	  static float pBins[] = {0,1,2,3,4,5,6,7,8,9,10,15,20,30,40,50};
+	  static const int nPBins = 15;
+
+	  static float ptBins[] = {0,1,2,3,4,5,6,7,8,9,10,12,15,20};
+	  static const int nPtBins = 13;
+
+	  static float etaBins[] = {1.8,2.0,2.2,2.4,2.6,2.8,3.0};
+	  static const int nEtaBins = 6;
+
+	  auto passMatch = [&](int idx, double phiC, double etaC,double dPhiC)-> bool{
+		  if(me0Muon_pt->at(idx) < 1) return false;
+		  const double dPhi = std::fabs(me0Muon_track_dphi->at(idx) - me0Muon_segment_dphi->at(idx));
+		  const double phi  = std::fabs(me0Muon_track_phi->at(idx) - me0Muon_segment_phi->at(idx));
+		  const double eta  = std::fabs(me0Muon_track_eta->at(idx) - me0Muon_segment_eta->at(idx));
+		  const double dPhiS2C  = std::min(std::max(alphaDPhi2SC/me0Muon_p->at(idx),maxDPhi2SC),dPhiC);
+		  const double phiS2C  = std::min(std::max(alphaPhi2SC/me0Muon_p->at(idx),maxPhi2SC),phiC);
+		  return eta < etaC && phi < phiC && dPhi < dPhiC && dPhi < dPhiS2C && phi < phiS2C ;
+	  };
+
+	  auto fillSigPlots = [&] (TString type, TString titleType, float pt,float mom,float absEta) {
+		    plotter.getOrMake1D(TString::Format("%s_%s_pt",prefix.Data(),type.Data()),TString::Format(";%s p_{T} [GeV]; muon ID efficiency",titleType.Data()),nPtBins,ptBins)->Fill(pt);
+		    plotter.getOrMake1D(TString::Format("%s_%s_p",prefix.Data(),type.Data()),TString::Format(";%s |p| [GeV]; muon ID efficiency",titleType.Data()),nPBins,pBins)->Fill(mom);
+		    plotter.getOrMake2D(TString::Format("%s_%s_pt_v_eta",prefix.Data(),type.Data()),TString::Format(";%s p_{T} [GeV]; %s |#eta|",titleType.Data(),titleType.Data()),nPtBins,ptBins,nEtaBins,etaBins)->Fill(pt,absEta);
+		    plotter.getOrMake2D(TString::Format("%s_%s_p_v_eta",prefix.Data(),type.Data()),TString::Format(";%s |p| [GeV]; %s |#eta|",titleType.Data(),titleType.Data()),nPBins,pBins,nEtaBins,etaBins)->Fill(mom,absEta);
+
+	  };
+
+
+	  //eff
+	  int nSM = 0;
+	  for(unsigned int iM = 0; iM < simMuon_pt->size(); ++iM ){
+		  const float pt  = simMuon_pt->at(iM);
+		  const float eta = simMuon_eta->at(iM);
+		  const float absEta = std::fabs(eta);
+		  const float mom = getP(pt,eta,simMuon_phi->at(iM));
+
+
+		  int  matchIDX = -1;
+		  for(unsigned int iRM = 0; iRM < me0Muon_pt->size(); ++iRM){
+			  if(me0Muon_segIDX->at(iRM) != simMuon_segmentIDX->at(iM)) continue;
+			  if(me0Muon_trackIDX->at(iRM) != simMuon_trackIDX->at(iM)) continue;
+			  matchIDX = iRM;
 			  break;
+
 		  }
-		  if(found) plotter.getOrMake1D(TString::Format("%s_real_muon_good_pt",prefix.Data()),";true muon p_{T} [GeV]; a.u.",60,0,30)->Fill(simMuon_pt->at(iM));
+
+		  fillSigPlots("signal_incl","true muon",pt,mom,absEta);
+		  if(matchIDX < 0) continue;
+		  if(isAMatch(matchIDX,true)) fillSigPlots("signal_wp_std","true muon",pt,mom,absEta);
+		  if(passMatch(matchIDX,0.032202,0.0483636,0.00412121)) fillSigPlots("signal_wp_95","true muon",pt,mom,absEta);
+		  if(passMatch(matchIDX,0.0241212,0.042303,0.00381818)) fillSigPlots("signal_wp_90","true muon",pt,mom,absEta);
 	  }
 
-	  for(int iRM : goodMatches ) {
-		  if(me0Muon_pt->at(iRM) < 2 ) continue;
-		  if(me0Muon_truthType->at(iRM) == 0 ) continue;
-		  plotter.getOrMake1D(TString::Format("%s_fake_muon_pt",prefix.Data()),";fake muon p_{T} [GeV]; a.u.",2,2,4)->Fill(std::min(me0Muon_pt->at(iRM),float(3.9)));
-		  if(nGMuons == 2) plotter.getOrMake1D(TString::Format("%s_nG2_fake_muon_pt",prefix.Data()),";fake muon p_{T} [GeV]; a.u.",2,2,4)->Fill(std::min(me0Muon_pt->at(iRM),float(3.9)) );
+	  //bkg
+	  if(isPureBKG || nSM==2){
+		  plotter.getOrMake1D(TString::Format("%s_nEvtsForTestWP",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
+		  for(unsigned int idx = 0; idx < me0Muon_p->size(); ++idx){
+			  if((me0Muon_pt->at(idx) < 2)) continue;
+			  if(me0Muon_truthType->at(idx) == 0) continue;
+			  const float pt  = me0Muon_pt->at(idx);
+			  const float eta = me0Muon_eta->at(idx);
+			  const float absEta = std::fabs(eta);
+			  const float mom = me0Muon_p->at(idx);
+			  if(isAMatch(idx,true)) fillSigPlots("bkg_wp_std","pixel track",pt,mom,absEta);
+			  if(passMatch(idx,0.032202,0.0483636,0.00412121)) fillSigPlots("bkg_wp_95","pixel track",pt,mom,absEta);
+			  if(passMatch(idx,0.0241212,0.042303,0.00381818)) fillSigPlots("bkg_wp_90","pixel track",pt,mom,absEta);
+		  }
+
 	  }
-
-	  plotter.getOrMake1D(TString::Format("%s_nEvent",prefix.Data()),";nEvents",2,0,2)->Fill(.5);
-	  if(nGMuons == 2) plotter.getOrMake1D(TString::Format("%s_nEvent",prefix.Data()),";nEvents",2,0,2)->Fill(1.5);
-
-
-
-
-
   }
+
+
 
   virtual void runAEvent() {
 	  doMatching(false);
-	  oneDCutPlots(glbPrefix);
-	  effCuts(glbPrefix);
-	  makeAnnaPlot(glbPrefix);
-	  makeResPlot(glbPrefix);
+//	  oneDCutPlots(glbPrefix);
+//	  effCuts(glbPrefix);
+//	  makeAnnaPlot(glbPrefix);
+//	  makeResPlot(glbPrefix);
 //	  getNPossibleMatches(glbPrefix);
 //	  getBKGComp(glbPrefix);
-
+	  testWorkingPoints(glbPrefix);
   }
 
   void write(TString fileName){ plotter.write(fileName);}

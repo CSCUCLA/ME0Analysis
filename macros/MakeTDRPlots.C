@@ -182,7 +182,7 @@ public:
 	    p->addHistLine(hr3 ,"signal muons, p_{T} 3-5 GeV",colors[1],syles[1],4);
 	    p->addHistLine(hr5 ,"signal muons, p_{T} 10-15 GeV",colors[2],syles[2],4);
 	    p->addHistLine(hr20,"signal muons, p_{T} 20-30 GeV",colors[3],syles[3],4);
-	    p->rebin(4);
+	    p->rebin(1);
 	    p->normalize();
 
 	    p->setXTitle("sim -#it{q}#times#Delta#phi");

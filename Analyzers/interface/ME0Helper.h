@@ -96,6 +96,10 @@ struct SimHitProperties{
 	LocalVector theLocalDirection;
 	AlgebraicSymMatrix theCovMatrix = AlgebraicSymMatrix(4);
 
+	GlobalPoint upGlb;
+	GlobalPoint dwnGlb;
+	GlobalPoint cenGlb;
+
 };
 SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vector<const PSimHit* >& simHits);
 

@@ -365,7 +365,7 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
             double b =  (z2*v1 - z1*v2)/(z2 - z1);
             return m*zc+b;
           };
-          const double zc = up.z() > 0 ? zValue : -1*zValue;
+          const double zc = up.z() *zValue < 0 ? -1*zValue : zValue;
           double xc = getCenter(up.x(),down.x(),up.z(),down.z(),zc);
           double yc = getCenter(up.y(),down.y(),up.z(),down.z(),zc);
           return GlobalPoint(xc,yc,zc);
@@ -393,6 +393,12 @@ SimHitProperties getSimTrackProperties( const ME0Geometry* mgeom, const std::vec
         prop.theCovMatrix(2,2) = .00001;
         prop.theCovMatrix(3,3) = .00001;
         prop.theCovMatrix(4,4) = .00001;
+
+        prop.upGlb = upPt;
+		prop.dwnGlb =downPt;
+		prop.cenGlb =centerPt;
+
+
     }
     return prop;
 }
