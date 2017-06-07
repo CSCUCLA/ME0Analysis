@@ -156,8 +156,8 @@ private:
 
 		  for(unsigned int iM = 0; iM < simMuons.size(); ++iM){
 				const auto& muon = simMuons[iM];
-				const float absETA = TMath::Abs(muon.trPart->eta());
-				if(absETA > 2.8 || absETA < 2.0 ) continue;
+//				const float absETA = TMath::Abs(muon.trPart->eta());
+//				if(absETA > 2.8 || absETA < 2.0 ) continue;
 
 			    tree.fillMulti(simMuon_pt             ,float(muon.trPart->pt()));
 			    tree.fillMulti(simMuon_eta            ,float(muon.trPart->eta()));

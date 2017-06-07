@@ -25,7 +25,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 
-process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D13Reco_cff')
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
 # from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023tilted
@@ -37,8 +37,8 @@ process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
-def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
-    from SimMuon.GEMDigitizer.muonME0NewGeoDigis_cfi import simMuonME0NewGeoDigis
+def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), minSegmentLayers = 4, usePads = False) :
+    from SimMuon.GEMDigitizer.muonME0ReDigis_cfi import simMuonME0ReDigis
     
     digi_name          = name + "Digis"
     setattr(process.RandomNumberGeneratorService, digi_name, cms.PSet(
@@ -46,13 +46,12 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
         initialSeed = cms.untracked.uint32(7654326)
     ))
     
-    setattr( process, digi_name, simMuonME0NewGeoDigis.clone(numberOfSrips=cms.uint32(nStrips), 
-                                                             numberOfPartitions =cms.uint32(nPartitions),
-                                                             neutronAcceptance  =cms.double(neutBKGAcc),
-                                                             layerReadout = layerRO))
+    setattr( process, digi_name, simMuonME0ReDigis.clone(useBuiltinGeo = cms.bool(False),numberOfStrips=cms.uint32(nStrips), 
+                                                            numberOfPartitions =cms.uint32(nPartitions),
+                                                            neutronAcceptance  =cms.double(neutBKGAcc),
+                                                            layerReadout = layerRO,usePadsForDefaultGeo =cms.bool(usePads)))
     seq += getattr(process, digi_name)    
     
-    if onlyDigis : return
     
     rh_name          = name + "RecHits"
     setattr( process, rh_name, process.me0RecHits.clone(me0DigiLabel = cms.InputTag(digi_name)))
@@ -63,7 +62,7 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
     algo_psets = cms.VPSet(cms.PSet(
         algo_name = cms.string('ME0SegmentAlgorithm'),
         algo_pset = cms.PSet(
-            ME0Debug = cms.untracked.bool(True),
+            ME0Debug = cms.untracked.bool(True),            
             dEtaChainBoxMax = cms.double(0.05),
             dPhiChainBoxMax = cms.double(0.02),
             dTimeChainBoxMax = cms.double(1.5),
@@ -80,24 +79,25 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
             algo_pset = cms.PSet(
                 allowWideSegments = cms.bool(True),
                 doCollisions = cms.bool(True),
+                requireCentralBX = cms.bool(True),
                 maxChi2Additional = cms.double(100.0),
                 maxChi2Prune = cms.double(50),
                 maxChi2GoodSeg = cms.double(50),
                 maxPhiSeeds = cms.double(1.2*0.35/nStrips),
                 maxPhiAdditional = cms.double(1.2*0.35/nStrips),
                 maxETASeeds = cms.double(0.8/nPartitions),
-                maxTOFDiff = cms.double(timeWindow),
+                maxTOFDiff = cms.double(25),
                 minNumberOfHits = cms.uint32(minSegmentLayers),
             )
         )),
-    algo_type = cms.int32(2 if doRUSegmentAlgo else 1),
+    algo_type = cms.int32(2),
     me0RecHitLabel = cms.InputTag(rh_name)
     ))
     seq += getattr(process, seg_name)
     
     
-def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, onlyDigis = False) :
-    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,timeWindow,onlyDigis)
+def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), minSegmentLayers = 4, usePads = False) :
+    ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,minSegmentLayers,usePads)
     anName = name + "Analysis"
     setattr( process, anName, cms.EDAnalyzer("ME0SegmentTreeMaker",
         outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
@@ -105,15 +105,16 @@ def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 
         segmentCollection = cms.string(name+"Segments"),
         recHitCollection = cms.string(name+"RecHits"),
         runName           = cms.untracked.string(name+"_")
-        )
+        )        
     )
     seq += getattr(process, anName)
+    print re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)
 
 
 process.newdigiseq  = cms.Sequence()
 
-doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
-doAnalysis(process,process.newdigiseq,"p8s192" ,192,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4)
+doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),4)
+doAnalysis(process,process.newdigiseq,"p8s192" ,192,8 ,2.0,cms.vint32(1,1,1,1,1,1),4,True)
 
 
 process.p = cms.Path(process.newdigiseq)
