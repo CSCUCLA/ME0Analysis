@@ -4,6 +4,7 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TString.h"
+#include "TLine.h"
 #include "HistoPlotting/include/Plotter.h"
 #include "HistoPlotting/include/PlotTools.h"
 #include <iostream>
@@ -238,10 +239,14 @@ public:
           p->setCMSLumi(0, "14 TeV", "Simulation preliminary",1.2 );
           p->setLegendPos(.13,0.78,0.65,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.15,0.74,0.04);
+          p->addText("|#Delta#phi| < 0.013",0.15,0.70,0.04);
 
 	      TCanvas * c = p->draw(false,"neutronSegmentMultiplicity.pdf");
 	      p->yAxis()->SetRangeUser(0.004,400);
 	      c->SetLogy();
+
+
+
 	      c->Print("neutronSegmentMultiplicity.pdf");
   }
 
@@ -267,6 +272,7 @@ public:
 			  TH1 * h;
 			  f->GetObject(TString::Format("%s___fake%s%s",digi.Data(),dPhis[iD].Data(),vars[iV].Data()),h);
 			  if(h == 0) continue;
+			  h = (TH1*)h->Clone();
 			  h->Rebin(10);
 			  h->Scale(1./nEvents);
 			  h->SetYTitle("<N. of bkg. segments> per BX / 0.1");
@@ -308,6 +314,7 @@ public:
 		  TH1 *hf = 0;
 		  fF->GetObject(histName,hf);
 		  if(hf==0) cout << histName<< endl;
+		  hf = (TH1*)hf->Clone();
 		  // hf = hf->Rebin(nBins,"",bins);
 		  PlotTools::toOverflow(hf);
 		  PlotTools::toUnderflow(hf);
@@ -344,6 +351,125 @@ public:
 	  fF->Close();
   }
 
+  void makeTotalBkgPlots(TString trackFile, TString segFile, TString matchFile) {
+	  Plotter  * p = new Plotter;
+
+
+	  //matches
+	  if(false){
+		  TString digi = "p8s384";
+		  TFile * ff = new TFile(matchFile,"READ");
+//		  TString pts[] = {"ptgeq2","ptgeq3","ptgeq5","",""};
+//		  TString ptNs[] = {"match p_{T} > 2 GeV","match p_{T} > 3 GeV","match p_{T} > 5 GeV",""};
+//		  TString pts[] = {"ptgeq5","ptgeq3","ptgeq2","",""};
+//		  TString ptNs[] = {"match p_{T} > 5 GeV","match p_{T} > 3 GeV","match p_{T} > 2 GeV",""};
+		  TString pts[] = {"ptgeq2","",""};
+		  TString ptNs[] = {"match p_{T} > 2 GeV",""};
+
+
+		  TH1 * hn = 0;
+		  ff->GetObject(TString::Format("%s_nEvtsForFakesA",digi.Data()),hn);
+		  float nEvents = hn->GetBinContent(1);
+		  for(unsigned int iP = 0; pts[iP][0]; ++iP){
+			  TH1 * ho;
+			  ff->GetObject(TString::Format("%s_fake_muon_%s_passME0Muon_eta",prefix.Data(),pts[iP].Data()),ho);
+			  if(ho == 0) continue;
+			  TH1 * h = new TH1F(TString::Format("rangeMatch_%s",pts[iP].Data()),"background object p_{T} [GeV]",10,1.9,2.9);
+				  for(unsigned int iB = 1; iB <= ho->GetNbinsX(); ++iB){
+					  double binLow = ho->GetBinLowEdge(iB);
+					  if(binLow < 1.9) continue;
+					  if(binLow >= 2.9) continue;
+					  h->Fill(ho->GetBinCenter(iB),ho->GetBinContent(iB));
+				  }
+//			  h->Rebin(10);
+			  h->Scale(1./nEvents);
+			  p->addHistLine(h,ptNs[iP],StyleInfo::getLineColor(iP),1);
+		  }
+
+		  ff->Close();
+	  }
+
+	  //segments
+	  {
+		  TString digi = "p8s384";
+		  TFile * ff = new TFile(segFile,"READ");
+//		  TString pts[] = {"fake_seg","fake_pt_gt2_seg","fake_pt_gt3_seg","fake_pt_gt5_seg",""};
+//		  TString ptNs[] = {"inclusive segments","segment p_{T} > 2 GeV","segment p_{T} > 3 GeV","segment p_{T} > 5 GeV",""};
+		  TString pts[] = {"fake_pt_gt5_seg","fake_pt_gt3_seg","fake_pt_gt2_seg","fake_seg",""};
+		  TString ptNs[] = {"segment p_{T} > 5 GeV","segment p_{T} > 3 GeV","segment p_{T} > 2 GeV","inclusive segments",""};
+//		  TString pts[] = {"fake_pt_gt2_seg","fake_seg",""};
+//		  TString ptNs[] = {"segment p_{T} > 2 GeV","inclusive segments",""};
+
+
+		  TH1 * hn = 0;
+		  ff->GetObject(TString::Format("%s___fake_nEvents",digi.Data()),hn);
+		  float nEvents = hn->GetBinContent(1);
+		  for(unsigned int iP = 0; pts[iP][0]; ++iP){
+			  TH1 * ho;
+			  ff->GetObject(TString::Format("%s___%s_eta",digi.Data(),pts[iP].Data()),ho);
+			  if(ho == 0) continue;
+			  TH1 * h = new TH1F(TString::Format("rangeSegs_%s",pts[iP].Data()),"background object p_{T} [GeV]",10,1.9,2.9);
+				  for(unsigned int iB = 1; iB <= ho->GetNbinsX(); ++iB){
+					  double binLow = ho->GetBinLowEdge(iB);
+					  if(binLow < 1.9) continue;
+					  if(binLow >= 2.9) continue;
+					  h->Fill(ho->GetBinCenter(iB),ho->GetBinContent(iB));
+				  }
+			  h->Scale(1./nEvents);
+			  p->addHistLine(h,ptNs[iP],StyleInfo::getLineColor(iP),9);
+		  }
+
+		  ff->Close();
+	  }
+
+	  //tracks
+	  if(false){
+		  TFile * ff = new TFile(trackFile,"READ");
+//		  TString pts[] = {"gt0p5","gt2p0","gt3p0","gt5p0","",""};
+//		  TString ptNs[] = {"track p_{T} > 0.5 GeV","track p_{T} > 2 GeV","track p_{T} > 3 GeV","track p_{T} > 5 GeV",""};
+//		  TString pts[] = {"gt5p0","gt3p0","gt2p0","gt0p5","",""};
+//		  TString ptNs[] = {"track p_{T} > 5 GeV","track p_{T} > 3 GeV","track p_{T} > 2 GeV","track p_{T} > 0.5 GeV",""};
+		  TString pts[] = {"gt2p0","gt0p5","",""};
+		  TString ptNs[] = {"track p_{T} > 2 GeV","track p_{T} > 0.5 GeV",""};
+
+
+		  TH1 * hn = 0;
+		  ff->GetObject(TString::Format("nEvents"),hn);
+		  float nEvents = hn->GetBinContent(1);
+		  for(unsigned int iP = 0; pts[iP][0]; ++iP){
+			  TH1 * ho;
+			  ff->GetObject(TString::Format("tracks_%s_abseta",pts[iP].Data()),ho);
+			  if(ho == 0) continue;
+			  TH1 * h = new TH1F(TString::Format("rangeTracks_%s",pts[iP].Data()),"background object p_{T} [GeV]",10,1.9,2.9);
+			  for(unsigned int iB = 1; iB <= ho->GetNbinsX(); ++iB){
+				  double binLow = ho->GetBinLowEdge(iB);
+				  if(binLow < 1.9) continue;
+				  if(binLow >= 2.9) continue;
+				  h->Fill(ho->GetBinCenter(iB),ho->GetBinContent(iB));
+			  }
+			  h->Scale(1./nEvents);
+			  p->addHistLine(h,ptNs[iP],StyleInfo::getLineColor(iP),7);
+		  }
+		  ff->Close();
+	  }
+
+
+	  p->setCanvasSize(1024,726);
+	  p->setMargins(0.08,.12,.12,.05);
+	  p->setAxisTextSize(0);
+	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+	  p->setLegendPos(.14,0.75,0.92,0.89);
+	  p->setLegendNColumns(3);
+//	  p->addText("2.0 < |#eta| < 2.8",0.15,0.71,0.03);
+	  p->setMinMax(0.001,10000);
+	  p->setYTitle("<N. of bkg. objects> per BX / 0.1");
+	  p->setXTitle("background object |#eta|");
+	  TCanvas * c = p->draw(false,"backgroundRateThreeLevels_eta.pdf");
+	  c->SetLogy();
+	  c->Print("backgroundRateThreeLevels_eta.pdf");
+
+  }
+
 
 
 
@@ -354,10 +480,14 @@ public:
 void MakeTDRPlots(){
 	TH1::AddDirectory(false);
 	Analyzer * a = new Analyzer();
-	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_p8s384_plots.root");
-	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
-	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
+//	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_p8s384_plots.root");
+//	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
+//	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
 	a->makeNeutronPlot();
-	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_p8s384.root");
-	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");
+//	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root");
+//	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");
+//	a->makeTotalBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/trackDensity_ForTDR_std.root",
+//			"/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root",
+//			"/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");
+
 }
