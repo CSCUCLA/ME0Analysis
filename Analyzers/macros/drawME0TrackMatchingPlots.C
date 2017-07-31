@@ -89,12 +89,12 @@
 
 //Effplot
 {
-  TString filename = "trackMatchingTree_p8s384_POGHP_plots.root";
+  TString filename = "zmumu_911_std_plots.root";
   TString prefix = "p8s384";
   TFile * f = new TFile(filename,"READ");
 
   TString extr = "";
-  TString var = "p";
+  TString var = "pt";
     // TString efftypes [] = {"incl","goodTrack","goodSegment","goodTrackAndSegment","goodME0Muon",""};
         // TString efftypes [] = {"incl","goodSegment"  ,"goodSegmentAndGoodPT","goodME0Muon",""};
         // TString efftypeNs[] = {"incl","segment reco.","+ gen-matched pixel track (20% p_{T} match)","+ exclusive track-segment match",""};
@@ -116,15 +116,19 @@
   // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
   // int nBins = 10;
   
-  double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
-  int nBins = 10;
+  // double bins[] = {0,1,2,3,4,5,10,15,20,25,30};
+  // int nBins = 10;
   
-    p = new Plotter;
+  double bins[] = {0,1,2,3,5,10,20,30};
+  int nBins = 7;
+  
+    Plotter * p = new Plotter;
         for(unsigned int iT = 0; efftypes[iT][0]; ++iT){
           TH1 * hd = 0;
           f->GetObject(TString::Format("%s_real_muon_%s_%s",prefix.Data(), efftypes[iT].Data(),var.Data()),hd);
-          hd = hd->Rebin(3);
-          // hd = hd->Rebin(nBins,"",bins);
+          // hd = hd->Rebin(3);
+                    // hd = hd->Rebin(3);
+          hd = hd->Rebin(nBins,"",bins);
           p->addHist(hd,efftypeNs[iT]);
         }
         
@@ -721,11 +725,13 @@ cout <<                TString::Format("%s_real_muon_%s_pt",prefix[iP].Data(), n
 
       TString prefix = "p8s384";
       TString vars[] = {"pt","p",""};
-      TString efftypes [] = {"incl","wp_std","wp_95","wp_90","",""  ,""};
-      TString efftypeNs[] = {"incl","standard wp","95% eff. wp","90% eff. wp","","",""};
+      // TString efftypes [] = {"incl","wp_std","wp_95","wp_90","",""  ,""};
+      // TString efftypeNs[] = {"incl","standard wp","loose wp","tight wp","","",""};
+      TString efftypes [] = {"incl","wp_95","wp_90","",""  ,""};
+      TString efftypeNs[] = {"incl","loose wp","tight wp","","",""};
 
       //signal
-      TFile * sf = new TFile("trackMatchingTree_p8s384_POGHP_plots.root","READ");
+      TFile * sf = new TFile("zmumu_911_noGen_plots.root","READ");
       //1D plots
       for(unsigned int iV = 0; vars[iV][0]; ++iV){
         Plotter * p = new Plotter;
@@ -771,7 +777,7 @@ cout <<                TString::Format("%s_real_muon_%s_pt",prefix[iP].Data(), n
       }
       
       //Background
-      TFile * ff = new TFile("trackMatchingTree_NU_p8s384_POGHP_plots.root","READ");
+      TFile * ff = new TFile("zmumu_911_noGen_plots.root","READ");
       TH1 * hfn = 0;
       ff->GetObject(TString::Format("%s_nEvtsForTestWP",prefix.Data()),hfn);
       float numEvent = hfn->GetBinContent(1);
@@ -792,8 +798,8 @@ cout <<                TString::Format("%s_real_muon_%s_pt",prefix[iP].Data(), n
             hdI->SetBinError(iB, TMath::Sqrt(hd->Integral(iB,-1)));
           }
           hdI->Scale(1./numEvent);
-          pI->addHist(hdI,efftypeNs[iT]);
-          
+          pI->addHist(hdI,efftypeNs[iT],-1,1,4,20,1,true,true,false,"P E1");
+
           hd->Scale(1./numEvent);
           p->addHist(hd,efftypeNs[iT]);
           cout << efftypeNs[iT]<<"\t";

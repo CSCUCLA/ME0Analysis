@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 import re
 
-process = cms.Process("TEST")
+from Configuration.StandardSequences.Eras import eras
+process = cms.Process('VALIDATION',eras.Phase2C2)
 
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('analysis')
@@ -24,7 +25,8 @@ process.MessageLogger = cms.Service("MessageLogger",
     categories = cms.untracked.vstring('FwkJob'),
     destinations = cms.untracked.vstring('cout')
 )
-process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
+
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
 # from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023tilted
@@ -33,7 +35,7 @@ process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 # no longer needed in CMSSW_9
 # process = cust_2023tilted(process)
 # process.load('Configuration.StandardSequences.MagneticField_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1),  doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, trackName = "generalTracks") :
@@ -101,6 +103,29 @@ def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2
     setattr( process, me0Muon_name, process.me0MuonConverting.clone(me0SegmentTag = cms.InputTag(segM_name)))
     seq += getattr(process, me0Muon_name)
     
+def ME0ReRecoOnlyME0Muons(process, seq, name, trackName = "generalTracks") :    
+    segM_name          = name + "SegmentMatching"
+    setattr( process, segM_name, process.me0SegmentMatching.clone(me0SegmentTag = cms.InputTag("me0Segments"),maxDiffX = cms.double(15.0),maxDiffY = cms.double(15.0),tracksTag = cms.InputTag(trackName)  ))
+    seq += getattr(process, segM_name)
+      
+    me0Muon_name          = name + "Me0Muon"
+    setattr( process, me0Muon_name, process.me0MuonConverting.clone(me0SegmentTag = cms.InputTag(segM_name)))
+    seq += getattr(process, me0Muon_name)
+def doAnalysisOnlyME0Muons(process, seq, name, trackName = "generalTracks") :
+    ME0ReRecoOnlyME0Muons(process,seq,name,trackName)
+    anName = name + "Analysis"
+    setattr( process, anName, cms.EDAnalyzer("ME0TrackMatchingTreeMakerForPOG",
+        outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
+        newDigiCollection = cms.string("simMuonME0ReDigis"),
+        segmentCollection = cms.string("me0Segments"),
+        recHitCollection = cms.string("me0RecHits"),
+        muonsTag = cms.string(name+"SegmentMatching"),
+        runName           = cms.untracked.string(name+"_"),
+        trackCollection   = cms.string(trackName)
+        )
+    )
+    seq += getattr(process, anName)
+    
 def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), doRUSegmentAlgo = True, minSegmentLayers = 4,timeWindow = 25, trackName = "generalTracks") :
     ME0ReReco(process,seq,name,nStrips,nPartitions,neutBKGAcc,layerRO,doRUSegmentAlgo,minSegmentLayers,timeWindow,trackName)
     anName = name + "Analysis"
@@ -118,8 +143,28 @@ def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '90X_upgrade2023_realistic_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
+process.selectedVertices = cms.EDFilter("VertexSelector",
+    src = cms.InputTag('offlinePrimaryVertices'),
+    cut = cms.string("isValid & ndof >= 4 & chi2 > 0 & tracksSize > 0 & abs(z) < 24 & abs(position.Rho) < 2."),
+    filter = cms.bool(False)
+)
+
+process.muonTiming = cms.EDFilter("MuonSelector",
+    src = cms.InputTag("muons"),
+    cut = cms.string("abs(time.timeAtIpInOut) < (12.5 + abs(time.timeAtIpInOutErr))"),
+    filter = cms.bool(False)
+)
+
+process.bestMuonLooseModExt = cms.EDProducer("MuonTrackProducer",
+   muonsTag = cms.InputTag("muonTiming"),
+   inputDTRecSegment4DCollection = cms.InputTag("dt4DSegments"),
+   inputCSCSegmentCollection = cms.InputTag("cscSegments"),
+   vtxTag = cms.InputTag("selectedVertices"),
+   selectionTags = cms.vstring('All'),
+   trackType = cms.string('globalTrackLooseModExt')
+)
 
 
 import PhysicsTools.RecoAlgos.recoTrackSelector_cfi
@@ -137,15 +182,36 @@ process.trackingParticleRecoTrackAsssociation.tpTag = 'mix:MergedTrackTruth'
 process.trackingParticleRecoTrackAsssociation.tracksTag = 'generalTracks'
 process.trackingParticleRecoTrackAsssociation.UseTracker = True
 process.trackingParticleRecoTrackAsssociation.UseMuon = False
-process.trackingParticleRecoTrackAsssociation.pixelSimLinkSrc =  cms.InputTag("simSiPixelDigis","Pixel")
-process.trackingParticleRecoTrackAsssociation.stripSimLinkSrc = cms.InputTag("simSiPixelDigis","Tracker")
+# import SimMuon.MCTruth.MuonAssociatorByHits_cfi
+# process.trackingParticleRecoTrackAsssociation = SimMuon.MCTruth.MuonAssociatorByHits_cfi.muonAssociatorByHits.clone()
+# process.trackingParticleRecoTrackAsssociation.tpTag = 'mix:MergedTrackTruth'
+# process.trackingParticleRecoTrackAsssociation.tracksTag = 'bestMuonLooseModExt'
+# process.trackingParticleRecoTrackAsssociation.UseTracker = True
+# process.trackingParticleRecoTrackAsssociation.UseMuon = True
+# process.trackingParticleRecoTrackAsssociation.acceptOneStubMatchings = False
+
+process.genMuons = cms.EDFilter("PdgIdCandViewSelector",
+    src = cms.InputTag("genParticles"),
+    pdgId = cms.vint32(13, -13)
+)
+ 
+## filter for sim level
+process.genMuonsGEM = cms.EDFilter("CandViewSelector",
+    src = cms.InputTag("genMuons"),
+    cut = cms.string("abs(eta)<3.0 & abs(eta)>1.8"),   
+    filter = cms.bool(True)
+)
 
 process.newdigiseq  = cms.Sequence()
 #run with general tracks
 # doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True)
-# process.p = cms.Path(process.trackingParticleRecoTrackAsssociation* process.newdigiseq)
+# doAnalysisOnlyME0Muons(process,process.newdigiseq,"p8s384","generalTracks")
+# process.p = cms.Path(process.genMuons* process.genMuonsGEM * process.selectedVertices*process.muonTiming * process.bestMuonLooseModExt* process.trackingParticleRecoTrackAsssociation* process.newdigiseq)
+
 
 #run with HP tracks:
-doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4,25,"probeTracks")
+# doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),True,4,25,"probeTracks")
+doAnalysisOnlyME0Muons(process,process.newdigiseq,"p8s384","probeTracks")
+
 process.trackingParticleRecoTrackAsssociation.tracksTag = cms.InputTag('probeTracks')
 process.p = cms.Path(process.probeTracks * process.trackingParticleRecoTrackAsssociation* process.newdigiseq)

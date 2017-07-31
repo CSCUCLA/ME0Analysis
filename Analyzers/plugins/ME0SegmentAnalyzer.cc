@@ -246,20 +246,20 @@ private:
 
 
 			if(typeC <= 2 ){
-				const auto* chamber = mgeom->chamber(muon.segments[0].first.first);
-				const ME0Segment * segment =  &*(segments.get(muon.segments[0].first.first).first + muon.segments[0].first.second);
+//				const auto* chamber = mgeom->chamber(muon.segments[0].first.first);
+//				const ME0Segment * segment =  &*(segments.get(muon.segments[0].first.first).first + muon.segments[0].first.second);
 
 //				GlobalPoint glbpt = chamber->toGlobal(segment->localPosition());
 //				GlobalVector glbvec = chamber->toGlobal(segment->localDirection());
 //				double ptsolved = (0.3 * 3.8/2) * (.01)*glbpt.x()*glbpt.x() /(glbpt.y() -glbpt.x()*glbvec.y()/glbvec.x()   );
-				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),segment);
-				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
-				double ptsolved = (0.073359 -0.02116*std::fabs(prop.cenEta))/std::fabs(prop.dPhi);
+//				auto prop = ME0Helper::getSegmentProperties(mgeom->chamber(muon.segments[0].first.first),segment);
+//				const bool passDPhi = std::fabs(prop.dPhi) <0.013;
+//				double ptsolved = (0.073359 -0.02116*std::fabs(prop.cenEta))/std::fabs(prop.dPhi);
 
 //				cout << pt <<" "<< ptsolved<<" "<< glbpt.x()<<" "<< glbpt.y()<<" "<< glbvec.y()/glbvec.x()<<" "<<glbvec.x()<<" "<< glbvec.y()<<" "<< glbvec.z() << endl;
-				hists.getOrMake1D(TString::Format("%s_recoFitmGen_pt",ptstr.c_str()),";reco/gen",200,0,10)->Fill(std::abs(ptsolved)/pt);
+//				hists.getOrMake1D(TString::Format("%s_recoFitmGen_pt",ptstr.c_str()),";reco/gen",200,0,10)->Fill(std::abs(ptsolved)/pt);
 
-				auto stp = ME0Helper::getSimTrackProperties(mgeom,muon.simHits);
+//				auto stp = ME0Helper::getSimTrackProperties(mgeom,muon.simHits);
 //				glbpt = chamber->toGlobal(stp.localPosition());
 //				glbvec = chamber->toGlobal(stp.localDirection());
 //				ptsolved = (0.3 * 3.8/2) * (.01)*glbpt.x()*glbpt.x() /(glbpt.y() -glbpt.x()*glbvec.y()/glbvec.x()   );
@@ -267,9 +267,9 @@ private:
 //				cout << segment->localPosition() <<" "<< stp.localPosition() << endl ;
 //				cout << chamber->position() <<" " <<  chamber->toGlobal(segment->localPosition()) <<" "<<chamber->toGlobal(stp.localPosition())<<endl;
 //				cout << stp.cenPhi <<" "<< stp.dPhi <<" "<< stp.cenGlb.x() <<" "<<stp.cenGlb.y() <<" "<<(stp.upGlb.y() -stp.dwnGlb.y())/(stp.upGlb.x() -stp.dwnGlb.x()) <<endl;
-				double ptsolved2 = (0.073359 -0.02116*std::fabs(stp.cenEta))/std::fabs(stp.dPhi);
-				hists.getOrMake1D(TString::Format("%s_simFitmGen_pt",ptstr.c_str()),";sim/gen",200,0,10)->Fill(std::abs(ptsolved2)/pt);
-				cout << pt <<" "<< ptsolved<< " "<< ptsolved2 <<endl;
+//				double ptsolved2 = (0.073359 -0.02116*std::fabs(stp.cenEta))/std::fabs(stp.dPhi);
+//				hists.getOrMake1D(TString::Format("%s_simFitmGen_pt",ptstr.c_str()),";sim/gen",200,0,10)->Fill(std::abs(ptsolved2)/pt);
+//				cout << pt <<" "<< ptsolved<< " "<< ptsolved2 <<endl;
 
 			}
 
@@ -417,6 +417,11 @@ private:
 
 					const bool passDPhi = std::fabs(prop.dPhi) <0.013;
 					const bool passTime = std::fabs(iS->time()) <11.0;
+
+					if(passTime)hists.getOrMake1D(TString::Format("%s%s_all_passTime_fake_seg_nHits",sname.Data(),catstr.c_str()),";# of hits",7,-0.5,6.5)->Fill(nHits);
+					if(passTime&&passDPhi)hists.getOrMake1D(TString::Format("%s%s_passTime_passDPhi_fake_seg_nHits",sname.Data(),catstr.c_str()),";# of hits",7,-0.5,6.5)->Fill(nHits);
+
+
 					if(passTime) nFakes_passTime++;
 					if(passDPhi) nFakes_passDPhi++;
 					if(passTime && std::fabs(prop.dPhi) < (3.6 - std::fabs(prop.cenEta))/80 ) nMatchesD++;
@@ -476,6 +481,20 @@ private:
 					}
 
 					if(passTime){
+
+						auto getMeasuredPT =[](float dPhi, float theta, bool gen=false, float a = -0.0039, float b = 0.134 )-> float
+								{ const float minDPhi = 0.5*(20.0*TMath::Pi()/180.0)/float(384);
+							return (a + b*theta)/std::max(dPhi,(gen? float(0.0) :minDPhi));
+								};
+						auto etaToTheta =[](const double& eta) -> double {return 2.0*TMath::ATan(TMath::Exp(-eta));};
+						float segPT = getMeasuredPT(std::fabs(prop.dPhi),etaToTheta(std::fabs(prop.cenEta)));
+						if(segPT > 2)  hists.getOrMake1D(TString::Format("%s_fake_pt_gt2_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(segPT > 3)  hists.getOrMake1D(TString::Format("%s_fake_pt_gt3_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(segPT > 5)  hists.getOrMake1D(TString::Format("%s_fake_pt_gt5_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(segPT > 10)  hists.getOrMake1D(TString::Format("%s_fake_pt_gt10_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+						if(segPT > 20)  hists.getOrMake1D(TString::Format("%s_fake_pt_gt20_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
+
+
 						hists.getOrMake1D(TString::Format("%s_fake_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
 						if(std::fabs(prop.dPhi) <0.013)  hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p013_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
 						if(std::fabs(prop.dPhi) <0.004)  hists.getOrMake1D(TString::Format("%s_fake_dPhi_lt0p004_seg_eta",sname.Data()),";segment |#eta|",120,1.8,3.0)->Fill(std::fabs(prop.cenEta));
@@ -575,15 +594,23 @@ ME0SegmentAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	for(const auto& ch_digis: *digisH ){
 		int nNeutronHits = 0;
 		int nNeutronHitsBX0 = 0;
+		int nNeutronHitsBX0Eta2p7 = 0;
+		int nNeutronHitsBX0Eta1p9 = 0;
+		const auto * ch = mgeom->chamber( ch_digis.first);
 		for (ME0DigiPreRecoCollection::const_iterator idigi = ch_digis.second.first;
 				idigi != ch_digis.second.second;idigi++) {
 			if(idigi->prompt()) continue;
 			nNeutronHits++;
 			if(idigi->tof() > 12.5 || idigi->tof() < -12.5) continue;
 			nNeutronHitsBX0++;
+			const float absEta = std::fabs(ch->toGlobal(LocalPoint(idigi->x(),idigi->y(),0)).eta() );
+			if(absEta > 2.7) nNeutronHitsBX0Eta2p7++;
+			if(absEta < 2.1) nNeutronHitsBX0Eta1p9++;
 		}
 		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHits);
 		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_BX0_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHitsBX0);
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_BX0_etagt2p7_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHitsBX0Eta2p7);
+		hists.getOrMake1D(TString::Format("%s_nNeutronHitsPerChamber_BX0_etalt1p9_origDigis",runName.Data()),";# of neutron hits",1000,-0.5,999.5)->Fill(nNeutronHitsBX0Eta1p9);
 	}
 	for(const auto& ch_digis: *digisNH ){
 		int nNeutronHits = 0;

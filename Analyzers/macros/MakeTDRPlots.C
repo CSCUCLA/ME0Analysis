@@ -102,6 +102,8 @@ public:
           p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
           p->setLegendPos(0.6,0.72,1.0,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.613,0.675,0.04);
+          p->addText("All sim particles",0.613,0.63,0.04);
+
 
 
 	      TCanvas * c = p->draw(false,"bkgParticleLayerNumber.pdf");
@@ -183,7 +185,7 @@ public:
 	    p->addHistLine(hr3 ,"signal muons, p_{T} 3-5 GeV",colors[1],syles[1],4);
 	    p->addHistLine(hr5 ,"signal muons, p_{T} 10-15 GeV",colors[2],syles[2],4);
 	    p->addHistLine(hr20,"signal muons, p_{T} 20-30 GeV",colors[3],syles[3],4);
-	    p->rebin(1);
+	    p->rebin(4);
 	    p->normalize();
 
 	    p->setXTitle("sim -#it{q}#times#Delta#phi");
@@ -221,7 +223,7 @@ public:
 	      g->SetPoint(iP,iP,vals[iN][iP]);
 	    }
 	    g->SetLineColor  (StyleInfo::getLineColor(iN));
-	    g->SetLineWidth  (4);
+	    g->SetLineWidth  (6);
 	    g->SetLineStyle  (1);
 	    g->SetMarkerStyle(20);
 	    g->SetMarkerColor(StyleInfo::getLineColor(iN));
@@ -240,12 +242,17 @@ public:
           p->setLegendPos(.13,0.78,0.65,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.15,0.74,0.04);
           p->addText("|#Delta#phi| < 0.013",0.15,0.70,0.04);
+          p->addText("PU segments, 200 PU",0.15,0.56,0.04,kRed);
 
 	      TCanvas * c = p->draw(false,"neutronSegmentMultiplicity.pdf");
 	      p->yAxis()->SetRangeUser(0.004,400);
 	      c->SetLogy();
 
-
+	      TLine *line = new TLine(-0.5,1.8,4.5,1.8);
+	      line->SetLineColor(kRed);
+	      line->SetLineWidth(5);
+	      line->SetLineStyle(9);
+	      line->Draw();
 
 	      c->Print("neutronSegmentMultiplicity.pdf");
   }
@@ -481,8 +488,8 @@ void MakeTDRPlots(){
 	TH1::AddDirectory(false);
 	Analyzer * a = new Analyzer();
 //	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_p8s384_plots.root");
-//	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
-//	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
+	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
+	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
 	a->makeNeutronPlot();
 //	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root");
 //	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");

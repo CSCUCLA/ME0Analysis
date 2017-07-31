@@ -1,4 +1,5 @@
 
+
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "/Users/nmccoll/Dropbox/Work/GitRepositories/AnalysisSupport/TreeInterface/interface/BaseTupleAnalyzer.h"
 #include "/Users/nmccoll/Dropbox/Work/GitRepositories/AnalysisSupport/Utilities/interface/HistGetter.h"
@@ -1015,8 +1016,17 @@ bool isAMatch(int idx, bool doExtra = false){
 	  static float pBins[] = {0,1,2,3,4,5,6,7,8,9,10,15,20,30,40,50};
 	  static const int nPBins = 15;
 
-	  static float ptBins[] = {0,1,2,3,4,5,6,7,8,9,10,12,15,20};
-	  static const int nPtBins = 13;
+//	    static float pBins[] = {0,1,2,3,4,5,6,7,8,9,10,15,20,30,40,50,75,100,125,150,200,300};
+//	      static const int nPBins = 21;
+
+//	  static float ptBins[] = {0,1,2,3,4,5,6,7,8,9,10,12,15,20};
+//	  static const int nPtBins = 13;
+
+	    static float ptBins[] = {0,1,2,3,5,10,15,20,25,35,40};
+	      static const int nPtBins = 10;
+
+//	    static float ptBins[] = {0,1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,35,40,45,50,60,80,100};
+//	      static const int nPtBins = 22;
 
 	  static float etaBins[] = {1.8,2.0,2.2,2.4,2.6,2.8,3.0};
 	  static const int nEtaBins = 6;
@@ -1031,6 +1041,12 @@ bool isAMatch(int idx, bool doExtra = false){
 		  return eta < etaC && phi < phiC && dPhi < dPhiC && dPhi < dPhiS2C && phi < phiS2C ;
 	  };
 
+//	  auto passMed = [&](int idx) -> bool { return passMatch(idx,0.032202,0.0483636,0.00412121);};
+//	  auto passLoose = [&](int idx) -> bool { return passMatch(idx,0.0241212,0.042303,0.00381818);};
+
+	  auto passMed = [&](int idx) -> bool { return passMatch(idx,0.0564444,0.0766465,0.00957576);};
+	  auto passTight = [&](int idx) -> bool { return passMatch(idx,0.032202,0.0483636,0.00412121);};
+
 	  auto fillSigPlots = [&] (TString type, TString titleType, float pt,float mom,float absEta) {
 		    plotter.getOrMake1D(TString::Format("%s_%s_pt",prefix.Data(),type.Data()),TString::Format(";%s p_{T} [GeV]; muon ID efficiency",titleType.Data()),nPtBins,ptBins)->Fill(pt);
 		    plotter.getOrMake1D(TString::Format("%s_%s_p",prefix.Data(),type.Data()),TString::Format(";%s |p| [GeV]; muon ID efficiency",titleType.Data()),nPBins,pBins)->Fill(mom);
@@ -1042,12 +1058,16 @@ bool isAMatch(int idx, bool doExtra = false){
 
 	  //eff
 	  int nSM = 0;
+	  int nMOOAcc = 0;
+	  int nMIAcc = 0;
 	  for(unsigned int iM = 0; iM < simMuon_pt->size(); ++iM ){
 		  const float pt  = simMuon_pt->at(iM);
 		  const float eta = simMuon_eta->at(iM);
 		  const float absEta = std::fabs(eta);
 		  const float mom = getP(pt,eta,simMuon_phi->at(iM));
-
+		  if(absEta < 1.4 || absEta < 4.0) nMOOAcc ++;
+		  else nMIAcc++;
+		  if(absEta < 2.0 || absEta >2.8) continue;
 
 		  int  matchIDX = -1;
 		  for(unsigned int iRM = 0; iRM < me0Muon_pt->size(); ++iRM){
@@ -1061,23 +1081,28 @@ bool isAMatch(int idx, bool doExtra = false){
 		  fillSigPlots("signal_incl","true muon",pt,mom,absEta);
 		  if(matchIDX < 0) continue;
 		  if(isAMatch(matchIDX,true)) fillSigPlots("signal_wp_std","true muon",pt,mom,absEta);
-		  if(passMatch(matchIDX,0.032202,0.0483636,0.00412121)) fillSigPlots("signal_wp_95","true muon",pt,mom,absEta);
-		  if(passMatch(matchIDX,0.0241212,0.042303,0.00381818)) fillSigPlots("signal_wp_90","true muon",pt,mom,absEta);
+		  if(passMed(matchIDX)) fillSigPlots("signal_wp_95","true muon",pt,mom,absEta);
+		  if(passTight(matchIDX)) fillSigPlots("signal_wp_90","true muon",pt,mom,absEta);
 	  }
 
 	  //bkg
-	  if(isPureBKG || nSM==2){
+	  if(isPureBKG || (nMOOAcc == 2 && nMIAcc == 0)){
 		  plotter.getOrMake1D(TString::Format("%s_nEvtsForTestWP",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
 		  for(unsigned int idx = 0; idx < me0Muon_p->size(); ++idx){
-			  if((me0Muon_pt->at(idx) < 2)) continue;
+              const float pt  = me0Muon_pt->at(idx);
+              const float eta = me0Muon_eta->at(idx);
+              const float absEta = std::fabs(eta);
+              if((me0Muon_pt->at(idx) < 2)) continue;
 			  if(me0Muon_truthType->at(idx) == 0) continue;
-			  const float pt  = me0Muon_pt->at(idx);
-			  const float eta = me0Muon_eta->at(idx);
-			  const float absEta = std::fabs(eta);
+
+//			  if(passTight(idx) && me0Muon_pt->at(idx) > 20){
+//			      getTree()->Scan("*","","",1,eventNumber);
+//			  }
+
 			  const float mom = me0Muon_p->at(idx);
 			  if(isAMatch(idx,true)) fillSigPlots("bkg_wp_std","pixel track",pt,mom,absEta);
-			  if(passMatch(idx,0.032202,0.0483636,0.00412121)) fillSigPlots("bkg_wp_95","pixel track",pt,mom,absEta);
-			  if(passMatch(idx,0.0241212,0.042303,0.00381818)) fillSigPlots("bkg_wp_90","pixel track",pt,mom,absEta);
+			  if(passMed(idx)) fillSigPlots("bkg_wp_95","pixel track",pt,mom,absEta);
+			  if(passTight(idx)) fillSigPlots("bkg_wp_90","pixel track",pt,mom,absEta);
 		  }
 
 	  }
@@ -1088,7 +1113,7 @@ bool isAMatch(int idx, bool doExtra = false){
   virtual void runAEvent() {
 	  doMatching(false);
 //	  oneDCutPlots(glbPrefix);
-//	  effCuts(glbPrefix);
+	  effCuts(glbPrefix);
 //	  makeAnnaPlot(glbPrefix);
 //	  makeResPlot(glbPrefix);
 //	  getNPossibleMatches(glbPrefix);
@@ -1116,6 +1141,10 @@ void AnalyzeME0TrackMatchingTree(std::string fileName,unsigned int nP, unsigned 
 	  a.phiC = 0.05;
 	  a.dPhiC = 0.0065;
 	  a.etaC = nP >= 8 ? 0.06 : 0.08;
+
+//    a.phiC = 0.032202;
+//    a.dPhiC = 0.00412121;
+//    a.etaC = nP >= 8 ? 0.0483636 : 0.0483636;
 
   a.glbPrefix = TString::Format("p%us%u",nP,nS);
   a.diag.fillTrans(10.0985,844.29 ,84.9847,-100.325);

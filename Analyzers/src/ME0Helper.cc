@@ -232,7 +232,8 @@ void fillSegmentCategories(const ME0SegmentCollection& segments,
 				else if(nT               ) cat.first = MUON_MISS_DIRTY_TRACK;
 				else                       cat.first = MUON_MISS_DIRTY_NEUT;
 			} else if(nT == int(nH) && mT != 0 ) cat.first =  FAKE_TRACK_PURE;
-			else if(nN == int(nH)) cat.first =  FAKE_NEUT_PURE;
+			else if(nT == int(nH))               cat.first =  FAKE_TRACK_MIXED;
+			else if(nN == int(nH))               cat.first =  FAKE_NEUT_PURE;
 			else cat.first =  FAKE_OTHER;
 		}
 	}

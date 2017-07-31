@@ -49,7 +49,7 @@ class ME0TrackDensity : public edm::EDAnalyzer {
 ME0TrackDensity::ME0TrackDensity(const edm::ParameterSet& iConfig) :
     outFileName(iConfig.getUntrackedParameter<std::string>("outFileName"))
 {
-  track_token = consumes<reco::TrackCollection>( edm::InputTag("generalTracks") );
+  track_token = consumes<reco::TrackCollection>( iConfig.getParameter<edm::InputTag>("tracks"));
   vtxToken_   = consumes<reco::VertexCollection>( edm::InputTag("offlinePrimaryVertices") );
 //  dToken_     = consumes<ME0DigiPreRecoCollection>( edm::InputTag("simMuonME0Digis") );
 }
@@ -100,10 +100,19 @@ ME0TrackDensity::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       hists.getOrMake1D("tracks_gt0p5_eta",";#eta",800,-4.0,4.0)->Fill(iTrack->eta());
       hists.getOrMake1D("tracks_gt0p5_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(iTrack->eta()));
     }
+    if(iTrack->pt() > 1.0){
+      hists.getOrMake1D("tracks_gt1p0_eta",";#eta",800,-4.0,4.0)->Fill(iTrack->eta());
+      hists.getOrMake1D("tracks_gt1p0_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(iTrack->eta()));
+    }
     if(iTrack->pt() > 1.5){
       hists.getOrMake1D("tracks_gt1p5_eta",";#eta",800,-4.0,4.0)->Fill(iTrack->eta());
       hists.getOrMake1D("tracks_gt1p5_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(iTrack->eta()));
     }
+    if(iTrack->pt() > 2.0){
+      hists.getOrMake1D("tracks_gt2p0_eta",";#eta",800,-4.0,4.0)->Fill(iTrack->eta());
+      hists.getOrMake1D("tracks_gt2p0_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(iTrack->eta()));
+    }
+
     if(iTrack->pt() > 3.0){
       hists.getOrMake1D("tracks_gt3p0_eta",";#eta",800,-4.0,4.0)->Fill(iTrack->eta());
       hists.getOrMake1D("tracks_gt3p0_abseta",";|#eta|",400,0,4.0)->Fill(TMath::Abs(iTrack->eta()));

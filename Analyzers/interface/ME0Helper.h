@@ -56,9 +56,9 @@ void associateSimMuons(SimMuons& simMuons, DigiInfoMap& digiInfoMap );
 int getRecHitIndex(const ME0RecHitCollection& recHits, const ME0RecHit& rh);
 
 enum SegmentGenCat { MUON_COMP_PURE, MUON_COMP_DIRTY_TRACK,MUON_COMP_DIRTY_NEUT, MUON_MISS_PURE, MUON_MISS_DIRTY_TRACK,MUON_MISS_DIRTY_NEUT,
-					 FAKE_TRACK_PURE, FAKE_NEUT_PURE, FAKE_MUON_MIX, FAKE_OTHER, SEGMENT_ERROR };
+					 FAKE_TRACK_PURE,FAKE_TRACK_MIXED, FAKE_NEUT_PURE, FAKE_MUON_MIX, FAKE_OTHER, SEGMENT_ERROR };
 const std::string SegmentGenCatNames[] = {"MUON_COMP_PURE", "MUON_COMP_DIRTY_TRACK","MUON_COMP_DIRTY_NEUT", "MUON_MISS_PURE", "MUON_MISS_DIRTY_TRACK","MUON_MISS_DIRTY_NEUT",
-		 "FAKE_TRACK_PURE", "FAKE_NEUT_PURE", "FAKE_MUON_MIX", "FAKE_OTHER", "SEGMENT_ERROR" };
+		 "FAKE_TRACK_PURE","FAKE_TRACK_MIXED" ,"FAKE_NEUT_PURE", "FAKE_MUON_MIX", "FAKE_OTHER", "SEGMENT_ERROR" };
 
 typedef std::map<ME0DetId, std::vector<std::pair<SegmentGenCat,int> > > SegmentCatMap;
 void fillSegmentCategories(const ME0SegmentCollection& segments,

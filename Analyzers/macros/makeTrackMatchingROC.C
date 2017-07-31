@@ -80,7 +80,7 @@ public:
 		int nP = 0;
 		TGraph * graph = new TGraph();
 //		vector<float> effs = {0.99,0.985,.98,.979,.978,.977,.976,.975,.97,.965,.96,.955,.95,.945,.94,.93,.92,.91,.90,.89,.88,.87,.86,.85,.80,.75,.7,.6,.5,.4,.3};
-		vector<float> effs = {0.99,0.985,.98,.979,.978,.977,.976,.975,.97,.965,.96,.955,.95,.945,.94,.93,.92,.91,.90,.89,.88,.87,.86,.85,.84,.83,.82,.81,.80,.79,.78,.77,.76,.75};
+		vector<float> effs = {0.99,0.985,.98,.979,.978,.977,.976,.975,.97,.965,.96,.955,.95,.945,.94,.935,.93,.925,.92,.91,.90,.89,.88,.87,.86,.85,.84,.83,.82,.81,.80,.79,.78,.77,.76,.75};
 		for(unsigned int iE = 0; iE < effs.size(); ++iE){
 			const float minSignal = effs[iE]*nTotSig;
 			float minBKG =-1;
@@ -325,8 +325,8 @@ public:
 	virtual void runAEvent() {
 		for(unsigned int iM = 0; iM < simMuon_pt->size(); ++iM ){
 			const float pt = simMuon_pt->at(iM);
-			if(pt < 2) continue;
-			if(pt > 4) continue;
+			if(pt < 3) continue;
+			if(pt > 5) continue;
 
 			bool goodTrack   = simMuon_trackIDX->at(iM) >= 0;
 			int  goodNearSegment = -1;
@@ -365,7 +365,7 @@ public:
 			const double dPhi = std::fabs(me0Muon_track_dphi->at(iRM) - me0Muon_segment_dphi->at(iRM));
 			const double phi  = std::fabs(me0Muon_track_phi->at(iRM) - me0Muon_segment_phi->at(iRM));
 			const double eta  = std::fabs(me0Muon_track_eta->at(iRM) - me0Muon_segment_eta->at(iRM));
-			if(me0Muon_pt->at(iRM) < 2) continue;
+			if(me0Muon_pt->at(iRM) < 3) continue;
 			bool passPDepCuts = phi < std::max(1.2/me0Muon_p->at(iRM),1.2/100)
 			&& dPhi < std::max(0.2/me0Muon_p->at(iRM),0.2/100) ;
 			if(passPDepCuts){
