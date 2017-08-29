@@ -25,7 +25,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 
-process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
 # from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023tilted
@@ -81,6 +81,15 @@ def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 
         )
     )
     seq += getattr(process, anName)
+def doAnalysisOnly(process, seq, name) :
+    anName = name + "Analysis"
+    setattr( process, anName, cms.EDAnalyzer("ME0DigiAnalyzer",
+        outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
+        newDigiCollection = cms.string("simMuonME0ReDigis"),
+        runName           = cms.untracked.string(name+"_")
+        )
+    )
+    seq += getattr(process, anName)
 
 
 process.newdigiseq  = cms.Sequence()
@@ -98,7 +107,8 @@ process.newdigiseq  = cms.Sequence()
 # doAnalysis(process,process.newdigiseq,"p8s640Merge",640,8,True,True)
 # doAnalysis(process,process.newdigiseq,"p8s512Merge",512,8,True,True)
 # doAnalysis(process,process.newdigiseq,"p8s384Merge",384,8,True,True)
-doAnalysis(process,process.newdigiseq,"p8s384",384,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+# doAnalysis(process,process.newdigiseq,"p8s384",384,8,0.0,cms.vint32(1,1,1,1,1,1), True,True)
+doAnalysisOnly(process,process.newdigiseq,"p8s384")
 # doAnalysis(process,process.newdigiseq,"p8s256Merge",256,8,True,True)
 # doAnalysis(process,process.newdigiseq,"p8s128Merge",128,8,True,True)
 # doAnalysis(process,process.newdigiseq,"p4s64Merge",64,4,True,True)

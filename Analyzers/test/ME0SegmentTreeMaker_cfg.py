@@ -25,7 +25,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 
-process.load('Configuration.Geometry.GeometryExtended2023D13Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.combinedCustoms
 # no longer needed in CMSSW_9
 # from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023tilted
@@ -34,7 +34,7 @@ process.load('Configuration.Geometry.GeometryExtended2023D13Reco_cff')
 # no longer needed in CMSSW_9
 # process = cust_2023tilted(process)
 # process.load('Configuration.StandardSequences.MagneticField_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 def ME0ReReco(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 2.0, layerRO =cms.vint32(1,1,1,1,1,1), minSegmentLayers = 4, usePads = False) :
@@ -111,10 +111,23 @@ def doAnalysis(process, seq, name, nStrips = 768, nPartitions = 8, neutBKGAcc = 
     print re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)
 
 
+def doAnalysisOnly(process, seq, name) :
+    anName = name + "Analysis"
+    setattr( process, anName, cms.EDAnalyzer("ME0SegmentTreeMaker",
+        outFileName       = cms.untracked.string(re.sub(r'(.*)\.root',r'\1_'+name+'.root',options.outputFile)),   
+        newDigiCollection = cms.string("simMuonME0ReDigis"),
+        segmentCollection = cms.string("me0Segments"),
+        recHitCollection = cms.string("me0RecHits"),
+        runName           = cms.untracked.string(name+"_"),
+        )
+    )
+    seq += getattr(process, anName)
+
 process.newdigiseq  = cms.Sequence()
 
-doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),4)
-doAnalysis(process,process.newdigiseq,"p8s192" ,192,8 ,2.0,cms.vint32(1,1,1,1,1,1),4,True)
+# doAnalysis(process,process.newdigiseq,"p8s384" ,384,8 ,2.0,cms.vint32(1,1,1,1,1,1),4)
+# doAnalysis(process,process.newdigiseq,"p8s192" ,192,8 ,2.0,cms.vint32(1,1,1,1,1,1),4,True)
+doAnalysisOnly(process,process.newdigiseq,"p8s384")
 
 
 process.p = cms.Path(process.newdigiseq)

@@ -655,8 +655,15 @@ bool isAMatch(int idx, bool doExtra = false){
   }
   void makeAnnaPlot(TString prefix) {
 	  //eff
-	  int nSM = 0;
+
+      int nMOOAcc = 0;
+      int nMIAcc = 0;
+
 	  for(unsigned int iM = 0; iM < simMuon_pt->size(); ++iM ){
+
+                    const float absEta = std::fabs(simMuon_eta->at(iM));
+            if(absEta < 1.5 || absEta > 3.5) nMOOAcc ++;
+            else nMIAcc++;
 
 		    bool goodTrack   = simMuon_trackIDX->at(iM) >= 0;
 		    bool goodSegment = simMuon_segmentQuality->at(iM) != 3;
@@ -701,12 +708,11 @@ bool isAMatch(int idx, bool doExtra = false){
 		    	plotter.getOrMake1D(TString::Format("%s_real_muon_passME0MuonExtra_pt",prefix.Data()),";pixel track p_{T} [GeV]; ",9,2,11)->Fill(pt);
 		    }
 //		    if(goodTrackPT && goodMatch) nSM++;
-		    if(goodMatch && passCut) nSM++;
 
 
 	  }
 
-		  if(isPureBKG || nSM==2){
+		  if(isPureBKG || (nMOOAcc == 2 && nMIAcc == 0)){
 		  plotter.getOrMake1D(TString::Format("%s_nEvtsForFakesA",prefix.Data()),";nEvtsForFakes; a.u.",1,0,2)->Fill(1);
 //		  for(unsigned int iRM = 0; iRM < goodMatches.size(); ++iRM){
 //			  if((me0Muon_pt->at(goodMatches[iRM]) < 2)) continue;
@@ -1044,8 +1050,8 @@ bool isAMatch(int idx, bool doExtra = false){
 //	  auto passMed = [&](int idx) -> bool { return passMatch(idx,0.032202,0.0483636,0.00412121);};
 //	  auto passLoose = [&](int idx) -> bool { return passMatch(idx,0.0241212,0.042303,0.00381818);};
 
-	  auto passMed = [&](int idx) -> bool { return passMatch(idx,0.0564444,0.0766465,0.00957576);};
-	  auto passTight = [&](int idx) -> bool { return passMatch(idx,0.032202,0.0483636,0.00412121);};
+	  auto passMed = [&](int idx) -> bool { return passMatch(idx,0.056,0.077,0.0096);};
+	  auto passTight = [&](int idx) -> bool { return passMatch(idx,0.032,0.048,0.0041);};
 
 	  auto fillSigPlots = [&] (TString type, TString titleType, float pt,float mom,float absEta) {
 		    plotter.getOrMake1D(TString::Format("%s_%s_pt",prefix.Data(),type.Data()),TString::Format(";%s p_{T} [GeV]; muon ID efficiency",titleType.Data()),nPtBins,ptBins)->Fill(pt);
@@ -1114,8 +1120,8 @@ bool isAMatch(int idx, bool doExtra = false){
 	  doMatching(false);
 //	  oneDCutPlots(glbPrefix);
 	  effCuts(glbPrefix);
-//	  makeAnnaPlot(glbPrefix);
-//	  makeResPlot(glbPrefix);
+	  makeAnnaPlot(glbPrefix);
+	  makeResPlot(glbPrefix);
 //	  getNPossibleMatches(glbPrefix);
 //	  getBKGComp(glbPrefix);
 	  testWorkingPoints(glbPrefix);
@@ -1138,13 +1144,14 @@ void AnalyzeME0TrackMatchingTree(std::string fileName,unsigned int nP, unsigned 
 	a.alphaDPhi2SC = 0.2;
 	a.maxDPhi2SC = a.alphaDPhi2SC/100;
 
-	  a.phiC = 0.05;
-	  a.dPhiC = 0.0065;
-	  a.etaC = nP >= 8 ? 0.06 : 0.08;
+//	  a.phiC = 0.05;
+//	  a.dPhiC = 0.0065;
+//	  a.etaC = nP >= 8 ? 0.06 : 0.08;
 
-//    a.phiC = 0.032202;
-//    a.dPhiC = 0.00412121;
-//    a.etaC = nP >= 8 ? 0.0483636 : 0.0483636;
+
+    a.phiC = 0.056;
+    a.dPhiC = 0.0096;
+    a.etaC = 0.077;
 
   a.glbPrefix = TString::Format("p%us%u",nP,nS);
   a.diag.fillTrans(10.0985,844.29 ,84.9847,-100.325);

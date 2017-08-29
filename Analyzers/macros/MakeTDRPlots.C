@@ -58,9 +58,9 @@ public:
 	            p->setCanvasSize(1024,726);
 	            p->setMargins(0.08,.12,.12,.05);
 	            p->setAxisTextSize(0);
-	            p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
-	            if(iV == 1) p->setMinMax(0.,0.46);
-	            else p->setMinMax(0.,0.52);
+	            p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+	            if(iV == 1) p->setMinMax(0.,0.52);
+	            else p->setMinMax(0.,0.57);
 	            p->setLegendPos(0.13,0.71,0.6,0.89);
 
 	            p->draw(true,pdfNames[iV]);
@@ -99,7 +99,7 @@ public:
           p->setCanvasSize(1024,726);
           p->setMargins(0.08,.12,.12,.05);
           p->setAxisTextSize(0);
-          p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+          p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
           p->setLegendPos(0.6,0.72,1.0,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.613,0.675,0.04);
           p->addText("All sim particles",0.613,0.63,0.04);
@@ -196,7 +196,7 @@ public:
         p->setCanvasSize(1024,726);
         p->setMargins(0.08,.12,.12,.05);
         p->setAxisTextSize(0);
-        p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+        p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
         p->setLegendPos(0.4,0.55,.9,0.89);
         p->addText("N. of ME0 layers crossed by particle #geq 4",0.416,0.50,0.04);
 	      TCanvas * c = p->draw(false,"generatedDPhi_signalAndBkg.pdf");
@@ -238,7 +238,7 @@ public:
           p->setCanvasSize(1024,726);
           p->setMargins(0.08,.12,.12,.05);
           p->setAxisTextSize(0);
-          p->setCMSLumi(0, "14 TeV", "Simulation preliminary",1.2 );
+          p->setCMSLumi(0, "14 TeV", "Simulation",1.2 );
           p->setLegendPos(.13,0.78,0.65,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.15,0.74,0.04);
           p->addText("|#Delta#phi| < 0.013",0.15,0.70,0.04);
@@ -289,7 +289,7 @@ public:
 		    p->setCanvasSize(1024,726);
 		    p->setMargins(0.08,.12,.12,.05);
 		    p->setAxisTextSize(0);
-		    p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+            p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
 		    p->setLegendPos(.13,0.70,0.65,0.89);
 		    p->addText("2.0 < |#eta| < 2.8",0.15,0.66,0.04);
 
@@ -347,7 +347,7 @@ public:
 	  p->setCanvasSize(1024,726);
 	  p->setMargins(0.08,.12,.12,.05);
 	  p->setAxisTextSize(0);
-	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
 	  p->setLegendPos(.13,0.75,0.65,0.89);
 	  p->addText("2.0 < |#eta| < 2.8",0.15,0.71,0.04);
 	  p->setMinMax(0.0,.065);
@@ -464,7 +464,7 @@ public:
 	  p->setCanvasSize(1024,726);
 	  p->setMargins(0.08,.12,.12,.05);
 	  p->setAxisTextSize(0);
-	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation preliminary",1.2 );
+	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
 	  p->setLegendPos(.14,0.75,0.92,0.89);
 	  p->setLegendNColumns(3);
 //	  p->addText("2.0 < |#eta| < 2.8",0.15,0.71,0.03);
@@ -487,12 +487,12 @@ public:
 void MakeTDRPlots(){
 	TH1::AddDirectory(false);
 	Analyzer * a = new Analyzer();
-//	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_p8s384_plots.root");
+	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/tenMu_trackMatchingtree_plots.root");
 	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
 	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
 	a->makeNeutronPlot();
-//	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root");
-//	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");
+	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_segmentreee_plots.root");
+	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_trackMatchingtree_plots.root");
 //	a->makeTotalBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/trackDensity_ForTDR_std.root",
 //			"/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root",
 //			"/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");

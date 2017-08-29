@@ -25,7 +25,7 @@ process.MessageLogger = cms.Service("MessageLogger",
     destinations = cms.untracked.vstring('cout')
 )
 
-process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
 
 
 process.analyze = cms.EDAnalyzer("ME0TrackDensity",
