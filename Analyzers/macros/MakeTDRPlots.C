@@ -58,7 +58,7 @@ public:
 	            p->setCanvasSize(1024,726);
 	            p->setMargins(0.08,.12,.12,.05);
 	            p->setAxisTextSize(0);
-	            p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+	            p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
 	            if(iV == 1) p->setMinMax(0.,0.52);
 	            else p->setMinMax(0.,0.57);
 	            p->setLegendPos(0.13,0.71,0.6,0.89);
@@ -99,7 +99,7 @@ public:
           p->setCanvasSize(1024,726);
           p->setMargins(0.08,.12,.12,.05);
           p->setAxisTextSize(0);
-          p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+          p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
           p->setLegendPos(0.6,0.72,1.0,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.613,0.675,0.04);
           p->addText("All sim particles",0.613,0.63,0.04);
@@ -196,7 +196,7 @@ public:
         p->setCanvasSize(1024,726);
         p->setMargins(0.08,.12,.12,.05);
         p->setAxisTextSize(0);
-        p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+        p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
         p->setLegendPos(0.4,0.55,.9,0.89);
         p->addText("N. of ME0 layers crossed by particle #geq 4",0.416,0.50,0.04);
 	      TCanvas * c = p->draw(false,"generatedDPhi_signalAndBkg.pdf");
@@ -223,9 +223,9 @@ public:
 	      g->SetPoint(iP,iP,vals[iN][iP]);
 	    }
 	    g->SetLineColor  (StyleInfo::getLineColor(iN));
-	    g->SetLineWidth  (6);
+	    g->SetLineWidth  (5);
 	    g->SetLineStyle  (1);
-	    g->SetMarkerStyle(20);
+	    g->SetMarkerStyle(21);
 	    g->SetMarkerColor(StyleInfo::getLineColor(iN));
 	    g->SetMarkerSize (1);
 	    Drawing::Drawable1D drawableF("P L",names[iN],Drawing::GRAPH,g,false);
@@ -238,11 +238,11 @@ public:
           p->setCanvasSize(1024,726);
           p->setMargins(0.08,.12,.12,.05);
           p->setAxisTextSize(0);
-          p->setCMSLumi(0, "14 TeV", "Simulation",1.2 );
+          p->setCMSLumi(0, "#sqrt{s}=14 TeV", "Phase-2 Simulation",1.2 );
           p->setLegendPos(.13,0.78,0.65,0.89);
           p->addText("2.0 < |#eta| < 2.8",0.15,0.74,0.04);
           p->addText("|#Delta#phi| < 0.013",0.15,0.70,0.04);
-          p->addText("PU segments, 200 PU",0.15,0.56,0.04,kRed);
+          p->addText("PU segments, <PU>=200",0.15,0.56,0.04,kRed);
 
 	      TCanvas * c = p->draw(false,"neutronSegmentMultiplicity.pdf");
 	      p->yAxis()->SetRangeUser(0.004,400);
@@ -289,7 +289,7 @@ public:
 		    p->setCanvasSize(1024,726);
 		    p->setMargins(0.08,.12,.12,.05);
 		    p->setAxisTextSize(0);
-            p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+            p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
 		    p->setLegendPos(.13,0.70,0.65,0.89);
 		    p->addText("2.0 < |#eta| < 2.8",0.15,0.66,0.04);
 
@@ -331,10 +331,10 @@ public:
 		  gr->SetLineColor  (StyleInfo::getLineColor(inColor));
 		  gr->SetLineWidth  (4);
 		  gr->SetLineStyle  (1);
-		  gr->SetMarkerStyle(inColor < 2 ? 20 : 21);
+		  gr->SetMarkerStyle(inColor < 1 ? 26 : (inColor < 2 ? 25 : 21));
 		  gr->SetMarkerColor(StyleInfo::getLineColor(inColor));
 		  gr->SetMarkerSize (1);
-		  Drawing::Drawable1D drawableF("P E 0",title,Drawing::GRAPH,gr,false);
+		  Drawing::Drawable1D drawableF("P E 0 Z",title,Drawing::GRAPH,gr,false);
 		  drawableF.graphAxisHist = hf;
 		  return drawableF;
 
@@ -347,7 +347,7 @@ public:
 	  p->setCanvasSize(1024,726);
 	  p->setMargins(0.08,.12,.12,.05);
 	  p->setAxisTextSize(0);
-	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+	  p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
 	  p->setLegendPos(.13,0.75,0.65,0.89);
 	  p->addText("2.0 < |#eta| < 2.8",0.15,0.71,0.04);
 	  p->setMinMax(0.0,.065);
@@ -464,7 +464,7 @@ public:
 	  p->setCanvasSize(1024,726);
 	  p->setMargins(0.08,.12,.12,.05);
 	  p->setAxisTextSize(0);
-	  p->setCMSLumi(0, "14 TeV, 200 PU", "Simulation",1.2 );
+	  p->setCMSLumi(0, "#sqrt{s}=14 TeV, <PU>=200", "Phase-2 Simulation",1.2 );
 	  p->setLegendPos(.14,0.75,0.92,0.89);
 	  p->setLegendNColumns(3);
 //	  p->addText("2.0 < |#eta| < 2.8",0.15,0.71,0.03);
