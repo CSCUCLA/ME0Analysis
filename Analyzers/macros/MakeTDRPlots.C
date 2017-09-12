@@ -211,16 +211,27 @@ public:
 
 	  vector<TString> xTitles{"7.5 (x1)","10 (x1.33)","22.5 (x3)","37.5 (x5)","75 (x10)"};
 	  vector<TString> names{"4 ME0 layers per segment","5 ME0 layers per segment"};
-	  vector<vector<double>> vals{{0.198,0.282,5.298,29.626,195.550},{0.008,0.023,0.214,1.748,39.374}};
+//	  vector<vector<double>> vals{{0.198,0.282,5.298,29.626,195.550},{0.008,0.023,0.214,1.748,39.374}};
+	  vector<vector<double>> nums{{26,37,694,3881,25617},{1,3,28,229,5158}};
+	  vector<vector<double>> dens{{131,131,131,131,131},{131,131,131,131,131}};
+
 	  Plotter * p = new Plotter();
 
 	  TH1F * axisHist = new TH1F("axisHist",";neutron luminosity scale [10^{34} Hz/cm] (safety margin)",xTitles.size(),-0.5,float(xTitles.size()) -.5);
 	  for (unsigned int i=1;i<=xTitles.size();i++) axisHist->GetXaxis()->SetBinLabel(i,xTitles[i-1]);
 
 	  for(unsigned int iN = 0; iN < names.size(); ++iN){
-	    TGraph * g = new TGraph();
-	    for(unsigned int iP = 0; iP < vals[iN].size(); ++iP){
-	      g->SetPoint(iP,iP,vals[iN][iP]);
+	    TGraphAsymmErrors * g = new TGraphAsymmErrors();
+	    for(unsigned int iP = 0; iP < nums[iN].size(); ++iP){
+	        const double num = nums[iN][iP];
+	        const double den = dens[iN][iP];
+	        double errUp,errDown;
+	        PlotTools::getPoissonErrors(num,errUp,errDown);
+	        g->SetPoint(iP,iP, num/den);
+	        g->SetPointEYhigh(iP, errUp/den);
+	        g->SetPointEYlow(iP, errDown/den);
+	        g->SetPointEXlow(iP, 0);
+	        g->SetPointEXhigh(iP, 0);
 	    }
 	    g->SetLineColor  (StyleInfo::getLineColor(iN));
 	    g->SetLineWidth  (5);
@@ -228,7 +239,7 @@ public:
 	    g->SetMarkerStyle(21);
 	    g->SetMarkerColor(StyleInfo::getLineColor(iN));
 	    g->SetMarkerSize (1);
-	    Drawing::Drawable1D drawableF("P L",names[iN],Drawing::GRAPH,g,false);
+	    Drawing::Drawable1D drawableF("P E 0 Z L",names[iN],Drawing::GRAPH,g,false);
 	    drawableF.graphAxisHist = (TH1*)axisHist->Clone();
 	    p->addDrawable(drawableF);
 	  }
@@ -487,12 +498,12 @@ public:
 void MakeTDRPlots(){
 	TH1::AddDirectory(false);
 	Analyzer * a = new Analyzer();
-	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/tenMu_trackMatchingtree_plots.root");
-	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
-	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
+//	a->makeResolutionPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/tenMu_trackMatchingtree_plots.root");
+//	a->makeLayersCrossedPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitAnalyzer.root");
+//	a->makeDPhiPlot("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/simHitTestForTDR.root","/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/digiTestForTDR_p8s384.root");
 	a->makeNeutronPlot();
-	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_segmentreee_plots.root");
-	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_trackMatchingtree_plots.root");
+//	a->makeSegmentBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_segmentreee_plots.root");
+//	a->makeMatchBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/7_31_TDRPlots/zmumu_trackMatchingtree_plots.root");
 //	a->makeTotalBkgPlots("/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/trackDensity_ForTDR_std.root",
 //			"/Users/nmccoll/Dropbox/Work/Projects/ME0/2_15_17_updatedTruthPlots/segmentAnalyzerForTDR_addPT_p8s384.root",
 //			"/Users/nmccoll/Dropbox/Work/Projects/ME0/3_13_17_trackMuonMatching/TDRVersion/trackMatchingTree_NU_p8s384_POGHP_plots.root");

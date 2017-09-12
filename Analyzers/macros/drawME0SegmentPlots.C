@@ -471,6 +471,21 @@ for(unsigned int iD = 0; digis[iD][0]; ++iD){
                  cout << TString::Format("%.3f,%.3f\t",mean,std);
         }
         cout <<endl;
+        cout << "Fake Rate (nSeg,nTrials)\t";
+        for(unsigned int iD = 0; digis[iD][0]; ++iD){
+            TH1 * h = 0;
+            f->GetObject(TString::Format("%s__fake_passDPhiTime_ext_nSegs",digis[iD].Data()),h);
+            float nSeg = 0;
+            float nTrials = 0;
+            if(h){
+              for(unsigned int iB = 1; iB <= h->GetNbinsX(); ++iB){
+                nSeg += h->GetBinContent(iB)*h->GetBinCenter(iB);
+                nTrials += h->GetBinContent(iB);
+              }
+            }
+                 cout << TString::Format("%.0f,%.0f\t",nSeg,nTrials);
+        }
+        cout <<endl;
         //fake proportions
         TString faketypes[] = { "FAKE_TRACK_PURE", "FAKE_NEUT_PURE", "FAKE_MUON_MIX", "FAKE_OTHER",""};
         TString fakeden = "all";
