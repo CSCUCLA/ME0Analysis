@@ -1,0 +1,384 @@
+20009.0 SingleMuPt1000_pythia8_2023D17_GenSimHLBeamSpotFull+DigiFullTrigger_2023D17+RecoFullGlobal_2023D17+HARVESTFullGlobal_2023D17 
+20209.0 SingleMuPt1000_pythia8_2023D17PU_GenSimHLBeamSpotFull+DigiFullTriggerPU_2023D17PU+RecoFullGlobalPU_2023D17PU+HARVESTFullGlobalPU_2023D17PU 
+
+
+cd /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0
+mkdir GE21_384
+cmsrel CMSSW_9_3_7
+git cms-addpkg Geometry/GEMGeometryBuilder
+git cms-addpkg RecoMuon/GlobalTrackingTools
+vim Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml
+vim RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc 
+
+
+./produceSample.py -c SingleMuPt100_pythia8_cfi_GEN_SIM.py -j genSim_100 -nj 100 -ne 1000 -o /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_1536/GENSIM_100
+
+
+mkdir test_cmsswcomp
+cp -r $CMSSW_BASE/src/* test_cmsswcomp/
+cd test_cmsswcomp
+tar -chzf ../genSim_100/cmssw.tar.gz *
+cd ..
+rm -rf test_cmsswcomp
+
+
+./makeJob.py -c step23_DIGI_L1_L1TrackTrigger_DIGI2RAW_HLT_RAW2DIGI_L1Reco_RECO.py -i /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_1536/GENSIM_100/ -j digiReco_100 -nf 1 -o /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_1536/DIGIRECO_100
+
+mkdir test_cmsswcomp
+cp -r $CMSSW_BASE/src/* test_cmsswcomp/
+cd test_cmsswcomp
+tar -chzf ../digiReco_100/cmssw.tar.gz *
+cd ..
+rm -rf test_cmsswcomp
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+Changes to add extra fits
+RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc
+GlobalMuonRefitter::ConstRecHitContainer  
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+diff --git a/RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc b/RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc
+index 7ba31db..3903b72 100644
+--- a/RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc
++++ b/RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc
+@@ -844,6 +844,7 @@ GlobalMuonRefitter::ConstRecHitContainer GlobalMuonRefitter::getRidOfSelectStati
+ {
+   ConstRecHitContainer results;
+   ConstRecHitContainer::const_iterator it = hits.begin();
++         bool filledGE21 = false;
+   for (; it!=hits.end(); it++) {
+ 
+     DetId id = (*it)->geographicalId();
+@@ -909,6 +910,30 @@ GlobalMuonRefitter::ConstRecHitContainer GlobalMuonRefitter::getRidOfSelectStati
+        station = rpcid.station();
+       }
+       if(station == theSkipStation) continue;
++            if(theSkipStation == 6 && id.subdetId() == MuonSubdetId::GEM){
++          GEMDetId did(id.rawId());
++          if(did.station() == 2) continue;
++      }
++      if(theSkipStation == 7 && id.subdetId() == MuonSubdetId::CSC){
++          CSCDetId did(id.rawId());
++          if(did.station() == 2) continue;
++      }
++      if( (theSkipStation == 8 || theSkipStation == 9)  && id.subdetId() == MuonSubdetId::GEM){
++          GEMDetId did(id.rawId());
++          if(did.station() == 1) continue;
++      }
++      if((theSkipStation == 8 || theSkipStation == 9) && id.subdetId() == MuonSubdetId::ME0){
++          continue;
++      }
++      if(theSkipStation == 9 && id.subdetId() == MuonSubdetId::CSC){
++          CSCDetId did(id.rawId());
++          if(did.station() == 2) continue;
++      }
++      if(theSkipStation == 10 && id.subdetId() == MuonSubdetId::GEM && station == 2 ){
++        if(filledGE21) continue;
++        filledGE21=true;
++      } 
++
+     }
+     results.push_back(*it);
+   }
+  
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+Changes to change geometry
+RecoMuon/GlobalTrackingTools/src/GlobalMuonRefitter.cc
+GlobalMuonRefitter::ConstRecHitContainer  
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+diff --git a/Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml b/Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml
+index 7c820e1..03ee1ce 100644
+--- a/Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml
++++ b/Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml
+@@ -11,7 +11,7 @@
+     </SpecPar>
+     <SpecPar name="nStripsGE21" eval="true">
+       <PartSelector path="//GHA2.."/>
+-      <Parameter name="nStrips" value="768"/>
++      <Parameter name="nStrips" value="1536"/>
+     </SpecPar>
+     <SpecPar name="nPadsGE11" eval="true">
+       <PartSelector path="//GHA1.."/>
+diff --git a/RecoLocalMuon/GEMRecHit/src/GEMEtaPartitionMask.h b/RecoLocalMuon/GEMRecHit/src/GEMEtaPartitionMask.h
+index e1ad3e4..070fd6c 100644
+--- a/RecoLocalMuon/GEMRecHit/src/GEMEtaPartitionMask.h
++++ b/RecoLocalMuon/GEMRecHit/src/GEMEtaPartitionMask.h
+@@ -4,7 +4,7 @@
+ #include <bitset>
+ #include <vector>
+ 
+-const int maskSIZE=768;
++const int maskSIZE=1536;
+ typedef std::bitset<maskSIZE> EtaPartitionMask;
+ 
+ #endif
+ 
+For MEOANalysis to run light:
+
+diff --git a/Analyzers/plugins/BuildFile.xml b/Analyzers/plugins/BuildFile.xml
+index 67dd327..3f30e6d 100644
+--- a/Analyzers/plugins/BuildFile.xml
++++ b/Analyzers/plugins/BuildFile.xml
+@@ -1,10 +1,10 @@
+ <library   name="ME0AnalysisPlugins" file="*.cc">
+-    <use name="ME0Analysis/Analyzers"/>
+     <use name="AnalysisSupport/CMSSWUtilities"/>
+     <use name="AnalysisSupport/Utilities"/>
+     <use name="AnalysisSupport/TreeInterface"/>
+-    <use name="RecoLocalMuon/GEMRecHit"/>
+     <use name="DataFormats/MuonReco"/>    
+     <use name="DataFormats/GEMRecHit"/>    
+-    <use   name="SimGeneral/HepPDTRecord"/>
++       <use name="TrackingTools/TransientTrackingRecHit"/>         
++<use name="TrackingTools/Records"/>
++<use   name="SimGeneral/HepPDTRecord"/>
+ </library>
+ 
+ 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+Changes to config
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+process.tevMuonsNoGE21 = process.tevMuons.clone()
+process.tevMuonsNoGE21.RefitterParameters.SkipStation = cms.int32(6)
+process.tevMuonsNoME21 = process.tevMuons.clone()
+process.tevMuonsNoME21.RefitterParameters.SkipStation = cms.int32(7)
+process.tevMuonsNoGE11ME0 = process.tevMuons.clone()
+process.tevMuonsNoGE11ME0.RefitterParameters.SkipStation = cms.int32(8)
+process.tevMuonsNoGE11ME0ME21 = process.tevMuons.clone()
+process.tevMuonsNoGE11ME0ME21.RefitterParameters.SkipStation = cms.int32(9)
+process.tevMuonsOneGE21 = process.tevMuons.clone()
+process.tevMuonsOneGE21.RefitterParameters.SkipStation = cms.int32(10)
+
+
+process.reconstruction += process.tevMuonsNoGE11ME0ME21
+process.reconstruction += process.tevMuonsNoGE11ME0
+process.reconstruction += process.tevMuonsNoME21
+process.reconstruction += process.tevMuonsNoGE21
+process.reconstruction += process.tevMuonsOneGE21
+
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_tevMuonsNoGE21_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_tevMuonsNoME21_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_tevMuonsNoGE11ME0_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_tevMuonsNoGE11ME0ME21_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_tevMuonsOneGE21_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_genParticles_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_offlinePrimaryVertices_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_offlinePrimaryVerticesWithBS_*_*')
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+Run locally
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_768/DIGIRECO_1000/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist.txt outputFile=ge21MomTree_nstrips_768.root
+     
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_384/DIGIRECO_1000/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist.txt outputFile=ge21MomTree_nstrips_384.root
+     
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_1536/DIGIRECO_1000/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist.txt outputFile=ge21MomTree_nstrips_1536.root
+     
+    
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_768/ge21MomTree_nstrips_768.root .
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_384/ge21MomTree_nstrips_384.root .
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_1536/ge21MomTree_nstrips_1536.root .
+     
+     .....
+     
+     
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_768/DIGIRECO_100/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist_100.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist_100.txt outputFile=ge21MomTree_100_nstrips_768.root
+     
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_384/DIGIRECO_100/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist_100.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist_100.txt outputFile=ge21MomTree_100_nstrips_384.root
+     
+   ll /eos/uscms/store/user/nmccoll/ME0Samples/5_23_18_GE21Granularity/GE21_1536/DIGIRECO_100/*.root | sed "s/.*\/eos\/uscms\(.*\)/root\:\/\/cmsxrootd.fnal.gov\/\1/" > filelist_100.txt 
+   cmsRun CMSSW_9_3_7/src/ME0Analysis/Analyzers/test/GE21MomentumTreeMaker_cfg.py inputFiles_load=filelist_100.txt outputFile=ge21MomTree_100_nstrips_1536.root
+     
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_768/ge21MomTree_100_nstrips_768.root .
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_384/ge21MomTree_100_nstrips_384.root .
+    sIn /uscms/home/nmccoll/nobackup/2011-04-15-susyra2/rel_ME0/GE21_1536/ge21MomTree_100_nstrips_1536.root .
+     
+     
+
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_nstrips_768.root","nstrips_768")'
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_nstrips_384.root","nstrips_384")'
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_nstrips_1536.root","nstrips_1536")'
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_100_nstrips_768.root","m100_nstrips_768")'
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_100_nstrips_384.root","m100_nstrips_384")'
+ rr -b -q '/Users/nmccoll/Dropbox/Work/GitRepositories/ME0Analysis/Analyzers/macros/AnalyzeGE21MomentumTree.C+("ge21MomTree_100_nstrips_1536.root","m100_nstrips_1536")'
+   hadd -f granPlots_all.root granPlots_*nstrips_*.root
+   
+   
+   
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+Make Plots
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+{
+  TFile * f = new TFile("granPlots_all.root","read");
+
+  std::vector<TString> grans = {"m100_nstrips_384","m100_nstrips_768","m100_nstrips_1536"};
+  // std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
+  std::vector<TString> granNs = {"384 strips","768 strips","1536 strips"};
+  
+  // std::vector<TString> moms = {"global","tracker","standalone","picky","noGE21_picky","noME21_picky","noGE11ME0_picky","noGE11ME0ME21_picky"};
+  std::vector<TString> moms = {"global","tracker","picky","oneGE21_picky","noGE21_picky","noME21_picky"};  
+  // std::vector<TString> sels = {"eta_1p6_2p4","eta_1p6_1p8","eta_1p8_2p0","eta_2p0_2p2","eta_2p2_2p4"};
+    std::vector<TString> sels = {"eta_1p6_1p8","eta_1p8_2p0","eta_2p0_2p2","eta_2p2_2p4"};
+    std::vector<float> selvs = {1.7,1.9,2.1,2.3};
+  
+  std::vector<std::vector<std::vector<float>>> stddevs(sels.size(),std::vector<std::vector<float>>(moms.size(),std::vector<float>(grans.size(),-1)));
+  std::vector<std::vector<std::vector<float>>> stddevEs(sels.size(),std::vector<std::vector<float>>(moms.size(),std::vector<float>(grans.size(),-1)));
+  
+  std::vector<std::vector<std::vector<float>>> gausdevs(sels.size(),std::vector<std::vector<float>>(moms.size(),std::vector<float>(grans.size(),-1)));
+  std::vector<std::vector<std::vector<float>>> gausdevEs(sels.size(),std::vector<std::vector<float>>(moms.size(),std::vector<float>(grans.size(),-1)));
+  
+  for(unsigned int iS = 0; iS < sels.size(); ++iS){
+    for(unsigned int iM = 0; iM < moms.size(); ++iM){
+      Plotter * p = new Plotter();
+        for(unsigned int iG = 0; iG < grans.size(); ++iG){
+          TH1 * h = 0;
+          f->GetObject(grans[iG]+"_"+moms[iM]+"_"+sels[iS]+"_rel_q_o_pt",h);
+          if(h==0) continue;
+          stddevs[iS][iM][iG] = h->GetStdDev();
+          stddevEs[iS][iM][iG] = h->GetStdDevError();
+          p->addHist(h,granNs[iG]);
+          
+          TF1 * func=new  TF1("gaus","gaus",-10,10);
+          h->Fit(func,"","");          
+          gausdevs[iS][iM][iG] = func->GetParameter(2);
+          gausdevEs[iS][iM][iG] = func->GetParError(2);          
+          delete func;
+        }
+        
+        p->setUnderflow(false);
+        p->setOverflow(false);
+        p->normalize();
+        p->draw(false,sels[iS]+"_"+moms[iM]);
+      
+    }
+    
+  }
+  
+  std::cout << std::endl<<"\t\t";
+        for(unsigned int iG = 0; iG < grans.size(); ++iG){
+            std::cout << granNs[iG]<<"\t"<<"error"<<"\t";
+        }
+        std::cout<<std::endl;
+  
+
+
+  for(unsigned int iS = 0; iS < sels.size(); ++iS){
+    for(unsigned int iM = 0; iM < moms.size(); ++iM){  
+      std::cout << sels[iS]+"\t"+moms[iM] <<"\t";
+      for(unsigned int iG = 0; iG < grans.size(); ++iG){
+        if(stddevs[iS][iM][iG] < 0) std::cout << "-" <<"\t";
+        else std::cout << stddevs[iS][iM][iG] <<"\t"<<stddevEs[iS][iM][iG]<<"\t";
+      }
+      std::cout <<std::endl;
+      
+    }
+  }
+  std::cout << endl;
+  
+  std::cout << std::endl<<"\t\t";
+        for(unsigned int iG = 0; iG < grans.size(); ++iG){
+            std::cout << granNs[iG]<<"\t"<<"error"<<"\t";
+        }
+        std::cout<<std::endl;
+
+
+  for(unsigned int iS = 0; iS < sels.size(); ++iS){
+    for(unsigned int iM = 0; iM < moms.size(); ++iM){  
+      std::cout << sels[iS]+"\t"+moms[iM] <<"\t";
+      for(unsigned int iG = 0; iG < grans.size(); ++iG){
+        if(gausdevs[iS][iM][iG] < 0) std::cout << "-" <<"\t";
+        else std::cout << gausdevs[iS][iM][iG] <<"\t"<<gausdevEs[iS][iM][iG]<<"\t";
+      }
+      std::cout <<std::endl;
+      
+    }
+  }
+  std::cout << endl;
+  
+  //Now for the graphs
+    for(unsigned int iM = 0; iM < moms.size(); ++iM){  
+      Plotter * p = new Plotter();
+      Plotter * rp = new Plotter();
+      for(unsigned int iG = 0; iG < grans.size(); ++iG){
+        TGraphErrors *g = new TGraphErrors();
+        TGraphErrors *rg = new TGraphErrors();
+        int nP = 0;
+        for(unsigned int iS = 0; iS < sels.size(); ++iS){
+          g->SetPoint(nP,selvs[iS],gausdevs[iS][iM][iG]);
+          g->SetPointError(nP,0,gausdevEs[iS][iM][iG]);
+          double ratio = gausdevs[iS][iM][iG]/gausdevs[iS][iM][0];
+          double ratioEr = ratio*TMath::Sqrt(gausdevEs[iS][iM][0]*gausdevEs[iS][iM][0]/(gausdevs[iS][iM][0]*gausdevs[iS][iM][0])+ gausdevEs[iS][iM][iG]*gausdevEs[iS][iM][iG]/(gausdevs[iS][iM][iG]*gausdevs[iS][iM][iG]) ); 
+          rg->SetPoint(nP,selvs[iS],ratio);         
+          rg->SetPointError(nP,0,ratioEr);   
+          nP++;       
+        }
+        p->addGraph(g,granNs[iG]);
+        if(iG) rp->addGraph(rg,granNs[iG]);            
+      }
+      p->setXTitle("|#eta|");
+      p->setYTitle("#sigma(#it{q}/#it{p}_{T}) [GeV^{-1}]");
+      
+      rp->setXTitle("|#eta|");
+      rp->setYTitle("#sigma(strips=N)/#sigma(strips=384)");
+      rp->setMinMax(0.9,1.05);
+
+ auto *c2 =      p->draw(false,moms[iM]+"_abs");
+auto *c =       rp->draw(false,moms[iM]+"_rel");
+            rp->yAxis()->SetTitleOffset(1.5);
+          c->Update();  
+          p->yAxis()->SetTitleOffset(1.5);
+        c2->Update();  
+      
+    }
+
+}
+
+
+{
+  TFile * f = new TFile("granPlots_all.root","read");
+
+  std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
+  std::vector<TString> granNs = {"384 strips","768 strips","1536 strips"};
+  std::vector<TString> moms = {"globalrh","pickyrh"};  
+  std::vector<TString> momNs = {"global","picky"};  
+  std::vector<TString> sels = {"eta_1p6_2p4","eta_1p6_1p8","eta_1p8_2p0","eta_2p0_2p2","eta_2p2_2p4"};
+    std::vector<TString> vars = {"ge21_phierror","ge21_phierror_o_avg_phierror","ge21_phierror_o_min_phierror","nOtherStations"};
+  
+  for(unsigned int iV = 0; iV < vars.size(); ++iV){  
+  for(unsigned int iS = 0; iS < sels.size(); ++iS){
+          Plotter * p = new Plotter();
+    for(unsigned int iM = 0; iM <  moms.size(); ++iM){
+        for(unsigned int iG = 0; iG < grans.size(); ++iG){
+          TH1 * h = 0;
+          f->GetObject(grans[iG]+"_"+moms[iM]+"_"+sels[iS]+"_"+vars[iV],h);
+          if(h==0) continue;
+          p->addHist(h,granNs[iG]+", "+momNs[iM]);
+        }        
+    }
+    p->setUnderflow(false);
+    p->setOverflow(false);
+    p->normalize();
+    p->draw(false,sels[iS]+"_"+vars[iV]);
+  
+    
+  }
+}
+
+}
+
+
+
+
+   
+   
+     
+     

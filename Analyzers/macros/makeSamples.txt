@@ -1,3 +1,15 @@
+>>>>> D17 recipe For GE21 Granularity
+cmsrel CMSSW_9_3_7
+git cms-addpkg Configuration/Geometry
+
+
+
+cmsDriver.py SingleMuPt1000_pythia8_cfi  --conditions auto:phase2_realistic -n 10 --era Phase2 --eventcontent FEVTDEBUG --relval 9000,100 -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC --geometry Extended2023D17 --no_exec --fileout file:step1.root
+cmsDriver.py step2  --conditions auto:phase2_realistic -s DIGI:pdigi_valid,L1,L1TrackTrigger,DIGI2RAW,HLT:@fake2 --datatier GEN-SIM-DIGI-RAW -n -1 --geometry Extended2023D17 --era Phase2 --eventcontent FEVTDEBUGHLT --no_exec --fileout file:step2.root
+cmsDriver.py step3  --conditions auto:phase2_realistic -n -1 --era Phase2 --eventcontent FEVTDEBUGHLT --runUnscheduled  -s RAW2DIGI,L1Reco,RECO --datatier GEN-SIM-RECO --geometry Extended2023D17 --filein file:step2.root  --fileout file:step3.root --no_exec
+cmsDriver.py step23 --conditions auto:phase2_realistic -n -1 --era Phase2 --eventcontent FEVTDEBUGHLT --runUnscheduled -s DIGI:pdigi_valid,L1,L1TrackTrigger,DIGI2RAW,HLT:@fake2,RAW2DIGI,L1Reco,RECO --datatier GEN-SIM-RECO --geometry Extended2023D17 --filein file:step1.root --fileout file:step23.root --no_exec
+
+
 >>>>> NEW D7 recipe
 cmsDriver.py MinBias_TuneZ2star_14TeV_pythia6_cff  --conditions auto:phase2_realistic  -n 1000 --era Phase2C1  --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D7 --fileout file:step1_minbias.root  --no_exec
 cmsDriver.py SingleMuPt100_pythia8_cfi  --conditions auto:phase2_realistic -n 100 --era Phase2C1 --eventcontent FEVTDEBUG  -s GEN,SIM --datatier GEN-SIM --beamspot HLLHC14TeV --geometry Extended2023D7 --fileout file:step1.root  --no_exec
