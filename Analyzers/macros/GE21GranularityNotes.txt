@@ -220,9 +220,9 @@ Make Plots
 {
   TFile * f = new TFile("granPlots_all.root","read");
 
-  std::vector<TString> grans = {"m100_nstrips_384","m100_nstrips_768","m100_nstrips_1536"};
-  // std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
-  std::vector<TString> granNs = {"384 strips","768 strips","1536 strips"};
+  //std::vector<TString> grans = {"m100_nstrips_384","m100_nstrips_768","m100_nstrips_1536"};
+   std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
+  std::vector<TString> granNs = {"384 strips, fine-#eta","768 strips, TDR","1536 strips, reference"};
   
   // std::vector<TString> moms = {"global","tracker","standalone","picky","noGE21_picky","noME21_picky","noGE11ME0_picky","noGE11ME0ME21_picky"};
   std::vector<TString> moms = {"global","tracker","picky","oneGE21_picky","noGE21_picky","noME21_picky"};  
@@ -314,11 +314,11 @@ Make Plots
         int nP = 0;
         for(unsigned int iS = 0; iS < sels.size(); ++iS){
           g->SetPoint(nP,selvs[iS],gausdevs[iS][iM][iG]);
-          g->SetPointError(nP,0,gausdevEs[iS][iM][iG]);
+          g->SetPointError(nP,0.1,gausdevEs[iS][iM][iG]);
           double ratio = gausdevs[iS][iM][iG]/gausdevs[iS][iM][0];
           double ratioEr = ratio*TMath::Sqrt(gausdevEs[iS][iM][0]*gausdevEs[iS][iM][0]/(gausdevs[iS][iM][0]*gausdevs[iS][iM][0])+ gausdevEs[iS][iM][iG]*gausdevEs[iS][iM][iG]/(gausdevs[iS][iM][iG]*gausdevs[iS][iM][iG]) ); 
           rg->SetPoint(nP,selvs[iS],ratio);         
-          rg->SetPointError(nP,0,ratioEr);   
+          rg->SetPointError(nP,0.1,ratioEr);   
           nP++;       
         }
         p->addGraph(g,granNs[iG]);
@@ -328,7 +328,7 @@ Make Plots
       p->setYTitle("#sigma(#it{q}/#it{p}_{T}) [GeV^{-1}]");
       
       rp->setXTitle("|#eta|");
-      rp->setYTitle("#sigma(strips=N)/#sigma(strips=384)");
+      rp->setYTitle("#sigma/#sigma(384 strips, fine-#eta)");
       rp->setMinMax(0.9,1.05);
 
  auto *c2 =      p->draw(false,moms[iM]+"_abs");
