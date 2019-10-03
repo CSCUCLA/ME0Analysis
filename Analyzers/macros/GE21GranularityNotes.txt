@@ -221,8 +221,11 @@ Make Plots
   TFile * f = new TFile("granPlots_all.root","read");
 
   //std::vector<TString> grans = {"m100_nstrips_384","m100_nstrips_768","m100_nstrips_1536"};
-   std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
-  std::vector<TString> granNs = {"384 strips, fine-#eta","768 strips, TDR","1536 strips, reference"};
+//   std::vector<TString> grans = {"nstrips_384","nstrips_768","nstrips_1536"};
+//  std::vector<TString> granNs = {"384 strips, fine-#eta","768 strips, TDR","1536 strips, reference"};
+  
+   std::vector<TString> grans = {"nstrips_384","nstrips_768"};
+  std::vector<TString> granNs = {"384 strips, fine-#eta","768 strips, TDR"};
   
   // std::vector<TString> moms = {"global","tracker","standalone","picky","noGE21_picky","noME21_picky","noGE11ME0_picky","noGE11ME0ME21_picky"};
   std::vector<TString> moms = {"global","tracker","picky","oneGE21_picky","noGE21_picky","noME21_picky"};  

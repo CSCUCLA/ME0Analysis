@@ -33,7 +33,6 @@
 #include <TRandom3.h>
 
 using namespace std;
-using ASTypes::size;
 
 class ME0SegmentTreeMaker : public edm::EDAnalyzer {
 public:
@@ -224,32 +223,32 @@ private:
 
 
     TreeWriter tree;
-    size simMuon_pt                    =-1;
-    size simMuon_eta                   =-1;
-    size simMuon_phi                   =-1;
-    size simMuon_q                     =-1;
-    size simMuon_segmentIDX            =-1;
+    ASTypes::size simMuon_pt                    =-1;
+    ASTypes::size simMuon_eta                   =-1;
+    ASTypes::size simMuon_phi                   =-1;
+    ASTypes::size simMuon_q                     =-1;
+    ASTypes::size simMuon_segmentIDX            =-1;
 
-    size simMuon_gen_eta                   =-1;
-    size simMuon_gen_phi                   =-1;
-    size simMuon_gen_dphi                  =-1;
-    size simMuon_gen_deta                  =-1;
-    size simMuon_gen_x                     =-1;
-    size simMuon_gen_y                     =-1;
-    size simMuon_gen_dx                    =-1;
-    size simMuon_gen_dy                    =-1;
+    ASTypes::size simMuon_gen_eta                   =-1;
+    ASTypes::size simMuon_gen_phi                   =-1;
+    ASTypes::size simMuon_gen_dphi                  =-1;
+    ASTypes::size simMuon_gen_deta                  =-1;
+    ASTypes::size simMuon_gen_x                     =-1;
+    ASTypes::size simMuon_gen_y                     =-1;
+    ASTypes::size simMuon_gen_dx                    =-1;
+    ASTypes::size simMuon_gen_dy                    =-1;
 
-    size simMuon_segment_quality               =-1;
-    size simMuon_segment_nGoodHits             =-1;
-    size simMuon_segment_nBadHits              =-1;
-    size segment_eta                   =-1;
-    size segment_phi                   =-1;
-    size segment_dphi                  =-1;
-    size segment_deta                  =-1;
-    size segment_x                     =-1;
-    size segment_y                     =-1;
-    size segment_dx                    =-1;
-    size segment_dy                    =-1;
+    ASTypes::size simMuon_segment_quality               =-1;
+    ASTypes::size simMuon_segment_nGoodHits             =-1;
+    ASTypes::size simMuon_segment_nBadHits              =-1;
+    ASTypes::size segment_eta                   =-1;
+    ASTypes::size segment_phi                   =-1;
+    ASTypes::size segment_dphi                  =-1;
+    ASTypes::size segment_deta                  =-1;
+    ASTypes::size segment_x                     =-1;
+    ASTypes::size segment_y                     =-1;
+    ASTypes::size segment_dx                    =-1;
+    ASTypes::size segment_dy                    =-1;
 
 
 };
